@@ -1,0 +1,17 @@
+{
+  "A reset link will be sent if the account exists.": "Hemos enviado por correo la liga para actualizar tu contraseña.",
+  "Hello!": "¡Hola!",
+  "Whoops!": "¡Ups!",
+  "You are receiving this email because we received a password reset request for your account.": "Estás recibiendo este correo porque hemos recibido una solicitud de recuperación de contraseña para tu cuenta.",
+  "Reset Password": "Actualizar contraseña",
+  "Reset your password": "Recupera tu contraseña",
+  "This password reset link will expire in :count minutes.": "Esta liga de recuperación de contraseña caducará en :count minutos.",
+  "Regards,": "Saludos,",
+  "If you did not request a password reset, no further action is required.": "Si no solicitaste recuperar tu contraseña, no es necesario realizar ninguna acción.",
+  "If you're having trouble clicking the \":actionText\" button, copy and paste the URL below\ninto your web browser:": "Si tienes problemas para hacer click en el botón \":actionText\", copia y pega la URL a continuación\nen tu navegador web:",
+  "Verify Email Address": "Verificar correo electrónico",
+  "Verify your email address": "Verifica tu correo electrónico",
+  "Please click the button below to verify your email address.": "Por favor, haz click en el botón para verificar tu correo.",
+  "If you did not create an account, no further action is required.": "Si no creaste una cuenta, no es necesario realizar ninguna acción.",
+  "All rights reserved.": "Todos los derechos reservados."
+}

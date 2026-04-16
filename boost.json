@@ -1,0 +1,26 @@
+{
+    "agents": [
+        "claude_code",
+        "opencode",
+        "cursor"
+    ],
+    "guidelines": true,
+    "mcp": true,
+    "nightwatch_mcp": false,
+    "packages": [
+        "laravel/fortify"
+    ],
+    "sail": false,
+    "skills": [
+        "laravel-best-practices",
+        "wayfinder-development",
+        "inertia-react-development",
+        "tailwindcss-development",
+        "fortify-development",
+        "create-feature-branch",
+        "finish-feature-branch",
+        "land-feature-branch",
+        "react-best-practices",
+        "run-preflight"
+    ]
+}
