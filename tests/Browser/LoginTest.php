@@ -34,6 +34,23 @@ it('can log in with valid credentials', function (): void {
     $this->assertAuthenticated();
 });
 
+it('redirects to intended url after login when ?redirect= is present', function (): void {
+    User::factory()->create([
+        'email' => 'browser@example.com',
+        'password' => 'Password1234!',
+    ]);
+
+    $page = visitWithoutAnimations('/login?redirect=/settings/profile');
+
+    $page->type('#email', 'browser@example.com')
+        ->type('#password', 'Password1234!')
+        ->press('[data-test="login-button"]')
+        ->assertPathIs('/settings/profile')
+        ->assertNoJavaScriptErrors();
+
+    $this->assertAuthenticated();
+});
+
 it('shows validation errors with invalid credentials', function (): void {
     User::factory()->create([
         'email' => 'browser@example.com',
