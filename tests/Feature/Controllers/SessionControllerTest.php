@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
 
@@ -49,6 +50,41 @@ it('may create a session', function (): void {
     $response->assertRedirectToRoute('dashboard');
 
     $this->assertAuthenticatedAs($user);
+});
+
+it('records last_login_at on successful login', function (): void {
+    Date::setTestNow('2026-04-16 12:00:00');
+
+    $user = User::factory()->create([
+        'email' => 'test@example.com',
+        'password' => Hash::make('Password1234!'),
+        'last_login_at' => null,
+    ]);
+
+    $this->fromRoute('login')
+        ->post(route('login.store'), [
+            'email' => 'test@example.com',
+            'password' => 'Password1234!',
+        ]);
+
+    expect($user->fresh()?->last_login_at?->toDateTimeString())
+        ->toBe('2026-04-16 12:00:00');
+});
+
+it('does not record last_login_at when credentials are invalid', function (): void {
+    $user = User::factory()->create([
+        'email' => 'test@example.com',
+        'password' => Hash::make('Password1234!'),
+        'last_login_at' => null,
+    ]);
+
+    $this->fromRoute('login')
+        ->post(route('login.store'), [
+            'email' => 'test@example.com',
+            'password' => 'wrong-password',
+        ]);
+
+    expect($user->fresh()?->last_login_at)->toBeNull();
 });
 
 it('may create a session with remember me', function (): void {
