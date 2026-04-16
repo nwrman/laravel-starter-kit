@@ -19,8 +19,14 @@ use Illuminate\Support\Facades\Route;
 
 Route::permanentRedirect('/', '/dashboard');
 
+// CSRF token refresh endpoint for session expired handler
+Route::get('csrf-token', fn () => response()->json(['token' => csrf_token()]))->name('csrf-token');
+
 Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Auth check endpoint for session expired handler
+    Route::get('auth-check', fn () => response()->json(['authenticated' => true]))->name('auth-check');
 
     Route::get('projects', [ProjectController::class, 'index'])->name('projects.index');
     Route::get('projects/create', [ProjectController::class, 'create'])->name('projects.create');

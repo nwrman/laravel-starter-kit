@@ -16,7 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->encryptCookies(except: ['sidebar_state']);
 
-        $middleware->redirectGuestsTo(fn (): string => route('login', ['session_expired' => true]));
+        $middleware->redirectGuestsTo(fn (): string => route('login'));
 
         $middleware->web(append: [
             HandleInertiaRequests::class,

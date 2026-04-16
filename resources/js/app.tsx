@@ -6,6 +6,7 @@ import { createRoot } from 'react-dom/client';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import AppLayout from '@/layouts/app-layout';
+import { initSessionExpiredHandler } from '@/lib/session-expired-handler';
 import '../css/app.css';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
@@ -35,3 +36,6 @@ void createInertiaApp({
     color: '#4B5563',
   },
 });
+
+// Initialize global 419 session expired handler
+initSessionExpiredHandler();
