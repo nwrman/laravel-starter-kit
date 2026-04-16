@@ -63,26 +63,21 @@ DEMO_LATENCY_DETAIL_MS=800
 ### Create a New Project
 
 ```bash
-laravel new my-app --using=nwrman/laravel-starter-kit
+composer create-project nwrman/laravel-starter-kit my-app --stability=dev
 ```
 
-Or with Composer directly:
+This automatically runs the full setup: environment configuration, key generation, database migration with seeding, and initializes a git repository with an initial commit.
 
-```bash
-composer create-project nwrman/laravel-starter-kit my-app
-```
-
-### Initial Setup
+### Start Developing
 
 ```bash
 cd my-app
-composer setup    # installs deps, generates key, runs migrations, builds assets
 composer dev      # starts queue worker, log watcher, and Vite dev server
 ```
 
 The application is automatically available at `https://my-app.test` via [Laravel Herd](https://herd.laravel.com/).
 
-**Demo credentials:** `admin@example.com` with any password (anypass is enabled in development).
+**Demo credentials:** `admin@example.com` with `default-dev-pass` as password or any password (anypass is enabled in development).
 
 ## Architecture
 

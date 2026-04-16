@@ -10,6 +10,8 @@
 /storage/*.key
 /storage/pail
 /vendor
+*.sqlite
+*.sqlite-journal
 .DS_Store
 .env
 .env.backup
