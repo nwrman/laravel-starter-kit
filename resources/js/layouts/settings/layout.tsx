@@ -1,13 +1,12 @@
 import { Link } from '@inertiajs/react';
-import { LockIcon, ShieldCheckIcon, UserIcon } from 'lucide-react';
+import { ShieldCheckIcon, UserIcon } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { cn, toUrl } from '@/lib/utils';
-import { edit as editPassword } from '@/routes/password';
-import { show as showTwoFactor } from '@/routes/two-factor';
+import { edit as editSecurity } from '@/routes/security';
 import { edit } from '@/routes/user-profile';
 import type { NavItem } from '@/types';
 
@@ -18,13 +17,8 @@ const sidebarNavItems: NavItem[] = [
     icon: UserIcon,
   },
   {
-    title: 'Contraseña',
-    href: editPassword(),
-    icon: LockIcon,
-  },
-  {
-    title: 'Autenticación 2FA',
-    href: showTwoFactor(),
+    title: 'Seguridad',
+    href: editSecurity(),
     icon: ShieldCheckIcon,
   },
 ];

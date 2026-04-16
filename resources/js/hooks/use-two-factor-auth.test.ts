@@ -140,6 +140,40 @@ describe('useTwoFactorAuth', () => {
     expect(result.current.errors).toEqual([]);
   });
 
+  it('clearTwoFactorAuthData resets QR code, setup key, recovery codes, and errors', async () => {
+    // First populate all state
+    let callCount = 0;
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
+      callCount++;
+      if (callCount === 1) return new Response(JSON.stringify({ svg: '<svg/>' }), { status: 200 });
+      if (callCount === 2)
+        return new Response(JSON.stringify({ secretKey: 'KEY' }), { status: 200 });
+      return new Response(JSON.stringify(['code1', 'code2']), { status: 200 });
+    });
+
+    const { result } = renderHook(() => useTwoFactorAuth());
+
+    await act(async () => {
+      await result.current.fetchSetupData();
+    });
+    await act(async () => {
+      await result.current.fetchRecoveryCodes();
+    });
+
+    expect(result.current.qrCodeSvg).not.toBeNull();
+    expect(result.current.manualSetupKey).not.toBeNull();
+    expect(result.current.recoveryCodesList).toEqual(['code1', 'code2']);
+
+    act(() => {
+      result.current.clearTwoFactorAuthData();
+    });
+
+    expect(result.current.qrCodeSvg).toBeNull();
+    expect(result.current.manualSetupKey).toBeNull();
+    expect(result.current.recoveryCodesList).toEqual([]);
+    expect(result.current.errors).toEqual([]);
+  });
+
   it('clearErrors removes all errors', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(null, { status: 500 }));
 
@@ -187,6 +221,7 @@ describe('useTwoFactorAuth', () => {
       fetchRecoveryCodes: result.current.fetchRecoveryCodes,
       clearErrors: result.current.clearErrors,
       clearSetupData: result.current.clearSetupData,
+      clearTwoFactorAuthData: result.current.clearTwoFactorAuthData,
     };
 
     // Trigger a state change to cause a re-render
@@ -202,5 +237,6 @@ describe('useTwoFactorAuth', () => {
     expect(result.current.fetchRecoveryCodes).toBe(firstRender.fetchRecoveryCodes);
     expect(result.current.clearErrors).toBe(firstRender.clearErrors);
     expect(result.current.clearSetupData).toBe(firstRender.clearSetupData);
+    expect(result.current.clearTwoFactorAuthData).toBe(firstRender.clearTwoFactorAuthData);
   });
 });

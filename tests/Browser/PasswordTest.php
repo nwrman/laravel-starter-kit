@@ -5,12 +5,12 @@ declare(strict_types=1);
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
-it('renders the password settings page', function (): void {
+it('renders the security settings page', function (): void {
     $user = User::factory()->create();
 
-    $this->actingAs($user);
+    $this->actingAs($user)->session(['auth.password_confirmed_at' => time()]);
 
-    $page = visitWithoutAnimations('/settings/password');
+    $page = visitWithoutAnimations('/settings/security');
 
     $page->assertSee('Actualizar contraseña')
         ->assertSee('Asegúrate de usar una contraseña larga y aleatoria para mantener tu cuenta segura')
@@ -25,9 +25,9 @@ it('can update the password', function (): void {
         'password' => 'old-password',
     ]);
 
-    $this->actingAs($user);
+    $this->actingAs($user)->session(['auth.password_confirmed_at' => time()]);
 
-    $page = visitWithoutAnimations('/settings/password');
+    $page = visitWithoutAnimations('/settings/security');
 
     $page->type('#current_password', 'old-password')
         ->type('#password', 'new-password')
@@ -47,9 +47,9 @@ it('shows server error when current password is incorrect', function (): void {
         'password' => 'correct-password',
     ]);
 
-    $this->actingAs($user);
+    $this->actingAs($user)->session(['auth.password_confirmed_at' => time()]);
 
-    $page = visitWithoutAnimations('/settings/password');
+    $page = visitWithoutAnimations('/settings/security');
 
     $page->type('#current_password', 'wrong-password')
         ->type('#password', 'new-password')
@@ -64,9 +64,9 @@ it('resets field values after server error', function (): void {
         'password' => 'correct-password',
     ]);
 
-    $this->actingAs($user);
+    $this->actingAs($user)->session(['auth.password_confirmed_at' => time()]);
 
-    $page = visitWithoutAnimations('/settings/password');
+    $page = visitWithoutAnimations('/settings/security');
 
     $page->type('#current_password', 'wrong-password')
         ->type('#password', 'some-new-password')

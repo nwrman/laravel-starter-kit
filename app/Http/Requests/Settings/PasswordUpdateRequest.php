@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Settings;
 
 use App\Concerns\PasswordValidationRules;
 use Illuminate\Foundation\Http\FormRequest;
 
-final class UpdateUserPasswordRequest extends FormRequest
+final class PasswordUpdateRequest extends FormRequest
 {
     use PasswordValidationRules;
 
