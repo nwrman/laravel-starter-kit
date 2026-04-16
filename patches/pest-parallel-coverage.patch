@@ -1,0 +1,9 @@
+--- a/src/Plugins/Parallel/Paratest/WrapperRunner.php
++++ b/src/Plugins/Parallel/Paratest/WrapperRunner.php
+@@ -468,6 +468,7 @@
+             $serializedCoverage['basePath'],
+         );
+         $codeCoverage = $coverageManager->codeCoverage();
++        $codeCoverage->setData($serializedCoverage['codeCoverage']);
+         $codeCoverage->setTests($serializedCoverage['testResults']);
+         (new ReflectionProperty(\SebastianBergmann\CodeCoverage\CodeCoverage::class, 'cachedReport'))->setValue($codeCoverage, $report);
