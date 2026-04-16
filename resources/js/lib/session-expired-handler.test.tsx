@@ -151,7 +151,7 @@ describe('session-expired-handler', () => {
     expect(router.get).not.toHaveBeenCalled();
   });
 
-  it('ignores non-419 http exceptions', async () => {
+  it('ignores non-401/419 http exceptions', async () => {
     await loadHandlerFresh();
 
     const httpExceptionListener = getListener('httpException');
@@ -163,5 +163,24 @@ describe('session-expired-handler', () => {
     });
 
     expect(preventDefault).not.toHaveBeenCalled();
+  });
+
+  it('mounts the modal immediately on 401 without attempting csrf refresh', async () => {
+    await loadHandlerFresh();
+
+    const fetchSpy = vi.fn();
+    globalThis.fetch = fetchSpy as typeof fetch;
+
+    const httpExceptionListener = getListener('httpException');
+    const preventDefault = vi.fn();
+
+    httpExceptionListener({
+      detail: { response: { status: 401 } },
+      preventDefault,
+    });
+
+    expect(preventDefault).toHaveBeenCalledOnce();
+    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(document.getElementById('session-expired-modal-root')).not.toBeNull();
   });
 });
