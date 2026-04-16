@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 use App\Models\User;
 
-it('renders the two factor authentication page', function (): void {
+it('renders the two factor authentication section on security page', function (): void {
     $user = User::factory()->create();
 
     $this->actingAs($user);
 
-    $page = visitWithoutAnimations('/settings/two-factor');
+    $page = visitWithoutAnimations('/settings/security');
 
     // Handle Fortify confirm-password redirection
     if (str_ends_with($page->url(), '/user/confirm-password')) {

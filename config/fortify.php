@@ -147,10 +147,14 @@ return [
 
     'features' => [
         Features::registration(),
-        // Features::resetPasswords(),
-        // Features::emailVerification(),
-        // Features::updateProfileInformation(),
-        // Features::updatePasswords(),
+        Features::resetPasswords(),
+        Features::emailVerification(),
+        // updateProfileInformation and updatePasswords are intentionally NOT
+        // enabled. Profile updates stay with UserProfileController (which owns
+        // photo upload via Spatie MediaLibrary + ULID-safe updates). Password
+        // updates stay with Settings\SecurityController (route name
+        // user-password.update to avoid colliding with Fortify's password.update
+        // reset-password endpoint).
         Features::twoFactorAuthentication([
             'confirm' => true,
             'confirmPassword' => true,

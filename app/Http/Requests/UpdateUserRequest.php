@@ -4,15 +4,16 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Concerns\ProfileValidationRules;
 use App\Models\User;
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 final class UpdateUserRequest extends FormRequest
 {
+    use ProfileValidationRules;
+
     /**
-     * @return array<string, ValidationRule|array<mixed>|string>
+     * @return array<string, array<int, mixed>>
      */
     public function rules(): array
     {
@@ -20,17 +21,7 @@ final class UpdateUserRequest extends FormRequest
         assert($user instanceof User);
 
         return [
-            'name' => ['required', 'string', 'max:255'],
-
-            'email' => [
-                'required',
-                'string',
-                'lowercase',
-                'email',
-                'max:255',
-                Rule::unique(User::class)->ignore($user->id),
-            ],
-
+            ...$this->profileRules($user->id),
             'photo' => ['nullable', 'image', 'max:2048'],
         ];
     }
