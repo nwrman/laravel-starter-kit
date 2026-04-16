@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
 
@@ -34,13 +35,13 @@ it('stores redirect url as intended when redirect query param is present', funct
 it('may create a session', function (): void {
     $user = User::factory()->create([
         'email' => 'test@example.com',
-        'password' => Hash::make('default-dev-pass'),
+        'password' => Hash::make('Password1234!'),
     ]);
 
     $response = $this->fromRoute('login')
         ->post(route('login.store'), [
             'email' => 'test@example.com',
-            'password' => 'default-dev-pass',
+            'password' => 'Password1234!',
         ]);
 
     $response->assertRedirectToRoute('dashboard');
@@ -48,16 +49,51 @@ it('may create a session', function (): void {
     $this->assertAuthenticatedAs($user);
 });
 
+it('records last_login_at on successful login', function (): void {
+    Date::setTestNow('2026-04-16 12:00:00');
+
+    $user = User::factory()->create([
+        'email' => 'test@example.com',
+        'password' => Hash::make('Password1234!'),
+        'last_login_at' => null,
+    ]);
+
+    $this->fromRoute('login')
+        ->post(route('login.store'), [
+            'email' => 'test@example.com',
+            'password' => 'Password1234!',
+        ]);
+
+    expect($user->fresh()?->last_login_at?->toDateTimeString())
+        ->toBe('2026-04-16 12:00:00');
+});
+
+it('does not record last_login_at when credentials are invalid', function (): void {
+    $user = User::factory()->create([
+        'email' => 'test@example.com',
+        'password' => Hash::make('Password1234!'),
+        'last_login_at' => null,
+    ]);
+
+    $this->fromRoute('login')
+        ->post(route('login.store'), [
+            'email' => 'test@example.com',
+            'password' => 'wrong-password',
+        ]);
+
+    expect($user->fresh()?->last_login_at)->toBeNull();
+});
+
 it('may create a session with remember me', function (): void {
     $user = User::factory()->create([
         'email' => 'test@example.com',
-        'password' => Hash::make('default-dev-pass'),
+        'password' => Hash::make('Password1234!'),
     ]);
 
     $response = $this->fromRoute('login')
         ->post(route('login.store'), [
             'email' => 'test@example.com',
-            'password' => 'default-dev-pass',
+            'password' => 'Password1234!',
             'remember' => true,
         ]);
 
@@ -69,7 +105,7 @@ it('may create a session with remember me', function (): void {
 it('redirects to two-factor challenge when enabled', function (): void {
     $user = User::factory()->create([
         'email' => 'test@example.com',
-        'password' => Hash::make('default-dev-pass'),
+        'password' => Hash::make('Password1234!'),
         'two_factor_secret' => encrypt('secret'),
         'two_factor_recovery_codes' => encrypt(json_encode(['code1', 'code2'])),
         'two_factor_confirmed_at' => now(),
@@ -78,7 +114,7 @@ it('redirects to two-factor challenge when enabled', function (): void {
     $response = $this->fromRoute('login')
         ->post(route('login.store'), [
             'email' => 'test@example.com',
-            'password' => 'default-dev-pass',
+            'password' => 'Password1234!',
         ]);
 
     $response->assertRedirectToRoute('two-factor.login');
@@ -89,7 +125,7 @@ it('redirects to two-factor challenge when enabled', function (): void {
 it('fails with invalid credentials', function (): void {
     User::factory()->create([
         'email' => 'test@example.com',
-        'password' => Hash::make('default-dev-pass'),
+        'password' => Hash::make('Password1234!'),
     ]);
 
     $response = $this->fromRoute('login')
@@ -107,7 +143,7 @@ it('fails with invalid credentials', function (): void {
 it('requires email', function (): void {
     $response = $this->fromRoute('login')
         ->post(route('login.store'), [
-            'password' => 'default-dev-pass',
+            'password' => 'Password1234!',
         ]);
 
     $response->assertRedirectToRoute('login')
@@ -149,7 +185,7 @@ it('redirects authenticated users away from login', function (): void {
 it('throttles login attempts after too many failures', function (): void {
     $user = User::factory()->create([
         'email' => 'test@example.com',
-        'password' => Hash::make('default-dev-pass'),
+        'password' => Hash::make('Password1234!'),
     ]);
 
     // Make 5 failed login attempts to trigger rate limiting
@@ -178,7 +214,7 @@ it('throttles login attempts after too many failures', function (): void {
 it('clears rate limit after successful login', function (): void {
     $user = User::factory()->create([
         'email' => 'test@example.com',
-        'password' => Hash::make('default-dev-pass'),
+        'password' => Hash::make('Password1234!'),
     ]);
 
     // Make a few failed attempts
@@ -194,7 +230,7 @@ it('clears rate limit after successful login', function (): void {
     $response = $this->fromRoute('login')
         ->post(route('login.store'), [
             'email' => 'test@example.com',
-            'password' => 'default-dev-pass',
+            'password' => 'Password1234!',
         ]);
 
     $response->assertRedirectToRoute('dashboard');
@@ -206,7 +242,7 @@ it('dispatches lockout event when rate limit is reached', function (): void {
 
     $user = User::factory()->create([
         'email' => 'test@example.com',
-        'password' => Hash::make('default-dev-pass'),
+        'password' => Hash::make('Password1234!'),
     ]);
 
     // Make 6 failed login attempts to trigger rate limiting and Lockout event

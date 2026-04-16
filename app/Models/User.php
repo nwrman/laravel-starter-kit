@@ -29,6 +29,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @property-read string|null $two_factor_secret
  * @property-read string|null $two_factor_recovery_codes
  * @property-read CarbonInterface|null $two_factor_confirmed_at
+ * @property-read CarbonInterface|null $last_login_at
  * @property-read string|null $photo_url
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
@@ -68,6 +69,7 @@ final class User extends Authenticatable implements HasMedia, MustVerifyEmail
             'two_factor_secret' => 'string',
             'two_factor_recovery_codes' => 'string',
             'two_factor_confirmed_at' => 'datetime',
+            'last_login_at' => 'datetime',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

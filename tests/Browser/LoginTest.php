@@ -19,13 +19,13 @@ it('renders the login page', function (): void {
 it('can log in with valid credentials', function (): void {
     User::factory()->create([
         'email' => 'browser@example.com',
-        'password' => 'default-dev-pass',
+        'password' => 'Password1234!',
     ]);
 
     $page = visitWithoutAnimations('/login');
 
     $page->type('#email', 'browser@example.com')
-        ->type('#password', 'default-dev-pass')
+        ->type('#password', 'Password1234!')
         ->press('[data-test="login-button"]')
         ->assertPathIs('/dashboard')
         ->assertSee('Inicio')
@@ -37,7 +37,7 @@ it('can log in with valid credentials', function (): void {
 it('shows validation errors with invalid credentials', function (): void {
     User::factory()->create([
         'email' => 'browser@example.com',
-        'password' => 'default-dev-pass',
+        'password' => 'Password1234!',
     ]);
 
     $page = visitWithoutAnimations('/login');

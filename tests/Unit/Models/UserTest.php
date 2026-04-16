@@ -21,6 +21,7 @@ test('to array', function (): void {
             'email',
             'email_verified_at',
             'two_factor_confirmed_at',
+            'last_login_at',
             'created_at',
             'updated_at',
             'photo_url',
