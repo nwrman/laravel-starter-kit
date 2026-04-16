@@ -51,6 +51,32 @@ DEMO_LATENCY_TABLE_MS=1000
 DEMO_LATENCY_DETAIL_MS=800
 ```
 
+## Auth Defaults
+
+### Email verification is off by default
+
+This starter kit **auto-verifies new users on registration**. New signups land directly on `/dashboard` instead of being redirected to an email-verification page. This is the right default for most projects — it removes mail-server setup friction from the "try it out" path.
+
+The email verification infrastructure is still wired up:
+
+- `Features::emailVerification()` is enabled in `config/fortify.php`
+- The `User` model still implements `MustVerifyEmail`
+- The `'verified'` middleware still protects `/dashboard` and friends
+- When a logged-in user **changes their email** in profile settings, their verification is reset and a verification email is sent (email is identity; changing it is security-sensitive)
+
+**To require email verification on registration**, delete one line from `app/Actions/Fortify/CreateNewUser.php`:
+
+```diff
+ return DB::transaction(fn (): User => User::query()->create([
+     'name' => $input['name'],
+     'email' => $input['email'],
+     'password' => $input['password'],
+-    'email_verified_at' => now(),
+ ]));
+```
+
+New users will then be redirected to `/email/verify` after registration, and must click the link sent to their email before they can access `/dashboard`.
+
 ## Getting Started
 
 ### Prerequisites

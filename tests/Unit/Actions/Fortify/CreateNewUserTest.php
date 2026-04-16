@@ -22,6 +22,7 @@ it('creates a user with valid input', function (): void {
     expect($user->email)->toBe('test@example.com');
     expect($user->id)->toMatch('/^[0-9a-z]{26}$/i'); // ULID
     expect(Hash::check('Password1234!', $user->password))->toBeTrue();
+    expect($user->email_verified_at)->not->toBeNull();
 });
 
 it('rejects missing name', function (): void {
