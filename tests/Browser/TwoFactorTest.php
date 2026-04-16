@@ -13,7 +13,7 @@ it('renders the two factor authentication page', function (): void {
 
     // Handle Fortify confirm-password redirection
     if (str_ends_with($page->url(), '/user/confirm-password')) {
-        $page->type('#password', 'default-dev-pass')
+        $page->type('#password', 'Password1234!')
             ->press('[data-test="confirm-password-button"]');
     }
 

@@ -77,7 +77,7 @@ composer dev      # starts queue worker, log watcher, and Vite dev server
 
 The application is automatically available at `https://my-app.test` via [Laravel Herd](https://herd.laravel.com/).
 
-**Demo credentials:** `admin@example.com` with `default-dev-pass` as password or any password (anypass is enabled in development).
+**Demo credentials:** `admin@example.com` with `Password1234!` as password or any password (anypass is enabled in development).
 
 ## Architecture
 
