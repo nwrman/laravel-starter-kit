@@ -1,5 +1,5 @@
 import { Form, Head } from '@inertiajs/react';
-import { AlertCircleIcon, CheckCircleIcon } from 'lucide-react';
+import { CheckCircleIcon } from 'lucide-react';
 import { Button } from '@/components/button';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
@@ -16,10 +16,9 @@ import { request } from '@/routes/password';
 type Props = {
   status?: string;
   canResetPassword: boolean;
-  sessionExpired?: boolean;
 };
 
-export default function Login({ status, canResetPassword, sessionExpired }: Props) {
+export default function Login({ status, canResetPassword }: Props) {
   return (
     <>
       <Head title="Iniciar sesión" />
@@ -28,15 +27,6 @@ export default function Login({ status, canResetPassword, sessionExpired }: Prop
         <Alert variant="default" className="mb-6">
           <CheckCircleIcon />
           <AlertDescription>{status}</AlertDescription>
-        </Alert>
-      )}
-
-      {sessionExpired && (
-        <Alert variant="destructive" className="mb-6">
-          <AlertCircleIcon />
-          <AlertDescription>
-            Tu sesión ha expirado. <br /> Por favor, inicia sesión de nuevo.
-          </AlertDescription>
         </Alert>
       )}
 

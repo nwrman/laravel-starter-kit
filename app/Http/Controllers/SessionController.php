@@ -16,10 +16,14 @@ final readonly class SessionController
 {
     public function create(Request $request): Response
     {
+        // Store redirect URL from session expiration handler
+        if ($request->has('redirect')) {
+            $request->session()->put('url.intended', $request->string('redirect')->value());
+        }
+
         return Inertia::render('session/create', [
             'canResetPassword' => Route::has('password.request'),
             'status' => $request->session()->get('status'),
-            'sessionExpired' => $request->boolean('session_expired'),
         ]);
     }
 

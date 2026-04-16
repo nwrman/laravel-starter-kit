@@ -17,7 +17,7 @@ it('renders dashboard for authenticated users', function (): void {
 
 it('redirects unauthenticated users to login', function (): void {
     $this->get(route('dashboard'))
-        ->assertRedirect(route('login', ['session_expired' => true]));
+        ->assertRedirect(route('login'));
 });
 
 it('dashboard kpiStats contains 4 items', function (): void {

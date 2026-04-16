@@ -7,7 +7,7 @@ use App\Models\User;
 it('requires authentication', function (): void {
     $response = $this->delete(route('user.destroy'));
 
-    $response->assertRedirect(route('login', ['session_expired' => true]));
+    $response->assertRedirect(route('login'));
 });
 
 it('requires a valid password', function (): void {

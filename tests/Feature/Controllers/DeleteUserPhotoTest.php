@@ -52,5 +52,5 @@ it('flashes success message when deleting photo', function (): void {
 it('requires authentication to delete photo', function (): void {
     $response = $this->delete(route('user-photo.destroy'));
 
-    $response->assertRedirect(route('login', ['session_expired' => true]));
+    $response->assertRedirect(route('login'));
 });

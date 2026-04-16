@@ -15,23 +15,20 @@ it('renders login page', function (): void {
         ->assertInertia(fn ($page) => $page
             ->component('session/create')
             ->has('canResetPassword')
-            ->has('status')
-            ->where('sessionExpired', false));
+            ->has('status'));
 });
 
-it('passes session expired prop when query param is present', function (): void {
-    $response = $this->get(route('login', ['session_expired' => true]));
-
-    $response->assertOk()
-        ->assertInertia(fn ($page) => $page
-            ->component('session/create')
-            ->where('sessionExpired', true));
-});
-
-it('redirects unauthenticated users to login with session expired flag', function (): void {
+it('redirects unauthenticated users to login', function (): void {
     $response = $this->get(route('dashboard'));
 
-    $response->assertRedirect(route('login', ['session_expired' => true]));
+    $response->assertRedirect(route('login'));
+});
+
+it('stores redirect url as intended when redirect query param is present', function (): void {
+    $response = $this->get(route('login', ['redirect' => '/settings/profile']));
+
+    $response->assertOk()
+        ->assertSessionHas('url.intended', '/settings/profile');
 });
 
 it('may create a session', function (): void {
