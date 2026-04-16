@@ -5,7 +5,7 @@ import PasswordInput from '@/components/password-input';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
-import { store } from '@/routes/password';
+import { update } from '@/routes/password';
 
 type Props = {
   token: string;
@@ -18,7 +18,7 @@ export default function ResetPassword({ token, email }: Props) {
       <Head title="Restablecer contraseña" />
 
       <Form
-        {...store.form()}
+        {...update.form()}
         transform={(data) => ({ ...data, token, email })}
         resetOnSuccess={['password', 'password_confirmation']}
       >

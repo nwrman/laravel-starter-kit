@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
 import { store } from '@/routes/password/confirm';
 
-export default function Create() {
+export default function ConfirmPassword() {
   return (
     <>
       <Head title="Confirmar contraseña" />
@@ -44,7 +44,7 @@ export default function Create() {
   );
 }
 
-Create.layout = [
+ConfirmPassword.layout = [
   AuthLayout,
   {
     title: 'Confirma tu contraseña',

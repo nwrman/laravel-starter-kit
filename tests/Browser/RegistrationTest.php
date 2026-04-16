@@ -24,7 +24,7 @@ it('can register a new user', function (): void {
         ->type('#password', 'password')
         ->type('#password_confirmation', 'password')
         ->press('[data-test="register-button"]')
-        ->assertPathIs('/verify-email')
+        ->assertPathIs('/email/verify')
         ->assertNoJavaScriptErrors();
 
     $this->assertAuthenticated();

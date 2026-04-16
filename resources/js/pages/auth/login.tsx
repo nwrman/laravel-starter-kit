@@ -16,9 +16,10 @@ import { request } from '@/routes/password';
 type Props = {
   status?: string;
   canResetPassword: boolean;
+  canRegister?: boolean;
 };
 
-export default function Login({ status, canResetPassword }: Props) {
+export default function Login({ status, canResetPassword, canRegister = true }: Props) {
   return (
     <>
       <Head title="Iniciar sesión" />
@@ -85,12 +86,14 @@ export default function Login({ status, canResetPassword }: Props) {
               </Button>
             </div>
 
-            <div className="text-center text-sm text-muted-foreground">
-              ¿No tienes una cuenta?{' '}
-              <TextLink href={register()} tabIndex={6}>
-                Regístrate
-              </TextLink>
-            </div>
+            {canRegister && (
+              <div className="text-center text-sm text-muted-foreground">
+                ¿No tienes una cuenta?{' '}
+                <TextLink href={register()} tabIndex={6}>
+                  Regístrate
+                </TextLink>
+              </div>
+            )}
           </>
         )}
       </Form>

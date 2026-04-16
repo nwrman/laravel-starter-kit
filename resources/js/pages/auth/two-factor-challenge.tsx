@@ -9,7 +9,7 @@ import { OTP_MAX_LENGTH } from '@/hooks/use-two-factor-auth';
 import AuthLayout from '@/layouts/auth-layout';
 import { store } from '@/routes/two-factor/login';
 
-export default function Show() {
+export default function TwoFactorChallenge() {
   const [showRecoveryInput, setShowRecoveryInput] = useState<boolean>(false);
   const [code, setCode] = useState<string>('');
 
@@ -98,4 +98,4 @@ export default function Show() {
   );
 }
 
-Show.layout = AuthLayout;
+TwoFactorChallenge.layout = AuthLayout;

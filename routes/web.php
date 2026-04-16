@@ -6,18 +6,16 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeleteUserController;
 use App\Http\Controllers\DeleteUserPhotoController;
 use App\Http\Controllers\Project\ProjectController;
-use App\Http\Controllers\SessionController;
 use App\Http\Controllers\Settings\SecurityController;
 use App\Http\Controllers\Team\TeamController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\UserEmailResetNotificationController;
-use App\Http\Controllers\UserEmailVerificationController;
-use App\Http\Controllers\UserEmailVerificationNotificationController;
-use App\Http\Controllers\UserPasswordController;
 use App\Http\Controllers\UserProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::permanentRedirect('/', '/dashboard');
+
+// Preserve legacy /verify-email URL used by UX copy and existing links.
+// Fortify registers this endpoint at /email/verify.
+Route::permanentRedirect('/verify-email', '/email/verify');
 
 // CSRF token refresh endpoint for session expired handler
 Route::get('csrf-token', fn () => response()->json(['token' => csrf_token()]))->name('csrf-token');
@@ -53,46 +51,4 @@ Route::middleware('auth')->group(function (): void {
 
     // User Security (password + two-factor)...
     Route::get('settings/security', [SecurityController::class, 'edit'])->name('security.edit');
-});
-
-Route::middleware('guest')->group(function (): void {
-    // User...
-    Route::get('register', [UserController::class, 'create'])->name('register');
-    Route::post('register', [UserController::class, 'store'])->name('register.store');
-
-    // User Password...
-    Route::get('reset-password/{token}', [UserPasswordController::class, 'create'])
-        ->name('password.reset');
-    Route::post('reset-password', [UserPasswordController::class, 'store'])
-        ->name('password.store');
-
-    // User Email Reset Notification...
-    Route::get('forgot-password', [UserEmailResetNotificationController::class, 'create'])
-        ->name('password.request');
-    Route::post('forgot-password', [UserEmailResetNotificationController::class, 'store'])
-        ->name('password.email');
-
-    // Session...
-    Route::get('login', [SessionController::class, 'create'])
-        ->name('login');
-    Route::post('login', [SessionController::class, 'store'])
-        ->name('login.store');
-});
-
-Route::middleware('auth')->group(function (): void {
-    // User Email Verification...
-    Route::get('verify-email', [UserEmailVerificationNotificationController::class, 'create'])
-        ->name('verification.notice');
-    Route::post('email/verification-notification', [UserEmailVerificationNotificationController::class, 'store'])
-        ->middleware('throttle:6,1')
-        ->name('verification.send');
-
-    // User Email Verification...
-    Route::get('verify-email/{id}/{hash}', [UserEmailVerificationController::class, 'update'])
-        ->middleware(['signed', 'throttle:6,1'])
-        ->name('verification.verify');
-
-    // Session...
-    Route::post('logout', [SessionController::class, 'destroy'])
-        ->name('logout');
 });
