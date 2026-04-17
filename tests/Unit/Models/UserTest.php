@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\User;
+use Filament\Facades\Filament;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileUnacceptableForCollection;
@@ -21,11 +22,38 @@ test('to array', function (): void {
             'email',
             'email_verified_at',
             'two_factor_confirmed_at',
+            'is_admin',
             'last_login_at',
             'created_at',
             'updated_at',
             'photo_url',
         ]);
+});
+
+test('is_admin defaults to false', function (): void {
+    $user = User::factory()->create();
+
+    expect($user->is_admin)->toBeFalse();
+});
+
+test('is_admin is cast to boolean', function (): void {
+    $user = User::factory()->admin()->create();
+
+    expect($user->is_admin)->toBeTrue();
+});
+
+test('canAccessPanel returns false for non-admin', function (): void {
+    $user = User::factory()->create();
+    $panel = Filament::getPanel('admin');
+
+    expect($user->canAccessPanel($panel))->toBeFalse();
+});
+
+test('canAccessPanel returns true for admin', function (): void {
+    $user = User::factory()->admin()->create();
+    $panel = Filament::getPanel('admin');
+
+    expect($user->canAccessPanel($panel))->toBeTrue();
 });
 
 test('photo_url is null when no photo is uploaded', function (): void {

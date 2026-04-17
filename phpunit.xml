@@ -20,6 +20,9 @@
             <directory>app</directory>
         </include>
         <exclude>
+            <directory>app/Filament</directory>
+            <directory>app/Providers/Filament</directory>
+            <file>app/Console/Commands/SyncColorsCommand.php</file>
             <file>app/Services/DemoDataService.php</file>
             <file>app/Http/Controllers/DashboardController.php</file>
             <file>app/Http/Controllers/Member/MembershipController.php</file>

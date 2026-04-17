@@ -13,5 +13,12 @@
   "Verify your email address": "Verifica tu correo electrónico",
   "Please click the button below to verify your email address.": "Por favor, haz click en el botón para verificar tu correo.",
   "If you did not create an account, no further action is required.": "Si no creaste una cuenta, no es necesario realizar ninguna acción.",
-  "All rights reserved.": "Todos los derechos reservados."
+  "All rights reserved.": "Todos los derechos reservados.",
+  "Name": "Nombre",
+  "Email": "Correo",
+  "Email verified at": "Correo verificado",
+  "Is admin": "Administrador",
+  "Last login at": "Último acceso",
+  "Created at": "Creado",
+  "Updated at": "Actualizado"
 }

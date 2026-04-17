@@ -17,6 +17,7 @@ final class DatabaseSeeder extends Seeder
                 'name' => 'Admin User',
                 'email_verified_at' => now(),
                 'password' => 'Password1234!',
+                'is_admin' => true,
             ],
         );
     }

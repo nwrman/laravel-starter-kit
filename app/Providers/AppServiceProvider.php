@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use Filament\Forms\Components\Field;
+use Filament\Infolists\Components\Entry;
+use Filament\Tables\Columns\Column;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Table;
 use Illuminate\Database\Schema\Builder;
 use Illuminate\Support\ServiceProvider;
 use Inertia\ExceptionResponse;
@@ -40,6 +45,30 @@ final class AppServiceProvider extends ServiceProvider
             }
 
             return null;
+        });
+
+        // Filament global defaults: auto-translate labels and set consistent table UX.
+        Column::configureUsing(function (Column $column): void {
+            $column->translateLabel();
+        });
+
+        Filter::configureUsing(function (Filter $filter): void {
+            $filter->translateLabel();
+        });
+
+        Field::configureUsing(function (Field $field): void {
+            $field->translateLabel();
+        });
+
+        Entry::configureUsing(function (Entry $entry): void {
+            $entry->translateLabel();
+        });
+
+        Table::configureUsing(function (Table $table): void {
+            $table
+                ->striped()
+                ->reorderableColumns()
+                ->paginationPageOptions([10, 25, 50, 100]);
         });
     }
 }

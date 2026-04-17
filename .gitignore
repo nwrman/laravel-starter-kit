@@ -41,3 +41,9 @@ storage/logs/test-failures.json
 .opencode/commands/
 CLAUDE.md
 AGENTS.md
+
+# Filament
+public/css/filament
+public/js/filament
+public/fonts/filament
+config/filament-colors.php

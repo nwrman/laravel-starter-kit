@@ -6,6 +6,8 @@ namespace App\Models;
 
 use Carbon\CarbonInterface;
 use Database\Factories\UserFactory;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -29,6 +31,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
  * @property-read string|null $two_factor_secret
  * @property-read string|null $two_factor_recovery_codes
  * @property-read CarbonInterface|null $two_factor_confirmed_at
+ * @property-read bool $is_admin
  * @property-read CarbonInterface|null $last_login_at
  * @property-read string|null $photo_url
  * @property-read CarbonInterface $created_at
@@ -44,7 +47,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 #[Appends([
     'photo_url',
 ])]
-final class User extends Authenticatable implements HasMedia, MustVerifyEmail
+final class User extends Authenticatable implements FilamentUser, HasMedia, MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory;
@@ -69,10 +72,16 @@ final class User extends Authenticatable implements HasMedia, MustVerifyEmail
             'two_factor_secret' => 'string',
             'two_factor_recovery_codes' => 'string',
             'two_factor_confirmed_at' => 'datetime',
+            'is_admin' => 'boolean',
             'last_login_at' => 'datetime',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->is_admin;
     }
 
     public function registerMediaCollections(): void
