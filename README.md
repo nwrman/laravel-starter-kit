@@ -222,7 +222,60 @@ composer cloud:build    # Build commands
 composer cloud:deploy   # Deploy commands
 ```
 
-## Customizing
+## Back Office
+
+A [Filament](https://filamentphp.com/) v5 panel ships at `/admin` for staff-only tooling. It runs on the `web` guard and is gated by an `is_admin` flag on the `User` model. Users support soft-deletes — deleted users' emails are freed for re-registration and their sessions are purged.
+
+### User management
+
+The panel ships a full-featured `UserResource` out of the box:
+
+- **List page**: 4 stats (Total / Admins / New this week / Active 24h), tab filter (All / Admins / Verified / Unverified), search, column toggles, copy-email
+- **Create**: admin-provisioned users with an initial password (auto-verified). Share the password out-of-band; the user changes it via `/settings/security`.
+- **Edit**: tabbed form (Personal / Security / Metadata). Password field is optional on edit. Toggle admin, view 2FA status (read-only — Fortify owns 2FA lifecycle).
+- **Soft-delete / restore / force-delete**: trashed users cannot log in or access the panel. Their email is freed via a parking strategy so new users can register with the same address. Restore reverts the email.
+- **Bulk actions**: toggle admin, delete, restore, force-delete.
+
+### Granting admin access
+
+```php
+// Via the factory state (tests / seeders):
+User::factory()->admin()->create();
+
+// Or on an existing user:
+$user->update(['is_admin' => true]);
+```
+
+### Brand colors
+
+Primary colors live in `resources/css/app.css` and are synced into a Filament-friendly OKLCH palette via:
+
+```bash
+php artisan filament:sync-colors
+```
+
+The command reads the single `--primary` token from `app.css`, interpolates an 11-shade ladder (`50`..`950`) anchored at `500`, and writes `config/filament-colors.php`. It also extracts `--chart-1..N` and (optionally) named brand tokens. Downstream projects can extend `BRAND_NAMES` in `app/Console/Commands/SyncColorsCommand.php` to include their own `--color-<name>` tokens.
+
+`post-install-cmd` and `post-update-cmd` run `filament:sync-colors` automatically.
+
+### Branding the panel
+
+- Theme: `resources/css/filament/admin/theme.css` — sets IBM Plex Sans for headings, Noto Sans for body (matching the app). Add thin brand overrides here.
+- Logo: `resources/views/filament/admin/logo.blade.php` — renders the `config('app.name')` wordmark with a "Back Office" tag. Replace with an `<x-application-logo />` or SVG for a real brand.
+
+### Adding resources
+
+```bash
+php artisan make:filament-resource Post --view --generate
+```
+
+Resources live in `app/Filament/Resources/<Domain>/` and follow the starter's domain-folder conventions (singular PascalCase). The starter ships a full `UserResource` (list + create + edit + delete/restore) demonstrating tabbed forms, stats widgets, tab filters, bulk actions, and soft-deletes. Tests in `tests/Feature/Filament/` show the Livewire assertion patterns.
+
+### Translations
+
+All table columns, form fields, filters, and infolist entries call `translateLabel()` automatically (see `AppServiceProvider::boot`). Labels are humanized attribute names resolved via `lang/es.json` — add new entries there for Spanish translations of resource attributes.
+
+
 
 To build your own application on top of this starter:
 

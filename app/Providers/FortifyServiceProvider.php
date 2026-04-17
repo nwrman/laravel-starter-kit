@@ -7,8 +7,10 @@ namespace App\Providers;
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
 use App\Http\Responses\LogoutResponse;
+use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -36,6 +38,26 @@ final class FortifyServiceProvider extends ServiceProvider
     {
         Fortify::createUsersUsing(CreateNewUser::class);
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
+
+        // Deny trashed (soft-deleted) users from logging in. Without this,
+        // Fortify's default query silently excludes them (user "not found"),
+        // which is fine for login but causes confusing UX on password-reset.
+        Fortify::authenticateUsing(function (Request $request): ?User {
+            /** @var User|null $user */
+            $user = User::withTrashed()
+                ->where('email', $request->string(Fortify::username())->value())
+                ->first();
+
+            if ($user === null || $user->trashed()) {
+                return null;
+            }
+
+            if (! Hash::check($request->string('password')->value(), $user->password)) {
+                return null;
+            }
+
+            return $user;
+        });
     }
 
     private function bootFortifyDefaults(): void

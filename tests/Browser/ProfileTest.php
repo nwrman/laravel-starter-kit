@@ -65,5 +65,5 @@ it('can delete account with password confirmation', function (): void {
         ->assertPathIs('/login')
         ->assertNoJavaScriptErrors();
 
-    $this->assertDatabaseMissing('users', ['id' => $user->id]);
+    $this->assertSoftDeleted('users', ['id' => $user->id]);
 });

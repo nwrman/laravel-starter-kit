@@ -12,6 +12,7 @@
     ],
     "require": {
         "php": "^8.5.0",
+        "filament/filament": "^5.5.1",
         "inertiajs/inertia-laravel": "^3.0.0-beta",
         "laravel/fortify": "^1.36.2",
         "laravel/framework": "^13.5.0",
@@ -63,15 +64,18 @@
         "patch": "grep -q setData vendor/pestphp/pest/src/Plugins/Parallel/Paratest/WrapperRunner.php 2>/dev/null || (cd vendor/pestphp/pest && patch -p1 --silent < ../../../patches/pest-parallel-coverage.patch)",
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "@php artisan package:discover --ansi"
+            "@php artisan package:discover --ansi",
+            "@php artisan filament:upgrade"
         ],
         "post-install-cmd": [
-            "@patch"
+            "@patch",
+            "@php artisan filament:sync-colors --ansi"
         ],
         "post-update-cmd": [
             "@patch",
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
             "@php artisan clear",
+            "@php artisan filament:sync-colors --ansi",
             "@update:requirements"
         ],
         "post-root-package-install": [
@@ -136,11 +140,12 @@
             "@php artisan toolkit:preflight"
         ],
         "optimize": [
-          "@php artisan optimize",
-          "@php artisan config:cache",
-          "@php artisan event:cache",
-          "@php artisan route:cache",
-          "@php artisan view:cache"
+            "@php artisan optimize",
+            "@php artisan config:cache",
+            "@php artisan event:cache",
+            "@php artisan route:cache",
+            "@php artisan view:cache",
+            "@php artisan filament:optimize"
         ],
         "cloud:build": [
             "sh scripts/cloud-build.sh"

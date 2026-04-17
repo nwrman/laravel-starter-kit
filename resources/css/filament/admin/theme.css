@@ -1,0 +1,39 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+
+/* Local fonts — already bundled via @fontsource-variable in resources/css/app.css.
+   They are re-imported here so the Filament asset bundle is self-contained. Vite
+   deduplicates shared modules, so the font files are only shipped once. */
+@import '@fontsource-variable/ibm-plex-sans';
+@import '@fontsource-variable/noto-sans';
+
+/* Filament defaults body to Inter. We match the app:
+   Noto Sans for body, IBM Plex Sans for headings. */
+:root,
+body,
+.fi-body {
+  font-family:
+    'Noto Sans Variable',
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+h1,
+h2,
+h3,
+.fi-header-heading,
+.fi-section-header-heading,
+.fi-form-section-header-heading,
+.fi-resource-table-header-heading,
+.fi-page-heading,
+.fi-topbar-title,
+.fi-sidebar-group-label {
+  font-family: 'IBM Plex Sans Variable', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Brand overrides go below. Keep this file small.
+   Primary colors come via config('filament-colors.primary') → panel ->colors(). */
