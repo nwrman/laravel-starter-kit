@@ -26,6 +26,7 @@ test('to array', function (): void {
             'last_login_at',
             'created_at',
             'updated_at',
+            'deleted_at',
             'photo_url',
         ]);
 });
@@ -54,6 +55,47 @@ test('canAccessPanel returns true for admin', function (): void {
     $panel = Filament::getPanel('admin');
 
     expect($user->canAccessPanel($panel))->toBeTrue();
+});
+
+test('canAccessPanel returns false for trashed admin', function (): void {
+    $user = User::factory()->admin()->trashed()->create();
+    $panel = Filament::getPanel('admin');
+
+    expect($user->canAccessPanel($panel))->toBeFalse();
+});
+
+test('soft delete frees the email for re-use', function (): void {
+    $user = User::factory()->create(['email' => 'alice@example.com']);
+    $user->delete();
+
+    expect($user->refresh()->email)
+        ->toStartWith(User::TRASHED_EMAIL_PREFIX)
+        ->toEndWith(User::TRASHED_EMAIL_DOMAIN);
+
+    // The original email is now available for a new user.
+    $newUser = User::factory()->create(['email' => 'alice@example.com']);
+    expect($newUser->email)->toBe('alice@example.com');
+});
+
+test('restore recovers the original email', function (): void {
+    $user = User::factory()->create(['email' => 'bob@example.com']);
+    $user->delete();
+    $user->restore();
+
+    expect($user->refresh()->email)->toBe('bob@example.com');
+});
+
+test('force delete does not mutate email', function (): void {
+    $user = User::factory()->create(['email' => 'charlie@example.com']);
+    $user->forceDelete();
+
+    expect(User::withTrashed()->find($user->id))->toBeNull();
+});
+
+test('trashed factory state produces deleted_at', function (): void {
+    $user = User::factory()->trashed()->create();
+
+    expect($user->trashed())->toBeTrue();
 });
 
 test('photo_url is null when no photo is uploaded', function (): void {

@@ -29,6 +29,7 @@ final class UserFactory extends Factory
             'two_factor_confirmed_at' => null,
             'is_admin' => false,
             'last_login_at' => null,
+            'deleted_at' => null,
         ];
     }
 
@@ -52,6 +53,13 @@ final class UserFactory extends Factory
             'two_factor_secret' => encrypt('secret'),
             'two_factor_recovery_codes' => encrypt(json_encode(['code1', 'code2'])),
             'two_factor_confirmed_at' => now(),
+        ]);
+    }
+
+    public function trashed(): self
+    {
+        return $this->state(fn (array $attributes): array => [
+            'deleted_at' => now()->subDay(),
         ]);
     }
 }

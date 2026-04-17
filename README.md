@@ -224,7 +224,17 @@ composer cloud:deploy   # Deploy commands
 
 ## Back Office
 
-A [Filament](https://filamentphp.com/) v5 panel ships at `/admin` for staff-only tooling. It runs on the `web` guard and is gated by an `is_admin` flag on the `User` model.
+A [Filament](https://filamentphp.com/) v5 panel ships at `/admin` for staff-only tooling. It runs on the `web` guard and is gated by an `is_admin` flag on the `User` model. Users support soft-deletes — deleted users' emails are freed for re-registration and their sessions are purged.
+
+### User management
+
+The panel ships a full-featured `UserResource` out of the box:
+
+- **List page**: 4 stats (Total / Admins / New this week / Active 24h), tab filter (All / Admins / Verified / Unverified), search, column toggles, copy-email
+- **Create**: admin-provisioned users with an initial password (auto-verified). Share the password out-of-band; the user changes it via `/settings/security`.
+- **Edit**: tabbed form (Personal / Security / Metadata). Password field is optional on edit. Toggle admin, view 2FA status (read-only — Fortify owns 2FA lifecycle).
+- **Soft-delete / restore / force-delete**: trashed users cannot log in or access the panel. Their email is freed via a parking strategy so new users can register with the same address. Restore reverts the email.
+- **Bulk actions**: toggle admin, delete, restore, force-delete.
 
 ### Granting admin access
 
@@ -259,7 +269,7 @@ The command reads the single `--primary` token from `app.css`, interpolates an 1
 php artisan make:filament-resource Post --view --generate
 ```
 
-Resources live in `app/Filament/Resources/<Domain>/` and follow the starter's domain-folder conventions (singular PascalCase). The starter ships one minimal example: `UserResource` (list + view, no create/edit/delete). Tests in `tests/Feature/Filament/` show the Livewire assertion patterns.
+Resources live in `app/Filament/Resources/<Domain>/` and follow the starter's domain-folder conventions (singular PascalCase). The starter ships a full `UserResource` (list + create + edit + delete/restore) demonstrating tabbed forms, stats widgets, tab filters, bulk actions, and soft-deletes. Tests in `tests/Feature/Filament/` show the Livewire assertion patterns.
 
 ### Translations
 

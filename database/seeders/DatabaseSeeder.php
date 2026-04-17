@@ -20,5 +20,10 @@ final class DatabaseSeeder extends Seeder
                 'is_admin' => true,
             ],
         );
+
+        // Demo users for back-office panel
+        User::factory()->count(10)->create();
+        User::factory()->unverified()->count(3)->create();
+        User::factory()->trashed()->count(2)->create();
     }
 }
