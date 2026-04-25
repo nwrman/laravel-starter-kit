@@ -40,12 +40,12 @@ it('generates all 11 primary shades interpolated from a single --primary token',
 });
 
 it('anchors the 500 shade to the source --primary token', function (): void {
-    // Starter's --primary is oklch(0.218 0.008 223.9) — verify 500 preserves it.
+    // Starter's --primary is oklch(0.35 0.14 250) — verify 500 preserves it.
     $this->artisan('filament:sync-colors', ['--output' => $this->output])->assertSuccessful();
 
     $colors = require $this->output;
 
-    expect($colors['primary'][500])->toBe('oklch(0.218 0.008 223.900)');
+    expect($colors['primary'][500])->toBe('oklch(0.350 0.140 250.000)');
 });
 
 it('extracts the chart colors', function (): void {

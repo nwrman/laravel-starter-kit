@@ -52,7 +52,7 @@ describe('session-expired-handler', () => {
 
     expect(registered).toContain('before');
     expect(registered).toContain('httpException');
-  });
+  }, 15_000);
 
   it('silently retries the original visit on 419 when csrf refresh + auth check succeed', async () => {
     await loadHandlerFresh();

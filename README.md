@@ -103,7 +103,9 @@ composer dev      # starts queue worker, log watcher, and Vite dev server
 
 The application is automatically available at `https://my-app.test` via [Laravel Herd](https://herd.laravel.com/).
 
-**Demo credentials:** `admin@example.com` with `Password1234!` as password or any password (anypass is enabled in development).
+**Demo credentials:** `admin@example.com` with any password (anypass is enabled in development). To test a failed login, use `1_wrong_pass`.
+
+**Disable public registration:** Set `ALLOW_REGISTRATION=false` in `.env` to restrict user creation to the Filament admin panel (`/admin`). The login page will automatically hide the registration link.
 
 ## Architecture
 

@@ -60,7 +60,7 @@ it('shows validation errors with invalid credentials', function (): void {
     $page = visitWithoutAnimations('/login');
 
     $page->type('#email', 'browser@example.com')
-        ->type('#password', 'wrong-password')
+        ->type('#password', '1_wrong_pass')
         ->press('[data-test="login-button"]')
         ->assertPathIs('/login')
         ->assertSee('Estas credenciales no coinciden con nuestros registros.')

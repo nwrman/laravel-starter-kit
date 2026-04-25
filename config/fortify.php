@@ -145,8 +145,8 @@ return [
     |
     */
 
-    'features' => [
-        Features::registration(),
+    'features' => array_values(array_filter([
+        env('ALLOW_REGISTRATION', true) ? Features::registration() : null,
         Features::resetPasswords(),
         Features::emailVerification(),
         // updateProfileInformation and updatePasswords are intentionally NOT
@@ -160,6 +160,6 @@ return [
             'confirmPassword' => true,
             // 'window' => 0
         ]),
-    ],
+    ])),
 
 ];

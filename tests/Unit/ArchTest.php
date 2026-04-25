@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Providers\Filament\AdminPanelProvider;
 use App\Services\DemoDataService;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 arch()->preset()->php();
 arch()->preset()->strict()->ignoring([
@@ -23,4 +24,33 @@ arch('controllers')
     ->expect('App\Http\Controllers')
     ->not->toBeUsed();
 
-//
+arch('avoid open for extension')
+    ->expect('App')
+    ->classes()
+    ->toBeFinal()
+    ->ignoring([
+        'App\Concerns', // Traits cannot be final
+    ]);
+
+arch('factories')
+    ->expect('Database\Factories')
+    ->toExtend(Factory::class)
+    ->toHaveMethod('definition')
+    ->toOnlyBeUsedIn([
+        'App\Models',
+    ]);
+
+arch('models')
+    ->expect('App\Models')
+    ->toHaveMethod('casts');
+
+arch('actions')
+    ->expect('App\Actions')
+    ->toHaveMethod('handle')
+    ->ignoring([
+        'App\Actions\Fortify',
+    ]);
+
+arch('globals')
+    ->expect(['dda', 'da', 'dd', 'dump', 'ray'])
+    ->not->toBeUsed();

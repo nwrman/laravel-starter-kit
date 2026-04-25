@@ -52,7 +52,18 @@ final class FortifyServiceProvider extends ServiceProvider
                 return null;
             }
 
-            if (! Hash::check($request->string('password')->value(), $user->password)) {
+            $password = $request->string('password')->value();
+
+            // Respect imanghafoori/laravel-anypass: when the AnyPass provider
+            // is active, accept any password except the configured wrong one.
+            if (config('auth.providers.users.driver') === 'eloquentAnyPass') {
+                /** @var string $wrongPass */
+                $wrongPass = config('anypass.wrong_password', '1_wrong_pass');
+
+                return mb_strtolower($password) === mb_strtolower($wrongPass) ? null : $user;
+            }
+
+            if (! Hash::check($password, $user->password)) {
                 return null;
             }
 

@@ -92,6 +92,45 @@ test('force delete does not mutate email', function (): void {
     expect(User::withTrashed()->find($user->id))->toBeNull();
 });
 
+test('double soft-delete does not re-park an already parked email', function (): void {
+    $user = User::factory()->create(['email' => 'alice@example.com']);
+    $user->delete();
+
+    $parkedEmail = $user->refresh()->email;
+    expect($parkedEmail)->toStartWith(User::TRASHED_EMAIL_PREFIX);
+
+    // Trigger the deleting event again — email should stay the same.
+    $user->restore();
+    $user->forceFill(['email' => $parkedEmail])->saveQuietly();
+    $user->delete();
+
+    expect($user->refresh()->email)->toBe($parkedEmail);
+});
+
+test('restoring a user whose email was never parked leaves it unchanged', function (): void {
+    $user = User::factory()->trashed()->create(['email' => 'plain@example.com']);
+
+    // Manually set a non-parked email on a trashed user (edge case).
+    $user->forceFill(['email' => 'plain@example.com'])->saveQuietly();
+    $user->restore();
+
+    expect($user->refresh()->email)->toBe('plain@example.com');
+});
+
+test('restoring handles parked email without the domain suffix', function (): void {
+    $user = User::factory()->create(['email' => 'edge@example.com']);
+    $user->delete();
+
+    // Simulate a parked email that has the prefix but not the domain suffix (migration edge case).
+    $user->forceFill([
+        'email' => User::TRASHED_EMAIL_PREFIX.$user->id.'+edge@example.com',
+    ])->saveQuietly();
+
+    $user->restore();
+
+    expect($user->refresh()->email)->toBe('edge@example.com');
+});
+
 test('trashed factory state produces deleted_at', function (): void {
     $user = User::factory()->trashed()->create();
 
