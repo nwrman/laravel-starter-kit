@@ -46,3 +46,36 @@ it('denies login to a soft-deleted user even when using the parked email', funct
 
     $this->assertGuest();
 });
+
+it('denies login with wrong password when anypass is not active', function (): void {
+    config()->set('auth.providers.users.driver', 'eloquent');
+
+    $user = User::factory()->create([
+        'email' => 'hash@example.com',
+        'password' => 'correct-password',
+    ]);
+
+    $this->post('/login', [
+        'email' => 'hash@example.com',
+        'password' => 'wrong-password',
+    ]);
+
+    $this->assertGuest();
+});
+
+it('allows login with correct password when anypass is not active', function (): void {
+    config()->set('auth.providers.users.driver', 'eloquent');
+
+    $user = User::factory()->create([
+        'email' => 'hash@example.com',
+        'password' => 'correct-password',
+    ]);
+
+    $response = $this->post('/login', [
+        'email' => 'hash@example.com',
+        'password' => 'correct-password',
+    ]);
+
+    expect($response->status())->toBeLessThan(400);
+    $this->assertAuthenticatedAs($user);
+});
