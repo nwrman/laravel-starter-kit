@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\User;
+use Laravel\Fortify\Features;
 
 it('renders the login page with Fortify view binding', function (): void {
     $response = $this->from('/')
@@ -75,6 +76,33 @@ it('renders the two-factor challenge page with Fortify view binding', function (
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page->component('auth/two-factor-challenge'));
+});
+
+it('renders the login page with canRegister true when registration is enabled', function (): void {
+    config()->set('fortify.features', [
+        Features::registration(),
+        Features::resetPasswords(),
+    ]);
+
+    $response = $this->get(route('login'));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('auth/login')
+            ->where('canRegister', true));
+});
+
+it('renders the login page with canRegister false when registration is disabled', function (): void {
+    config()->set('fortify.features', [
+        Features::resetPasswords(),
+    ]);
+
+    $response = $this->get(route('login'));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('auth/login')
+            ->where('canRegister', false));
 });
 
 it('renders the confirm password page with Fortify view binding', function (): void {
