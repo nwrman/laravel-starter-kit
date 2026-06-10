@@ -105,9 +105,22 @@
             "bun run lint"
         ],
         "test:type-coverage": "pest --type-coverage --min=100",
-        "test:unit": "pest --testsuite=Unit --parallel --compact",
-        "test:feature": "pest --testsuite=Feature --parallel --compact",
-        "test:browser": "pest --testsuite=Browser --parallel --compact",
+        "test:unit": [
+            "Composer\\Config::disableProcessTimeout",
+            "@php artisan toolkit:report --no-interaction --suite=unit"
+        ],
+        "test:feature": [
+            "Composer\\Config::disableProcessTimeout",
+            "@php artisan toolkit:report --no-interaction --suite=feature"
+        ],
+        "test:browser": [
+            "Composer\\Config::disableProcessTimeout",
+            "@php artisan toolkit:report --no-interaction --suite=browser"
+        ],
+        "test:frontend": [
+            "Composer\\Config::disableProcessTimeout",
+            "@php artisan toolkit:report --no-interaction --suite=frontend"
+        ],
         "test:lint": [
             "pint --parallel --test",
             "rector --dry-run",
@@ -118,10 +131,8 @@
             "bun run test:types"
         ],
         "test": [
-            "@test:unit",
-            "@test:feature",
-            "@test:browser",
-            "bun run test:ui"
+            "Composer\\Config::disableProcessTimeout",
+            "@php artisan toolkit:report --no-interaction"
         ],
         "test:ci": [
             "@test:type-coverage",

@@ -37,7 +37,9 @@ storage/logs/test-failures.json
 
 .agents
 .cursor
-.claude
+.claude/*
+!.claude/hooks/
+!.claude/settings.json
 .opencode/commands/
 CLAUDE.md
 AGENTS.md
