@@ -15,6 +15,7 @@ use Illuminate\Routing\Controllers\Middleware;
 use Inertia\Inertia;
 use Inertia\Response;
 use Laravel\Fortify\Features;
+use Laravel\Passkeys\Passkey;
 
 final readonly class SecurityController implements HasMiddleware
 {
@@ -40,6 +41,22 @@ final readonly class SecurityController implements HasMiddleware
 
             $props['twoFactorEnabled'] = $user->hasEnabledTwoFactorAuthentication();
             $props['requiresConfirmation'] = Features::optionEnabled(Features::twoFactorAuthentication(), 'confirm');
+        }
+
+        $props['canManagePasskeys'] = Features::canManagePasskeys();
+
+        if (Features::canManagePasskeys()) {
+            $props['passkeys'] = $user->passkeys()
+                ->latest()
+                ->get()
+                ->map(fn (Passkey $passkey): array => [
+                    'id' => $passkey->id,
+                    'name' => $passkey->name,
+                    'authenticator' => $passkey->authenticator,
+                    'created_at_diff' => $passkey->created_at?->diffForHumans(),
+                    'last_used_at_diff' => $passkey->last_used_at?->diffForHumans(),
+                ])
+                ->all();
         }
 
         return Inertia::render('settings/security', $props);

@@ -53,6 +53,28 @@ it('shows two factor enabled when enabled', function (): void {
             ->where('twoFactorEnabled', true));
 });
 
+it("renders the security page with the user's passkeys", function (): void {
+    $user = User::factory()->create();
+
+    $user->passkeys()->create([
+        'name' => 'My Laptop',
+        'credential_id' => 'credential-render-id',
+        'credential' => ['aaguid' => '00000000-0000-0000-0000-000000000000'],
+    ]);
+
+    $this->actingAs($user)->session(['auth.password_confirmed_at' => time()]);
+
+    $response = $this->fromRoute('dashboard')
+        ->get(route('security.edit'));
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('settings/security')
+            ->where('canManagePasskeys', true)
+            ->has('passkeys', 1)
+            ->where('passkeys.0.name', 'My Laptop'));
+});
+
 it('redirects to password.confirm when password has not been confirmed', function (): void {
     $user = User::factory()->create();
 

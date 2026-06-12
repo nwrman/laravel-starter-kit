@@ -119,6 +119,7 @@ return [
     'limiters' => [
         'login' => 'login',
         'two-factor' => 'two-factor',
+        'passkeys' => 'passkeys',
     ],
 
     /*
@@ -159,6 +160,9 @@ return [
             'confirm' => true,
             'confirmPassword' => true,
             // 'window' => 0
+        ]),
+        Features::passkeys([
+            'confirmPassword' => true,
         ]),
     ])),
 

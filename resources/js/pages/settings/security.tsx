@@ -6,6 +6,7 @@ import * as z from 'zod';
 import { update } from '@/actions/App/Http/Controllers/Settings/SecurityController';
 import { Button } from '@/components/button';
 import { PasswordField } from '@/components/form-fields';
+import ManagePasskeys, { type Props as ManagePasskeysProps } from '@/components/manage-passkeys';
 import TwoFactorRecoveryCodes from '@/components/two-factor-recovery-codes';
 import TwoFactorSetupModal from '@/components/two-factor-setup-modal';
 import {
@@ -53,12 +54,14 @@ type Props = {
   canManageTwoFactor?: boolean;
   requiresConfirmation?: boolean;
   twoFactorEnabled?: boolean;
-};
+} & ManagePasskeysProps;
 
 export default function Security({
   canManageTwoFactor = false,
   requiresConfirmation = false,
   twoFactorEnabled = false,
+  canManagePasskeys = false,
+  passkeys = [],
 }: Props) {
   const { form, processing } = useInertiaForm({
     schema: passwordSchema,
@@ -230,6 +233,8 @@ export default function Security({
             </CardFooter>
           </Card>
         )}
+
+        <ManagePasskeys canManagePasskeys={canManagePasskeys} passkeys={passkeys} />
 
         <TwoFactorSetupModal
           isOpen={showSetupModal}
