@@ -1,17 +1,23 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import PasskeyRegister from './passkey-register';
 
 const mockRegister = vi.fn();
 const mockUsePasskeyRegister = vi.fn();
+let mockOnSuccess: (() => void) | undefined;
 
 vi.mock('@laravel/passkeys/react', () => ({
-  usePasskeyRegister: (opts: unknown) => mockUsePasskeyRegister(opts),
+  usePasskeyRegister: (opts: { onSuccess?: () => void }) => {
+    mockOnSuccess = opts.onSuccess;
+
+    return mockUsePasskeyRegister();
+  },
 }));
 
 describe('PasskeyRegister', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockOnSuccess = undefined;
     mockUsePasskeyRegister.mockReturnValue({
       register: mockRegister,
       isLoading: false,
@@ -64,5 +70,31 @@ describe('PasskeyRegister', () => {
     await user.click(screen.getByRole('button', { name: /cancelar/i }));
 
     expect(screen.queryByLabelText('Nombre de la llave')).not.toBeInTheDocument();
+  });
+
+  it('resets the form and notifies the parent after a successful registration', async () => {
+    const onSuccess = vi.fn();
+    const user = userEvent.setup();
+    render(<PasskeyRegister onSuccess={onSuccess} />);
+
+    await user.click(screen.getByRole('button', { name: /agregar llave de acceso/i }));
+    expect(screen.getByLabelText('Nombre de la llave')).toBeInTheDocument();
+
+    act(() => mockOnSuccess?.());
+
+    expect(onSuccess).toHaveBeenCalledOnce();
+    expect(screen.queryByLabelText('Nombre de la llave')).not.toBeInTheDocument();
+  });
+
+  it('submits the entered name when Enter is pressed', async () => {
+    const user = userEvent.setup();
+    render(<PasskeyRegister onSuccess={vi.fn()} />);
+
+    await user.click(screen.getByRole('button', { name: /agregar llave de acceso/i }));
+    const input = screen.getByLabelText('Nombre de la llave');
+    await user.clear(input);
+    await user.type(input, 'iPhone{Enter}');
+
+    expect(mockRegister).toHaveBeenCalledWith('iPhone');
   });
 });

@@ -1,18 +1,20 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import type { Passkey } from '@/types/auth';
 import ManagePasskeys from './manage-passkeys';
 
+const mockReload = vi.fn();
+let mockRegisterOnSuccess: (() => void) | undefined;
+
 vi.mock('@inertiajs/react', () => ({
-  router: { reload: vi.fn(), delete: vi.fn() },
+  router: { reload: (...args: unknown[]) => mockReload(...args), delete: vi.fn() },
 }));
 
 vi.mock('@laravel/passkeys/react', () => ({
-  usePasskeyRegister: () => ({
-    register: vi.fn(),
-    isLoading: false,
-    error: null,
-    isSupported: true,
-  }),
+  usePasskeyRegister: (opts: { onSuccess?: () => void }) => {
+    mockRegisterOnSuccess = opts.onSuccess;
+
+    return { register: vi.fn(), isLoading: false, error: null, isSupported: true };
+  },
 }));
 
 vi.mock('@/actions/Laravel/Passkeys/Http/Controllers/PasskeyRegistrationController', () => ({
@@ -30,6 +32,11 @@ const passkeys: Passkey[] = [
 ];
 
 describe('ManagePasskeys', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRegisterOnSuccess = undefined;
+  });
+
   it('renders nothing when passkeys cannot be managed', () => {
     const { container } = render(<ManagePasskeys canManagePasskeys={false} passkeys={passkeys} />);
 
@@ -48,5 +55,13 @@ describe('ManagePasskeys', () => {
 
     expect(screen.getByText('My Phone')).toBeInTheDocument();
     expect(screen.getByText('Llaves de acceso')).toBeInTheDocument();
+  });
+
+  it('reloads the passkeys prop after a passkey is registered', () => {
+    render(<ManagePasskeys canManagePasskeys passkeys={[]} />);
+
+    act(() => mockRegisterOnSuccess?.());
+
+    expect(mockReload).toHaveBeenCalledWith({ only: ['passkeys'] });
   });
 });

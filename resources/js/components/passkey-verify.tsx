@@ -3,7 +3,6 @@ import { usePasskeyVerify } from '@laravel/passkeys/react';
 import { KeyRound } from 'lucide-react';
 import { Button } from '@/components/button';
 import InputError from '@/components/input-error';
-import { Separator } from '@/components/ui/separator';
 
 /**
  * "Sign in with a passkey" button shown on the login page. The WebAuthn
@@ -23,7 +22,7 @@ export default function PasskeyVerify() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div>
       <div className="grid gap-2">
         <Button
           type="button"
@@ -39,13 +38,10 @@ export default function PasskeyVerify() {
         {error && <InputError message={error} className="text-center" />}
       </div>
 
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <Separator className="w-full" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">O continúa con tu correo</span>
-        </div>
+      <div className="my-6 flex items-center gap-3">
+        <span className="h-px flex-1 bg-border" />
+        <span className="text-sm text-muted-foreground">O continúa con tu correo</span>
+        <span className="h-px flex-1 bg-border" />
       </div>
     </div>
   );

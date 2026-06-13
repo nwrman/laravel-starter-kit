@@ -3,19 +3,26 @@ import userEvent from '@testing-library/user-event';
 import PasskeyVerify from './passkey-verify';
 
 const mockVerify = vi.fn();
+const mockRouterVisit = vi.fn();
 const mockUsePasskeyVerify = vi.fn();
-
-vi.mock('@laravel/passkeys/react', () => ({
-  usePasskeyVerify: (opts: unknown) => mockUsePasskeyVerify(opts),
-}));
+let mockOnSuccess: ((response: { redirect?: string }) => void) | undefined;
 
 vi.mock('@inertiajs/react', () => ({
-  router: { visit: vi.fn() },
+  router: { visit: (...args: unknown[]) => mockRouterVisit(...args) },
+}));
+
+vi.mock('@laravel/passkeys/react', () => ({
+  usePasskeyVerify: (opts: { onSuccess?: (response: { redirect?: string }) => void }) => {
+    mockOnSuccess = opts.onSuccess;
+
+    return mockUsePasskeyVerify();
+  },
 }));
 
 describe('PasskeyVerify', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockOnSuccess = undefined;
     mockUsePasskeyVerify.mockReturnValue({
       verify: mockVerify,
       isLoading: false,
@@ -66,5 +73,21 @@ describe('PasskeyVerify', () => {
     render(<PasskeyVerify />);
 
     expect(screen.getByText('No se pudo iniciar sesión')).toBeInTheDocument();
+  });
+
+  it('redirects to the response URL on success', () => {
+    render(<PasskeyVerify />);
+
+    mockOnSuccess?.({ redirect: '/projects' });
+
+    expect(mockRouterVisit).toHaveBeenCalledWith('/projects');
+  });
+
+  it('falls back to the dashboard when no redirect is returned', () => {
+    render(<PasskeyVerify />);
+
+    mockOnSuccess?.({});
+
+    expect(mockRouterVisit).toHaveBeenCalledWith('/dashboard');
   });
 });
