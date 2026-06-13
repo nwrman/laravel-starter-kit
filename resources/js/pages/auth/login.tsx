@@ -2,6 +2,7 @@ import { Form, Head } from '@inertiajs/react';
 import { CheckCircleIcon } from 'lucide-react';
 import { Button } from '@/components/button';
 import InputError from '@/components/input-error';
+import PasskeyVerify from '@/components/passkey-verify';
 import PasswordInput from '@/components/password-input';
 import TextLink from '@/components/text-link';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -30,6 +31,8 @@ export default function Login({ status, canResetPassword, canRegister = true }: 
           <AlertDescription>{status}</AlertDescription>
         </Alert>
       )}
+
+      <PasskeyVerify />
 
       <Form {...store.form()} resetOnSuccess={['password']} className="flex flex-col gap-6">
         {({ processing, errors }) => (

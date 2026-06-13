@@ -17,6 +17,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Fortify\Contracts\PasskeyUser;
+use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -49,7 +51,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 #[Appends([
     'photo_url',
 ])]
-final class User extends Authenticatable implements FilamentUser, HasMedia, MustVerifyEmail
+final class User extends Authenticatable implements FilamentUser, HasMedia, MustVerifyEmail, PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory;
@@ -57,6 +59,7 @@ final class User extends Authenticatable implements FilamentUser, HasMedia, Must
     use HasUlids;
     use InteractsWithMedia;
     use Notifiable;
+    use PasskeyAuthenticatable;
     use SoftDeletes;
     use TwoFactorAuthenticatable;
 

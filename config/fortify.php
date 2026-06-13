@@ -119,6 +119,7 @@ return [
     'limiters' => [
         'login' => 'login',
         'two-factor' => 'two-factor',
+        'passkeys' => 'passkeys',
     ],
 
     /*
@@ -160,6 +161,25 @@ return [
             'confirmPassword' => true,
             // 'window' => 0
         ]),
+        Features::passkeys([
+            'confirmPassword' => true,
+        ]),
     ])),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Passkeys
+    |--------------------------------------------------------------------------
+    |
+    | Stable secret used to derive each user's WebAuthn user handle. It defaults
+    | to APP_KEY for backwards-compatibility, but set PASSKEYS_USER_HANDLE_SECRET
+    | in any environment that may rotate APP_KEY — otherwise rotating the key
+    | silently invalidates every registered passkey.
+    |
+    */
+
+    'passkeys' => [
+        'user_handle_secret' => env('PASSKEYS_USER_HANDLE_SECRET', env('APP_KEY')),
+    ],
 
 ];

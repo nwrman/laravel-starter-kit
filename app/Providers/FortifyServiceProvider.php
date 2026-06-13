@@ -9,6 +9,7 @@ use App\Actions\Fortify\ResetUserPassword;
 use App\Http\Responses\LogoutResponse;
 use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
@@ -18,6 +19,8 @@ use Inertia\Inertia;
 use Laravel\Fortify\Contracts\LogoutResponse as LogoutResponseContract;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
+use Laravel\Passkeys\Passkey;
+use Laravel\Passkeys\Passkeys;
 
 final class FortifyServiceProvider extends ServiceProvider
 {
@@ -32,6 +35,7 @@ final class FortifyServiceProvider extends ServiceProvider
         $this->bootActions();
         $this->bootFortifyDefaults();
         $this->bootRateLimitingDefaults();
+        $this->bootPasskeyDefaults();
     }
 
     private function bootActions(): void
@@ -117,5 +121,19 @@ final class FortifyServiceProvider extends ServiceProvider
         });
 
         RateLimiter::for('two-factor', fn (Request $request): Limit => Limit::perMinute(5)->by($request->session()->get('login.id')));
+
+        RateLimiter::for('passkeys', fn (Request $request): Limit => Limit::perMinute(10)->by(
+            ($request->string('credential.id')->value() ?: $request->session()->getId()).'|'.$request->ip(),
+        ));
+    }
+
+    private function bootPasskeyDefaults(): void
+    {
+        // The passkey login path calls $guard->login($passkey->user) directly; a
+        // soft-deleted user resolves to null (SoftDeletes scope) and would 500.
+        // Reject cleanly, mirroring the trashed-user block on password login.
+        Passkeys::authorizeLoginUsing(
+            static fn (Request $request, ?Authenticatable $user, Passkey $passkey): bool => $user instanceof Authenticatable,
+        );
     }
 }
