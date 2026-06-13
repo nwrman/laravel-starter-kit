@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { dashboard } from '@/routes';
 import PasskeyVerify from './passkey-verify';
 
 const mockVerify = vi.fn();
@@ -88,6 +89,6 @@ describe('PasskeyVerify', () => {
 
     mockOnSuccess?.({});
 
-    expect(mockRouterVisit).toHaveBeenCalledWith('/dashboard');
+    expect(mockRouterVisit).toHaveBeenCalledWith(dashboard().url);
   });
 });

@@ -3,6 +3,7 @@ import { usePasskeyVerify } from '@laravel/passkeys/react';
 import { KeyRound } from 'lucide-react';
 import { Button } from '@/components/button';
 import InputError from '@/components/input-error';
+import { dashboard } from '@/routes';
 
 /**
  * "Sign in with a passkey" button shown on the login page. The WebAuthn
@@ -13,7 +14,7 @@ import InputError from '@/components/input-error';
 export default function PasskeyVerify() {
   const { verify, isLoading, error, isSupported } = usePasskeyVerify({
     onSuccess: (response) => {
-      router.visit(response.redirect ?? '/dashboard');
+      router.visit(response.redirect ?? dashboard().url);
     },
   });
 
