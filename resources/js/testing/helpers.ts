@@ -28,6 +28,7 @@ export function resetPageProps(): void {
 export function getPageProps(): Record<string, unknown> {
   return {
     auth: { user: createUser() },
+    name: 'Laravel',
     sidebarOpen: true,
     ...currentPageProps,
   };

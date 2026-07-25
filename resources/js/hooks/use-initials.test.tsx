@@ -25,4 +25,16 @@ describe('useInitials', () => {
 
     expect(result.current('María del Carmen López')).toBe('ML');
   });
+
+  it('collapses repeated whitespace between names', () => {
+    const { result } = renderHook(() => useInitials());
+
+    expect(result.current('José   Luis')).toBe('JL');
+  });
+
+  it('takes whole code points instead of splitting surrogate pairs', () => {
+    const { result } = renderHook(() => useInitials());
+
+    expect(result.current('𝕁onathan 𝔽ernández')).toBe('𝕁𝔽');
+  });
 });

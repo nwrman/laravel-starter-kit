@@ -69,3 +69,12 @@ it('redirects authenticated users away from passkey login options', function ():
         ->get(route('passkey.login-options'))
         ->assertRedirect();
 });
+
+it('advertises passkey endpoints via the well-known url', function (): void {
+    $this->getJson('/.well-known/passkey-endpoints')
+        ->assertOk()
+        ->assertExactJson([
+            'enroll' => route('security.edit'),
+            'manage' => route('security.edit'),
+        ]);
+});

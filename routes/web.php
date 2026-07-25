@@ -52,3 +52,11 @@ Route::middleware('auth')->group(function (): void {
     // User Security (password + two-factor)...
     Route::get('settings/security', [SecurityController::class, 'edit'])->name('security.edit');
 });
+
+// Passkey discovery: password managers (1Password, Chrome, iCloud Keychain) read this
+// public endpoint to deep-link users to passkey enrollment/management. Ported from the
+// official starter kit (react-starter-kit c14d860), pointed at our security page.
+Route::get('.well-known/passkey-endpoints', fn () => response()->json([
+    'enroll' => route('security.edit'),
+    'manage' => route('security.edit'),
+]))->name('well-known.passkeys');
