@@ -7,15 +7,19 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
 import { login } from '@/routes';
-import { store } from '@/routes/register';
 
 export default function Register() {
   return (
     <>
       <Head title="Crear cuenta" />
 
+      {/* Literal path, not Wayfinder's `@/routes/register`: registration is gated by
+          ALLOW_REGISTRATION, so when it's off Fortify never registers the route and
+          Wayfinder generates no helper — a hard import would break the build. This page
+          only renders when the route exists. Update if `fortify.prefix` is customised. */}
       <Form
-        {...store.form()}
+        action="/register"
+        method="post"
         resetOnSuccess={['password', 'password_confirmation']}
         className="flex flex-col gap-6"
       >

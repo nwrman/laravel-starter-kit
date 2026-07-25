@@ -19,6 +19,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Application Description
+    |--------------------------------------------------------------------------
+    |
+    | Used for the meta description and the Open Graph / Twitter share tags
+    | rendered in the root view. Keep it under ~160 characters so search and
+    | social previews don't truncate it.
+    |
+    */
+
+    'description' => env('APP_DESCRIPTION', 'A Laravel application.'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Environment
     |--------------------------------------------------------------------------
     |

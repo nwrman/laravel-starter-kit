@@ -1,6 +1,10 @@
 #!/bin/sh
 set -eu
 
+# The production build doesn't need a browser; skip the Playwright Chromium download that
+# package.json's postinstall would otherwise run on `bun install`.
+export PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+
 notify_failed() {
     php artisan deploy:notify-telegram failed --stage=build --reason="Build command failed" || true
 }

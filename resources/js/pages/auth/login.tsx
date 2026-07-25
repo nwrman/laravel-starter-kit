@@ -10,7 +10,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
-import { register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
 
@@ -89,10 +88,13 @@ export default function Login({ status, canResetPassword, canRegister = true }: 
               </Button>
             </div>
 
+            {/* Literal path, not Wayfinder's `register()`: ALLOW_REGISTRATION gates the
+                route, so the helper doesn't exist when registration is off. `canRegister`
+                hides the link in that case. Update if `fortify.prefix` is customised. */}
             {canRegister && (
               <div className="text-center text-sm text-muted-foreground">
                 ¿No tienes una cuenta?{' '}
-                <TextLink href={register()} tabIndex={6}>
+                <TextLink href="/register" tabIndex={6}>
                   Regístrate
                 </TextLink>
               </div>
