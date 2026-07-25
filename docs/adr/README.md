@@ -21,3 +21,4 @@ until chosen and built.
 | [0007](0007-typed-props-pipeline.md) | Typed props: laravel-data + typescript-transformer | Accepted |
 | [0008](0008-starter-vs-toolkit-distribution.md) | Distribution model: starter template vs toolkit package | Accepted |
 | [0009](0009-english-source-strings.md) | i18n: English source strings, Spanish first translation | Accepted |
+| [0010](0010-upstream-sync-curated-review.md) | Upstream sync: scheduled curated review, not maestro | Accepted |
