@@ -15,6 +15,12 @@ from here.
 - **Backport passkeys to `minuta-app`** — same Fortify/Inertia/base-ui stack;
   currently lacks passkeys.
 
+## Auth
+
+- **Magic-link (passwordless) login** — minuta built `MagicLinkMail` + view.
+  Not adopted into the starter during the 2026-07-24 grilling; adopt only if a
+  second app wants it.
+
 ## Origin
 
 The passkey items came from a read-only `/improve` audit of PR #6 (passkeys /

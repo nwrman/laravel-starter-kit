@@ -16,3 +16,8 @@ until chosen and built.
 | [0002](0002-tiered-form-convention.md) | Tiered form convention | Accepted |
 | [0003](0003-no-dark-mode.md) | No dark mode / appearance system | Accepted |
 | [0004](0004-deliberate-divergences-from-upstream.md) | Deliberate divergences from upstream | Accepted |
+| [0005](0005-team-is-the-tenant.md) | Team is the tenant — single-DB scoping, strippable | Accepted |
+| [0006](0006-default-on-permissions-and-audit.md) | Default-on authorization and audit baseline | Accepted |
+| [0007](0007-typed-props-pipeline.md) | Typed props: laravel-data + typescript-transformer | Accepted |
+| [0008](0008-starter-vs-toolkit-distribution.md) | Distribution model: starter template vs toolkit package | Accepted |
+| [0009](0009-english-source-strings.md) | i18n: English source strings, Spanish first translation | Accepted |
