@@ -30,10 +30,14 @@ changes, triage against our decisions, port as small curated commits.
 ## Decision
 
 - **No maestro.** Revisit only if we ever maintain multiple starter variants.
-- **Monthly scheduled curated review.** A scheduled agent fetches upstream
-  commits since the marker in `docs/upstream-sync.md`, auto-skips what existing
-  ADRs reject (logging the reason), and opens a GitHub issue listing adoption
-  candidates. **Nothing is ported without explicit approval.**
+- **Monthly curated review, run locally.** The maintainer runs the
+  `/upstream-sync` skill (`.ai/skills/upstream-sync/`) in a local session: it
+  fetches upstream commits since the marker in `docs/upstream-sync.md`,
+  auto-skips what existing ADRs reject (logging the reason), and presents
+  adoption candidates. **Nothing is ported without explicit approval.**
+  _Amended 2026-07-24: originally a scheduled cloud routine; after one test run
+  the maintainer chose local execution instead — the cloud routine
+  (`trig_01RhFumAkt2KjEsKy7Nx3buv`) is disabled, kept for reference._
 - `docs/upstream-sync.md` records the last-reviewed upstream SHA and every
   triage verdict (adopted / adapted / skipped + why), so rejected items are
   never re-litigated.

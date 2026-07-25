@@ -1,8 +1,8 @@
 # Upstream sync log
 
-Tracks the curated review of `laravel/react-starter-kit` (ADR 0010). The
-monthly routine reviews upstream commits **after** the marker below, triages
-each against our ADRs, and opens a GitHub issue with candidates. Adoption
+Tracks the curated review of `laravel/react-starter-kit` (ADR 0010). Monthly,
+the maintainer runs the `/upstream-sync` skill locally: it reviews upstream
+commits **after** the marker below and triages each against our ADRs. Adoption
 requires explicit approval; every verdict is appended here so nothing is
 re-litigated.
 
