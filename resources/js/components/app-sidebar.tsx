@@ -14,11 +14,14 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { isNavGroup, sidebarNav } from '@/config/navigation';
+import { useCloseMobileSidebarOnNavigate } from '@/hooks/use-close-mobile-sidebar-on-navigate';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { dashboard } from '@/routes';
 
 export function AppSidebar() {
   const { isCurrentUrl } = useCurrentUrl();
+
+  useCloseMobileSidebarOnNavigate();
 
   return (
     <Sidebar collapsible="icon" variant="floating">
