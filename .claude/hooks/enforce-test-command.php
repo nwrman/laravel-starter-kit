@@ -21,7 +21,7 @@ declare(strict_types=1);
  */
 $raw = file_get_contents('php://stdin');
 
-if (! is_string($raw) || trim($raw) === '') {
+if (! is_string($raw) || mb_trim($raw) === '') {
     exit(0);
 }
 
@@ -40,7 +40,7 @@ if (is_string($toolName) && $toolName !== 'Bash') {
 
 $command = $payload['tool_input']['command'] ?? '';
 
-if (! is_string($command) || trim($command) === '') {
+if (! is_string($command) || mb_trim($command) === '') {
     exit(0);
 }
 
@@ -61,7 +61,7 @@ exit(0);
  */
 function isBlockedTestCommand(string $segment): bool
 {
-    $segment = trim($segment);
+    $segment = mb_trim($segment);
 
     if ($segment === '') {
         return false;
@@ -85,10 +85,10 @@ function isBlockedTestCommand(string $segment): bool
         return true;
     }
 
-    // Bare `composer test` / `composer run test` — but NOT `composer test:<suite>`.
-    if (preg_match('#^composer\s+(?:run\s+)?test(?!:)\b#i', $segment) === 1) {
-        return true;
-    }
+    // `composer test` used to be blocked as the slow full sweep. Test Impact Analysis
+    // inverted that: a full run replays only the tests the working tree can affect, so
+    // it is now both the fastest option and the only one that can't under-test by
+    // guessing the wrong suite. Allowed.
 
     return false;
 }

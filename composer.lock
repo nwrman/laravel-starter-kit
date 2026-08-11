@@ -4431,16 +4431,16 @@
         },
         {
             "name": "nwrman/laravel-toolkit",
-            "version": "v0.1.4",
+            "version": "v0.1.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nwrman/laravel-toolkit.git",
-                "reference": "a967eda7bcb247474cc352f38735e647d195854a"
+                "reference": "9da25a930caebfdee5c6df15cbee90a33c9398e3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nwrman/laravel-toolkit/zipball/a967eda7bcb247474cc352f38735e647d195854a",
-                "reference": "a967eda7bcb247474cc352f38735e647d195854a",
+                "url": "https://api.github.com/repos/nwrman/laravel-toolkit/zipball/9da25a930caebfdee5c6df15cbee90a33c9398e3",
+                "reference": "9da25a930caebfdee5c6df15cbee90a33c9398e3",
                 "shasum": ""
             },
             "require": {
@@ -4497,9 +4497,9 @@
             ],
             "support": {
                 "issues": "https://github.com/nwrman/laravel-toolkit/issues",
-                "source": "https://github.com/nwrman/laravel-toolkit/tree/v0.1.4"
+                "source": "https://github.com/nwrman/laravel-toolkit/tree/v0.1.5"
             },
-            "time": "2026-08-11T22:52:14+00:00"
+            "time": "2026-08-11T23:07:20+00:00"
         },
         {
             "name": "openspout/openspout",
