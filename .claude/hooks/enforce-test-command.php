@@ -5,13 +5,14 @@ declare(strict_types=1);
 /**
  * Claude Code PreToolUse guard (Bash) — published by nwrman/laravel-toolkit.
  *
- * Backstop for the "Running Tests" AI guideline: blocks raw test runners and the
- * undifferentiated `composer test` so runs go through the toolkit's `composer test:*`
- * wrappers (which produce the structured failure report). Steering lives in the
- * guideline; this only fires when the agent ignores it.
+ * Backstop for the "Running Tests" AI guideline: blocks raw test runners so runs go
+ * through the toolkit's composer wrappers, which produce the structured failure
+ * report. Steering lives in the guideline; this only fires when the agent ignores it.
  *
- * Allowed (never blocked): any `composer test:<suite>` / `composer preflight`,
- * single-test debugging via `--filter`, and frontend runners (vitest / bun).
+ * Allowed (never blocked): every `composer test*` script — including the bare
+ * `composer test`, which Test Impact Analysis turned into the fast, safe default —
+ * `composer preflight`, single-test debugging via `--filter`, and frontend runners
+ * (vitest / bun).
  *
  * Contract: reads the PreToolUse JSON from stdin. On a blocked command it prints a
  * `deny` decision and exits 0; otherwise it stays silent and exits 0. It fails open
@@ -56,8 +57,8 @@ foreach ($segments as $segment) {
 exit(0);
 
 /**
- * A segment is blocked when it runs a raw PHP test runner or the bare full
- * `composer test`, unless it scopes to a single test with `--filter`.
+ * A segment is blocked when it runs a raw PHP test runner, unless it scopes to a
+ * single test with `--filter`.
  */
 function isBlockedTestCommand(string $segment): bool
 {
@@ -104,7 +105,7 @@ function denyWithGuidance(): never
           • composer test:report        (interactive suite picker)
           • composer test:retry         (re-run only the last run's failures)
         Single-test debugging is fine: php artisan test --filter='X'
-        For a full sweep, run the suites you need or: composer preflight
+        For a full sweep: composer test (TIA replays only affected tests) or composer preflight
         See the "Running Tests" guideline. (Guard: .claude/hooks/enforce-test-command.php — edit to adjust.)
         TXT;
 
