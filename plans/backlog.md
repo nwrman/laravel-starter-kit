@@ -15,6 +15,17 @@ from here.
 - **Backport passkeys to `minuta-app`** — same Fortify/Inertia/base-ui stack;
   currently lacks passkeys.
 
+## Frontend
+
+- **`@tanstack/react-table` v9** — pinned to `^8.21.3` on 2026-08-11. v9 is a
+  full API rewrite (`useReactTable`/`getCoreRowModel` → `useTable`/
+  `createTableHook`); it ships a `./legacy` shim (`useLegacyTable`,
+  `legacyCreateColumnHelper`, the row models) that would make migration
+  mechanical. Deferred because the server-driven data-table work rewrites this
+  code anyway — decide v8-vs-v9 there, not before.
+  Note: `composer update` runs `update:requirements` (`composer bump` +
+  `ncu -u`), which will keep re-proposing `^9`; re-pin unless migrating.
+
 ## Auth
 
 - **Magic-link (passwordless) login** — minuta built `MagicLinkMail` + view.

@@ -8,8 +8,8 @@ re-litigated.
 
 ## Marker
 
-- **Last reviewed upstream commit:** `7a0eabb` (2026-07-23)
-- **Last review date:** 2026-07-24
+- **Last reviewed upstream commit:** `d852be5` (2026-07-30)
+- **Last review date:** 2026-08-11
 
 ## Standing auto-skips (from ADRs — do not re-propose)
 
@@ -37,3 +37,4 @@ _(append one row per reviewed upstream commit)_
 | 2026-07-24 | `a12bae1` | Add Larastan | skipped | already have it |
 | 2026-07-24 | `5711814` `23c871f` `ab24332` `673d8dd` `578ad03` `c37ddd5` `32907da` | CI/installer/maestro infra | skipped | not applicable to this fork's own CI/installer |
 | 2026-07-24 | 7 commits | dependabot bumps ×3, skeleton syncs ×3, node-deps cleanup | noise | — |
+| 2026-08-11 | `d852be5` | logging: `daily.days` → `max_files`, add `monthly` channel | **adopted** | Required Laravel ≥13.7 (`createMonthlyDriver`, `max_files`); adopted after upgrading 13.6→13.25 in the same session. On 13.6 it would have silently cut retention to the 7-day default. |

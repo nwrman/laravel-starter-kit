@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
 /**
@@ -17,6 +19,10 @@ use Illuminate\Console\Command;
  *   - `chart` palette: extracts numeric --chart-N tokens verbatim (matches both
  *     Minuta's ladder and the starter's --chart-1..5 tokens).
  */
+#[Description('Generate Filament color config from the main app CSS variables')]
+#[Signature('filament:sync-colors
+        {--source= : Path to the source CSS file (defaults to resources/css/app.css)}
+        {--output= : Path to write the generated config (defaults to config/filament-colors.php)}')]
 final class SyncColorsCommand extends Command
 {
     /**
@@ -27,12 +33,6 @@ final class SyncColorsCommand extends Command
      * @var list<string>
      */
     private const array BRAND_NAMES = [];
-
-    protected $signature = 'filament:sync-colors
-        {--source= : Path to the source CSS file (defaults to resources/css/app.css)}
-        {--output= : Path to write the generated config (defaults to config/filament-colors.php)}';
-
-    protected $description = 'Generate Filament color config from the main app CSS variables';
 
     public function handle(): int
     {
