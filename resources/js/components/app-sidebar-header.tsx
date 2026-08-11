@@ -56,9 +56,11 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
         <SearchPill onClick={() => setCommandOpen(true)} />
       </div>
 
-      {/* Right: mobile icons + bell + crear. shrink-0 (not flex-1) so this group takes
-          only the width it needs, leaving the rest to the breadcrumbs. */}
-      <div className="flex shrink-0 items-center justify-end gap-1 md:gap-3">
+      {/* Right: mobile icons + bell + crear.
+          On mobile it takes only the width it needs, leaving the rest to the breadcrumbs.
+          From md it grows like the left side, so the two flexible sides split the free
+          space evenly and the search pill between them lands dead centre. */}
+      <div className="flex items-center justify-end gap-1 max-md:shrink-0 md:flex-1 md:gap-3">
         <Button
           variant="ghost"
           size="icon"
