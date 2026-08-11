@@ -26,8 +26,9 @@ describe('AppSidebarHeader', () => {
       </SidebarProvider>,
     );
 
-    expect(screen.getByText('Home')).toBeInTheDocument();
-    expect(screen.getByText('Settings')).toBeInTheDocument();
+    // The mobile and desktop trails both render; CSS shows one per breakpoint.
+    expect(screen.getAllByText('Home').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Settings').length).toBeGreaterThan(0);
   });
 
   it('renders the search pill with keyboard shortcut', () => {

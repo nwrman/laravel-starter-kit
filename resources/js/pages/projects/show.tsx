@@ -1,7 +1,8 @@
-import { Deferred, Head, Link, usePage } from '@inertiajs/react';
-import { ArrowLeft, Banknote, TrendingUp, Users } from 'lucide-react';
+import { Deferred, Head, usePage } from '@inertiajs/react';
+import { Banknote, TrendingUp, Users } from 'lucide-react';
 import { ProjectActivityChart } from '@/components/demo/project-activity-chart';
 import { StatCard } from '@/components/demo/stat-card';
+import { PageHeader } from '@/components/page-header';
 import { StatCardSkeleton } from '@/components/stat-card-skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -37,19 +38,15 @@ export default function ProjectShow() {
     <>
       <Head title={project.name} />
       <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
-        {/* Header */}
-        <div className="flex items-start gap-4">
-          <Link href="/projects" className="mt-1.5 text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="size-5" />
-          </Link>
-          <div className="flex-1">
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold tracking-tight">{project.name}</h1>
-              <Badge variant={statusVariant[project.status] ?? 'outline'}>{project.status}</Badge>
-            </div>
-            <p className="text-muted-foreground">Líder: {project.teamLead}</p>
-          </div>
-        </div>
+        <PageHeader
+          title={project.name}
+          description={`Líder: ${project.teamLead}`}
+          backHref="/projects"
+          backLabel="Proyectos"
+          badge={
+            <Badge variant={statusVariant[project.status] ?? 'outline'}>{project.status}</Badge>
+          }
+        />
 
         {/* Project Details Card */}
         <Card>

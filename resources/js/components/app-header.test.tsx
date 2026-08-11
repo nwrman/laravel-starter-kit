@@ -38,6 +38,7 @@ describe('AppHeader', () => {
       />,
     );
 
-    expect(screen.getByText('Settings')).toBeInTheDocument();
+    // The mobile and desktop trails both render; CSS shows one per breakpoint.
+    expect(screen.getAllByText('Settings').length).toBeGreaterThan(0);
   });
 });

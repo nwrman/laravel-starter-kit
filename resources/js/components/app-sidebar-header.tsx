@@ -46,7 +46,7 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
           orientation="vertical"
           className="mr-2 shrink-0 data-[orientation=vertical]:h-4"
         />
-        <div className="min-w-0 truncate">
+        <div className="min-w-0">
           <Breadcrumbs breadcrumbs={breadcrumbs} />
         </div>
       </div>
@@ -56,8 +56,9 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
         <SearchPill onClick={() => setCommandOpen(true)} />
       </div>
 
-      {/* Right: mobile icons + bell + crear */}
-      <div className="flex min-w-0 flex-1 items-center justify-end gap-1 md:gap-3">
+      {/* Right: mobile icons + bell + crear. shrink-0 (not flex-1) so this group takes
+          only the width it needs, leaving the rest to the breadcrumbs. */}
+      <div className="flex shrink-0 items-center justify-end gap-1 md:gap-3">
         <Button
           variant="ghost"
           size="icon"

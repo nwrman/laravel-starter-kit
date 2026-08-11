@@ -2,7 +2,9 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        {{-- viewport-fit=cover is required for env(safe-area-inset-*) to resolve on
+             notched iOS devices; without it bottom-anchored UI sits under the home indicator. --}}
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
         {{-- Inline style to set the HTML background color based on our theme in app.css --}}
         <style>

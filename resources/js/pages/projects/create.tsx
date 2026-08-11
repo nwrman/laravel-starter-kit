@@ -1,7 +1,7 @@
 import { Form, Head, Link } from '@inertiajs/react';
-import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/button';
 import InputError from '@/components/input-error';
+import { PageHeader } from '@/components/page-header';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -25,17 +25,12 @@ export default function ProjectCreate() {
     <>
       <Head title="Crear Proyecto" />
       <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
-        <div className="flex items-center gap-4">
-          <Link href="/projects" className="text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="size-5" />
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Crear Proyecto</h1>
-            <p className="text-muted-foreground">
-              Completa los datos para crear un nuevo proyecto.
-            </p>
-          </div>
-        </div>
+        <PageHeader
+          title="Crear Proyecto"
+          description="Completa los datos para crear un nuevo proyecto."
+          backHref="/projects"
+          backLabel="Proyectos"
+        />
 
         <div className="mx-auto w-full max-w-2xl">
           <Form action="/projects" method="post">

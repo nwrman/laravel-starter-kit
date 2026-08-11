@@ -6,6 +6,7 @@ import { ProjectStatusChart } from '@/components/demo/project-status-chart';
 import { RecentActivity } from '@/components/demo/recent-activity';
 import { RevenueChart } from '@/components/demo/revenue-chart';
 import { StatCard } from '@/components/demo/stat-card';
+import { PageHeader } from '@/components/page-header';
 import { StatCardSkeleton } from '@/components/stat-card-skeleton';
 import { getTimeOfDayGreeting } from '@/lib/utils';
 import { dashboard } from '@/routes';
@@ -61,13 +62,10 @@ export default function Dashboard() {
     <>
       <Head title="Inicio" />
       <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
-        {/* Greeting */}
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            {greeting}, {auth.user.name}
-          </h1>
-          <p className="text-muted-foreground">Resumen de la actividad en Acme Corp.</p>
-        </div>
+        <PageHeader
+          title={`${greeting}, ${auth.user.name}`}
+          description="Resumen de la actividad en Acme Corp."
+        />
 
         {/* KPI Stat Cards */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

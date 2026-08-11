@@ -1,6 +1,5 @@
-import { Deferred, Head, Link, usePage } from '@inertiajs/react';
+import { Deferred, Head, usePage } from '@inertiajs/react';
 import { Banknote, CheckCircle, FolderOpen, Plus } from 'lucide-react';
-import { Button } from '@/components/button';
 import { ChartSkeleton } from '@/components/chart-skeleton';
 import { ProjectChart } from '@/components/demo/project-chart';
 import { ProjectTable } from '@/components/demo/project-table';
@@ -31,25 +30,21 @@ type PageProps = {
   chartData?: TableDataProps;
 };
 
+import { PageHeader } from '@/components/page-header';
+import { PagePrimaryAction } from '@/components/page-primary-action';
+
 export default function ProjectsIndex() {
   const { kpiStats, tableData, chartData } = usePage<PageProps>().props;
 
   return (
     <>
       <Head title="Proyectos" />
-      <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Proyectos</h1>
-            <p className="text-muted-foreground">Gestiona los proyectos de Acme Corp.</p>
-          </div>
-          <Link href="/projects/create">
-            <Button>
-              <Plus className="size-4" data-icon="inline-start" />
-              Nuevo Proyecto
-            </Button>
-          </Link>
-        </div>
+      <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4 max-sm:pb-24">
+        <PageHeader
+          title="Proyectos"
+          description="Gestiona los proyectos de Acme Corp."
+          actions={<PagePrimaryAction label="Nuevo Proyecto" href="/projects/create" icon={Plus} />}
+        />
 
         {/* KPI Stat Cards */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

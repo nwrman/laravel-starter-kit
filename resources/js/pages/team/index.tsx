@@ -4,6 +4,7 @@ import { ChartSkeleton } from '@/components/chart-skeleton';
 import { StatCard } from '@/components/demo/stat-card';
 import { TeamChart } from '@/components/demo/team-chart';
 import { TeamTable } from '@/components/demo/team-table';
+import { PageHeader } from '@/components/page-header';
 import { TableSkeleton } from '@/components/table-skeleton';
 import type { BreadcrumbItem } from '@/types';
 import type { DepartmentDistribution, StatCardData, TeamMember } from '@/types/demo';
@@ -36,10 +37,7 @@ export default function TeamIndex() {
     <>
       <Head title="Equipo" />
       <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Equipo</h1>
-          <p className="text-muted-foreground">Miembros del equipo de Acme Corp.</p>
-        </div>
+        <PageHeader title="Equipo" description="Miembros del equipo de Acme Corp." />
 
         {/* KPI Stat Cards */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
