@@ -28,7 +28,26 @@ passed!` and deletes the failure files so stale data never lingers.
 | `composer test` | All suites at once. Prefer a narrower suite above unless you made sweeping changes. |
 | `composer test:report` | Interactive picker — prompts which suites to run. |
 | `composer test:retry` | Re-runs only the tests that failed last run (reads the JSON above). |
+| `composer test:fast` | Whole backend suite, but replays only the tests your changes can reach (Pest TIA). Seconds instead of ~9s; sub-second when nothing changed. No failure report — use the wrappers above for that. |
 | `composer test:ci` / `composer preflight` | Full gate: coverage + lint + types. The "is this branch ready?" check. |
+
+## Test Impact Analysis (`composer test:fast`)
+
+Configured in `tests/Pest.php`. It records which test touches which file, then on
+later runs replays only the tests a change can actually reach — a one-file edit
+typically drops 280 tests to ~100, and an unchanged tree runs nothing at all.
+Comment-only edits, a Pint pass or a Prettier reformat hash identically and run
+zero tests.
+
+**It only works on full runs.** Pest classes `--testsuite`, `--filter` and
+`--group` as a partial selection and disables TIA, so the per-suite wrappers
+(which pass `--testsuite`) can never use it — that is why this is a separate
+command. Nothing to gitignore: the graph lives in `~/.pest/tia/<project-key>/`
+and rebuilds itself when `composer.lock`, `phpunit.xml`, the vite config or the
+node lockfile change.
+
+Trust it for the inner loop, not as the ship gate — `composer preflight` still
+runs everything, and CI never uses TIA.
 
 ## After a failure
 

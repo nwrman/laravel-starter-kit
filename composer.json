@@ -6,7 +6,7 @@
     "license": "MIT",
     "authors": [
         {
-            "name": "Jonathan H. Fernández",
+            "name": "Jonathan H. Fern\u00e1ndez",
             "email": "nwrman@gmail.com"
         }
     ],
@@ -116,6 +116,10 @@
         "test:browser": [
             "Composer\\Config::disableProcessTimeout",
             "@php artisan toolkit:report --no-interaction --suite=browser"
+        ],
+        "test:fast": [
+            "Composer\\Config::disableProcessTimeout",
+            "XDEBUG_MODE=coverage pest --parallel"
         ],
         "test:frontend": [
             "Composer\\Config::disableProcessTimeout",
