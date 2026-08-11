@@ -58,7 +58,7 @@ export default function TeamIndex() {
           data="tableData"
           fallback={
             <div className="grid gap-4 lg:grid-cols-3">
-              <div className="lg:col-span-2">
+              <div className="min-w-0 lg:col-span-2">
                 <TableSkeleton />
               </div>
               <ChartSkeleton />
@@ -67,7 +67,7 @@ export default function TeamIndex() {
         >
           {tableData && (
             <div className="grid gap-4 lg:grid-cols-3">
-              <div className="lg:col-span-2">
+              <div className="min-w-0 lg:col-span-2">
                 <TeamTable rows={tableData.teamRows} />
               </div>
               <TeamChart

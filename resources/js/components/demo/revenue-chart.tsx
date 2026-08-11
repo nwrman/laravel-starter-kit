@@ -30,7 +30,7 @@ type Props = {
 
 export function RevenueChart({ monthlyRevenue, revenueTotal }: Props) {
   return (
-    <Card className="lg:col-span-2">
+    <Card className="min-w-0 lg:col-span-2">
       <CardHeader>
         <CardDescription>Últimos 12 meses</CardDescription>
         <CardTitle className="flex items-baseline gap-2 text-2xl">
