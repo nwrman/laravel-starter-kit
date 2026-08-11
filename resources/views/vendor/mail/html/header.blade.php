@@ -1,10 +1,13 @@
 @props(['url'])
 <tr>
 <td class="header">
-<a href="{{ $url }}" style="display: inline-block;">
-{{-- Raster logo: most mail clients don't render SVG. Regenerate public/email-logo.png
-     from public/logo.svg when rebranding (400x100, white background, 2x for retina). --}}
-<img src="{{ asset('email-logo.png') }}" alt="{{ config('app.name') }}" style="height: 50px; width: auto; display: block; margin: 0 auto;">
+{{-- Same lockup as the app sidebar: the brand mark on the primary tile, then the app
+     name. The image is public/email-logo.png, generated from public/logo.svg by
+     `bun run brand` (raster, not SVG — most mail clients won't render SVG). The name
+     stays dynamic, so renaming the app needs no new asset. See docs/branding.md. --}}
+<a href="{{ $url }}" style="display: inline-block; text-decoration: none;">
+<img src="{{ asset('email-logo.png') }}" alt="" width="48" height="48" style="height: 48px; width: 48px; border-radius: 11px; vertical-align: middle; border: none;">
+<span style="vertical-align: middle; margin-left: 10px;">{{ config('app.name') }}</span>
 </a>
 </td>
 </tr>
