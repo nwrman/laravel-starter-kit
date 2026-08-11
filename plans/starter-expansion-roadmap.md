@@ -35,13 +35,16 @@ One coherent build; later items consume earlier ones.
       super-admin gate; spatie/activitylog team-aware
 - [ ] **User management screens** (app-facing, built on the new table): members
       list, invite by email, deactivate, assign roles
-- [ ] **Branded email templates**: harvest minuta's published mail theme
-      (`vendor/mail/html/themes/default.css` + `header.blade.php` reading the
-      app logo from config) and `vendor/notifications/email.blade.php`, so all
-      framework mail (reset, verification) is branded; `TeamInvitation`
-      mailable ships with the invite flow. Starter today sends stock Laravel
-      templates. (minuta's `MagicLinkMail` noted but not adopted — passwordless
-      login is an undecided idea, see plans/backlog.md)
+- [x] **Branded email templates** (done 2026-08-11, pulled forward for the next
+      project): minuta's theme pattern applied with the starter palette —
+      `vendor/mail/html/themes/default.css`, `header.blade.php` (logo via
+      `asset('email-logo.png')`, alt from `config('app.name')`),
+      `vendor/notifications/email.blade.php` published; `public/email-logo.png`
+      rendered from `logo.svg` (regenerate when rebranding). All framework mail
+      (reset, verification) now branded; covered by
+      `tests/Feature/BrandedMailTest.php`. Remaining for S08: the
+      `TeamInvitation` mailable ships with the invite flow. (minuta's
+      `MagicLinkMail` still not adopted — see plans/backlog.md)
 - [ ] **Typed props** (ADR 0007): laravel-data + typescript-transformer; new
       payloads as Data classes
 - [ ] **i18n** (ADR 0009): English source strings, `es` translation shipped
