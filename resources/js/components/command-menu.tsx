@@ -77,7 +77,7 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
               <CommandGroup heading={group.heading}>
                 {group.records.map((record) => (
                   <CommandItem
-                    key={record.href}
+                    key={`${record.href}-${record.label}`}
                     value={`${record.label} ${record.subtitle}`}
                     onSelect={() => navigate(record.href)}
                   >
