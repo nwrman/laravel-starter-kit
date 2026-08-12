@@ -17,12 +17,11 @@ from here.
 
 ## Frontend
 
-- **`@tanstack/react-table` v9** — pinned to `^8.21.3` on 2026-08-11. v9 is a
-  full API rewrite (`useReactTable`/`getCoreRowModel` → `useTable`/
-  `createTableHook`); it ships a `./legacy` shim (`useLegacyTable`,
-  `legacyCreateColumnHelper`, the row models) that would make migration
-  mechanical. Deferred because the server-driven data-table work rewrites this
-  code anyway — decide v8-vs-v9 there, not before.
+- **`@tanstack/react-table` v9** — pinned to `^8.21.3` on 2026-08-11, still
+  deferred pending the server-driven data-table work. Written up in full as
+  [react-table-v9-migration.md](react-table-v9-migration.md): confirmed v9 API
+  changes, the `./legacy` shim route, the eight affected files, and the
+  `autoResetPageIndex` fix to fold in. Read that before acting on this.
   Note: `composer update` runs `update:requirements` (`composer bump` +
   `ncu -u`), which will keep re-proposing `^9`; re-pin unless migrating.
 
