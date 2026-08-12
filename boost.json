@@ -4,20 +4,25 @@
         "opencode",
         "cursor"
     ],
+    "cloud": false,
     "guidelines": true,
     "mcp": true,
     "nightwatch_mcp": false,
     "sail": false,
     "skills": [
+        "infer-conventions",
         "fortify-development",
         "laravel-best-practices",
         "wayfinder-development",
+        "pest-testing",
         "inertia-react-development",
         "tailwindcss-development",
         "create-feature-branch",
         "finish-feature-branch",
         "land-feature-branch",
+        "provision-laravel-cloud",
         "react-best-practices",
-        "run-preflight"
+        "run-preflight",
+        "upstream-sync"
     ]
 }
