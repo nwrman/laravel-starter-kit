@@ -147,7 +147,14 @@ return [
     */
 
     'features' => array_values(array_filter([
-        env('ALLOW_REGISTRATION', true) ? Features::registration() : null,
+        // On by default everywhere except production: a fresh clone gets working
+        // signup, and a production deploy has to opt in explicitly. Leaving the
+        // variable undeclared in production previously gave open public self-signup
+        // with no warning. APP_ENV falls back to 'production' so that a missing
+        // APP_ENV also fails to the closed side.
+        env('ALLOW_REGISTRATION', env('APP_ENV', 'production') !== 'production')
+            ? Features::registration()
+            : null,
         Features::resetPasswords(),
         Features::emailVerification(),
         // updateProfileInformation and updatePasswords are intentionally NOT

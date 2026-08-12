@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 // oxlint-disable no-console -- CLI script; console output is its interface.
 /**
  * Regenerates every derived brand asset from a single source: public/logo.svg
@@ -16,7 +17,6 @@
  * docs/branding.md.
  */
 import { chromium } from 'playwright';
-import { readFileSync } from 'node:fs';
 
 // Keep in sync with resources/css/app.css (--primary) and the mail theme.
 const PRIMARY = '#00397f';

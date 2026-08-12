@@ -11,6 +11,16 @@ use App\Http\Controllers\Team\TeamController;
 use App\Http\Controllers\UserProfileController;
 use Illuminate\Support\Facades\Route;
 
+// For a page with no controller logic, use a typed closure — not Route::inertia().
+// The macro is typed `mixed`, so `Route::inertia(...)->name(...)` fails PHPStan with
+// "Cannot call method name() on mixed". A closure registers the same GET and HEAD
+// pair and types cleanly:
+//
+//     Route::get('/about', fn (): Response => Inertia::render('about'))->name('about');
+//
+// `composer test` runs neither PHPStan nor Rector, so route type errors surface only
+// at `composer preflight`. Run it before pushing route changes.
+
 Route::permanentRedirect('/', '/dashboard');
 
 // Preserve legacy /verify-email URL used by UX copy and existing links.
