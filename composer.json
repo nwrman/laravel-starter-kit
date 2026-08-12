@@ -17,6 +17,7 @@
         "laravel/fortify": "^1.38",
         "laravel/framework": "^13.25.0",
         "laravel/wayfinder": "^0.1.21",
+        "league/flysystem-aws-s3-v3": "^3.35.2",
         "nunomaduro/essentials": "^1.2.0",
         "nwrman/laravel-toolkit": "@dev",
         "spatie/laravel-medialibrary": "^11.23.5"
