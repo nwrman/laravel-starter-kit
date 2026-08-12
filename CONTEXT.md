@@ -42,6 +42,18 @@ A documented pattern pointing at a proven implementation in a descendant (e.g.
 billing = Cashier-on-Team as done in minuta). Copied by hand when needed; not
 starter code, not toolkit code.
 
+**Provision**:
+Creating the infrastructure an app will run on — the application, its environment,
+database, compute, and optionally a custom domain — inside a chosen hosting
+organization. Rare, driven from a developer's machine, and additive: it fills gaps and
+never tears down. Growing that infrastructure afterwards is a separate, deliberate act.
+_Avoid_: deploy, setup, install — each names a different thing.
+
+**Deploy**:
+Shipping a build of the app's code onto infrastructure that already exists. Frequent,
+runs on the build host with no developer present, and assumes everything it needs was
+Provisioned first.
+
 ## Relationships
 
 - A **User** belongs to one or more **Teams**; at any moment they act within one current Team.
@@ -50,3 +62,6 @@ starter code, not toolkit code.
   *instead of* Team scoping; the starter does not carry Branch/Module-Entitlement concepts.
 - A **Descendant** clones the **Starter** once and requires the **Toolkit** forever;
   what it cannot get from either, it copies from a **Recipe**.
+- A **Descendant** is **Provisioned** once and **Deployed** many times. Because Deploying
+  happens where development dependencies are absent, anything it runs must live in the
+  app itself; Provisioning has no such constraint.

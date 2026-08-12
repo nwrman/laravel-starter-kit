@@ -167,6 +167,9 @@
         ],
         "cloud:deploy": [
             "sh scripts/cloud-deploy.sh"
+        ],
+        "cloud:setup": [
+            "sh scripts/cloud-setup.sh"
         ]
     },
     "extra": {
