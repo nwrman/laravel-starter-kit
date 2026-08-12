@@ -72,6 +72,10 @@ return [
             'path' => env('MAIL_SENDMAIL_PATH', '/usr/sbin/sendmail -bs -i'),
         ],
 
+        // Writes the rendered message at DEBUG level. Any LOG_LEVEL above debug
+        // discards it silently — Mail::send still reports success and nothing
+        // errors, the message just never exists. If you select this mailer,
+        // LOG_LEVEL must be debug or you have configured a black hole.
         'log' => [
             'transport' => 'log',
             'channel' => env('MAIL_LOG_CHANNEL'),

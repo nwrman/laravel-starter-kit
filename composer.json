@@ -76,8 +76,7 @@
             "@patch",
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
             "@php artisan clear",
-            "@php artisan filament:sync-colors --ansi",
-            "@update:requirements"
+            "@php artisan filament:sync-colors --ansi"
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
@@ -94,6 +93,9 @@
         ],
         "update:requirements": [
             "composer bump",
+            "@update:frontend"
+        ],
+        "update:frontend": [
             "bunx npm-check-updates -u"
         ],
         "lint:dirty": [
