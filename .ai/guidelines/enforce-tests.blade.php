@@ -95,6 +95,19 @@ A `PreToolUse` guard (`.claude/hooks/enforce-test-command.php`) **blocks** direc
 and the bare `composer test`, redirecting to the wrappers. Single-test debugging with `--filter` is allowed. Reach for the
 `composer test:*` wrappers first so you never hit it.
 
+## Push permutations down the stack
+
+Feature stays the default suite for behavior, but a matrix of input cases is not
+"behavior × N". Test the matrix at the **cheapest level that can falsify the logic** — a
+validation rule set driven through a direct `Validator`, a Pest dataset over the rule
+object, a matcher ladder over plain strings, an expiry calculation over timestamps — and
+write **one feature test per wiring path** (the endpoint validates and returns 422; the
+controller invokes the action; the resource saves).
+
+Twenty feature tests exercising twenty inputs through HTTP is the smell; one wiring test
+plus a twenty-case dataset at unit level is the fix. Same coverage, a fraction of the
+runtime, and a failure that points at the rule instead of at the route.
+
 ## Test path convention
 
 Tests mirror the `app/` directory structure. The test for `app/Foo/Bar/Baz.php` lives at

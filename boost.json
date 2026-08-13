@@ -17,6 +17,7 @@
         "pest-testing",
         "inertia-react-development",
         "tailwindcss-development",
+        "build-ticket",
         "create-feature-branch",
         "finish-feature-branch",
         "land-feature-branch",

@@ -205,6 +205,23 @@ composer test:lint     # Backend
 bun run test:lint      # Frontend
 ```
 
+## Building With Agents
+
+A multi-agent build loop ships with the kit: one GitHub ticket per slice, one git worktree per ticket — each with its own Herd site, database and build caches — and a PR at the end that a human merges. The issue tracker's `Blocked by` edges are the only state machine.
+
+```bash
+/build-ticket 33                   # run one ticket through the whole loop
+/build-ticket                      # …or take the next ready ticket off the frontier
+
+scripts/worktree-setup.sh          # provision a worktree (seed | clone)
+scripts/worktree-teardown.sh       # after the PR merges — site + databases
+scripts/refresh-main.sh            # bring the main checkout back to latest
+```
+
+Naming derives from the repo directory, so nothing is project-specific: branch `t33-user-import` gets `http://<project>-t-33.test`. Sqlite projects need no database server — the file lives inside the worktree.
+
+Full guide: [`docs/build-loop.md`](docs/build-loop.md). Why it works this way, and what was rejected: [ADR 0012](docs/adr/0012-multi-agent-build-loop.md).
+
 ## Deployment (Laravel Cloud)
 
 ### Telegram Notifications
