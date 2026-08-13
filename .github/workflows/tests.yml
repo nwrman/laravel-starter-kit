@@ -134,12 +134,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
+      # zend.assertions=1 is load-bearing: setup-php installs the production
+      # ini, where -1 strips assert() at parse time. Those lines then read as
+      # uncovered and --exactly=100.0 fails here and nowhere else. See
+      # .ai/rules/workflows.md.
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: 8.5
           tools: composer:v2
           coverage: xdebug
+          ini-values: zend.assertions=1
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
