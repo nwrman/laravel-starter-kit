@@ -101,7 +101,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: node_modules
-          key: ${{ github.repository }}-bun-${{ hashFiles('bun.lockb') }}
+          key: ${{ github.repository }}-bun-${{ hashFiles('bun.lock') }}
           restore-keys: ${{ runner.os }}-bun-
 
       - name: Install Bun Dependencies
@@ -163,7 +163,7 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: node_modules
-          key: ${{ github.repository }}-bun-${{ hashFiles('bun.lockb') }}
+          key: ${{ github.repository }}-bun-${{ hashFiles('bun.lock') }}
           restore-keys: ${{ runner.os }}-bun-
 
       - name: Copy Environment File
@@ -245,7 +245,7 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: node_modules
-          key: ${{ github.repository }}-bun-${{ hashFiles('bun.lockb') }}
+          key: ${{ github.repository }}-bun-${{ hashFiles('bun.lock') }}
           restore-keys: ${{ runner.os }}-bun-
 
       - name: Install Bun Dependencies
@@ -299,7 +299,7 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: node_modules
-          key: ${{ github.repository }}-bun-${{ hashFiles('bun.lockb') }}
+          key: ${{ github.repository }}-bun-${{ hashFiles('bun.lock') }}
           restore-keys: ${{ runner.os }}-bun-
 
       - name: Copy Environment File
