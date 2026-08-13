@@ -24,3 +24,4 @@ until chosen and built.
 | [0010](0010-upstream-sync-curated-review.md) | Upstream sync: scheduled curated review, not maestro | Accepted |
 | [0011](0011-cloud-provisioning-distribution.md) | Laravel Cloud provisioning: toolkit stub plus a wizard skill | Accepted |
 | [0012](0012-multi-agent-build-loop.md) | Multi-agent build loop: worktrees, the issue tracker as state machine | Accepted |
+| [0013](0013-sqlite-default-postgres-shipped.md) | sqlite is the default test driver, and the Postgres path ships complete | Accepted |
