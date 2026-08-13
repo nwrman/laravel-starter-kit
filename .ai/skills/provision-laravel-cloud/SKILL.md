@@ -14,7 +14,7 @@ it as soon as the stack exists.
 | File | Owner | Holds |
 |---|---|---|
 | `.cloud/config.json` | Laravel's `cloud` CLI | `organization_id` (the org pin), `application_id` |
-| `.cloud/provision.json` | this project | repository, names, region, database and instance sizing, optional domain |
+| `.cloud/provision.json` | this project | repository, names, region, database and instance sizing, optional worker, optional domain |
 
 Do not move `organization_id` out of `.cloud/config.json`. The CLI reads it from there, and it
 is the only thing that selects an organization.
@@ -87,6 +87,12 @@ Optional keys:
 - `domain` — **omit it entirely** when there is no custom domain yet. The script skips the
   domain step and the app runs on its Cloud-assigned URL. Adding the key later and re-running
   creates the domain then.
+- `worker_size` — omit it when the app dispatches no queued jobs, and a worker is billable
+  compute it should not pay for. **Ask whether the app queues anything at all** rather than
+  defaulting either way: an app instance serves HTTP only, so without a worker every dispatched
+  job sits in the jobs table forever with no error and no failed row. Nothing about that is
+  visible until someone wonders why an email never arrived. Sizes come from
+  `cloud instance:create -h`; the smallest that works is the right starting point.
 - `env_file` — defaults to `.cloud/env.production`.
 - `build_command` / `deploy_command` — default to `composer cloud:build` and
   `composer cloud:deploy`, which the toolkit publishes into `scripts/`.

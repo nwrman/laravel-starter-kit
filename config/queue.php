@@ -13,6 +13,17 @@ return [
     | API, giving you convenient access to each backend using identical
     | syntax for each. The default queue connection is defined below.
     |
+    | On Laravel Cloud there is no "cloud" driver — do not set
+    | QUEUE_CONNECTION=cloud, it would fail at boot. Cloud runs ordinary
+    | Laravel connections; `database` is what a Cloud-provisioned app gets,
+    | using the managed Postgres it was already given.
+    |
+    | What Cloud does need is somewhere to *run* the worker. An app instance
+    | serves HTTP and nothing else, so with no worker instance every dispatched
+    | job lands in the jobs table and stays there: no exception, no failed_jobs
+    | row, just work that silently never happens. Set `worker_size` in
+    | .cloud/provision.json and re-run `composer cloud:setup` to provision one.
+    |
     */
 
     'default' => env('QUEUE_CONNECTION', 'database'),
