@@ -62,18 +62,15 @@
             "Composer\\Config::disableProcessTimeout",
             "bunx concurrently -c \"#c4b5fd,#fb7185,#fdba74\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"vp dev\" --names=queue,logs,vite --kill-others"
         ],
-        "patch": "test -f vendor/pestphp/pest/src/Plugins/Parallel/Paratest/WrapperRunner.php && (grep -q setData vendor/pestphp/pest/src/Plugins/Parallel/Paratest/WrapperRunner.php || (cd vendor/pestphp/pest && patch -p1 --silent < ../../../patches/pest-parallel-coverage.patch)) || true",
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi",
             "@php artisan filament:upgrade"
         ],
         "post-install-cmd": [
-            "@patch",
             "@php artisan filament:sync-colors --ansi"
         ],
         "post-update-cmd": [
-            "@patch",
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
             "@php artisan clear",
             "@php artisan filament:sync-colors --ansi"

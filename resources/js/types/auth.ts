@@ -1,5 +1,7 @@
 export type User = {
-  id: number;
+  // ULID. app/Models/User.php uses HasUlids, so this has never been a number —
+  // nothing read it, which is why the mismatch survived from the starter's first commit.
+  id: string;
   name: string;
   email: string;
   photo_url?: string | null;

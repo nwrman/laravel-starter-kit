@@ -86,13 +86,22 @@ jobs:
         with:
           path: vendor
           key: ${{ github.repository }}-composer-${{ hashFiles('composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
+          restore-keys: ${{ github.repository }}-composer-
 
       - name: Install Composer Dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader --no-progress
 
+      # .env.example's driver comes along with the copy. No lane in this workflow
+      # runs a database service, but artisan does boot here (post-autoload-dump,
+      # key:generate, the Wayfinder build, PHPStan). Neutralise the driver so a
+      # boot-time query can never turn a lane red for a database it was never
+      # meant to reach — including after a descendant switches .env.example to
+      # Postgres, which is exactly how this surfaced downstream.
       - name: Copy Environment File
-        run: cp .env.example .env
+        run: |
+          cp .env.example .env
+          sed -i "s|^DB_CONNECTION=.*|DB_CONNECTION=sqlite|" .env
+          sed -i "s|^DB_DATABASE=.*|DB_DATABASE=:memory:|" .env
 
       - name: Generate Application Key
         run: php artisan key:generate
@@ -102,7 +111,7 @@ jobs:
         with:
           path: node_modules
           key: ${{ github.repository }}-bun-${{ hashFiles('bun.lock') }}
-          restore-keys: ${{ runner.os }}-bun-
+          restore-keys: ${{ github.repository }}-bun-
 
       - name: Install Bun Dependencies
         run: bun install
@@ -159,7 +168,7 @@ jobs:
         with:
           path: vendor
           key: ${{ github.repository }}-composer-${{ hashFiles('composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
+          restore-keys: ${{ github.repository }}-composer-
 
       - name: Install Composer Dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader --no-progress
@@ -169,10 +178,19 @@ jobs:
         with:
           path: node_modules
           key: ${{ github.repository }}-bun-${{ hashFiles('bun.lock') }}
-          restore-keys: ${{ runner.os }}-bun-
+          restore-keys: ${{ github.repository }}-bun-
 
+      # .env.example's driver comes along with the copy. No lane in this workflow
+      # runs a database service, but artisan does boot here (post-autoload-dump,
+      # key:generate, the Wayfinder build, PHPStan). Neutralise the driver so a
+      # boot-time query can never turn a lane red for a database it was never
+      # meant to reach — including after a descendant switches .env.example to
+      # Postgres, which is exactly how this surfaced downstream.
       - name: Copy Environment File
-        run: cp .env.example .env
+        run: |
+          cp .env.example .env
+          sed -i "s|^DB_CONNECTION=.*|DB_CONNECTION=sqlite|" .env
+          sed -i "s|^DB_DATABASE=.*|DB_DATABASE=:memory:|" .env
 
       - name: Generate Application Key
         run: php artisan key:generate
@@ -209,10 +227,16 @@ jobs:
       - name: Run PHP Type Coverage
         run: composer test:type-coverage
 
+      # --ci is the ONLY thing Pest treats as "this is CI": Plugins\Environment
+      # reads that flag and nothing else — never CI=true, never GITHUB_ACTIONS —
+      # and defaults to local. Without it the locally() guard in tests/Pest.php
+      # stops guarding anything: TIA switches on, finds no graph, skips, and
+      # prints two lines about recording a baseline for next time. There is no
+      # next time on a fresh runner, and CI must measure everything anyway.
       - name: Run Pest Coverage
         run: |
           mkdir -p tests/reports
-          XDEBUG_MODE='coverage' vendor/bin/pest --parallel --coverage --exactly=100.0 --log-junit tests/reports/pest-report.xml
+          XDEBUG_MODE='coverage' vendor/bin/pest --ci --parallel --coverage --exactly=100.0 --log-junit tests/reports/pest-report.xml
 
       - name: Store Screenshots
         if: failure()
@@ -251,7 +275,7 @@ jobs:
         with:
           path: node_modules
           key: ${{ github.repository }}-bun-${{ hashFiles('bun.lock') }}
-          restore-keys: ${{ runner.os }}-bun-
+          restore-keys: ${{ github.repository }}-bun-
 
       - name: Install Bun Dependencies
         run: bun install
@@ -295,7 +319,7 @@ jobs:
         with:
           path: vendor
           key: ${{ github.repository }}-composer-${{ hashFiles('composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
+          restore-keys: ${{ github.repository }}-composer-
 
       - name: Install Composer Dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader --no-progress
@@ -305,10 +329,19 @@ jobs:
         with:
           path: node_modules
           key: ${{ github.repository }}-bun-${{ hashFiles('bun.lock') }}
-          restore-keys: ${{ runner.os }}-bun-
+          restore-keys: ${{ github.repository }}-bun-
 
+      # .env.example's driver comes along with the copy. No lane in this workflow
+      # runs a database service, but artisan does boot here (post-autoload-dump,
+      # key:generate, the Wayfinder build, PHPStan). Neutralise the driver so a
+      # boot-time query can never turn a lane red for a database it was never
+      # meant to reach — including after a descendant switches .env.example to
+      # Postgres, which is exactly how this surfaced downstream.
       - name: Copy Environment File
-        run: cp .env.example .env
+        run: |
+          cp .env.example .env
+          sed -i "s|^DB_CONNECTION=.*|DB_CONNECTION=sqlite|" .env
+          sed -i "s|^DB_DATABASE=.*|DB_DATABASE=:memory:|" .env
 
       - name: Generate Application Key
         run: php artisan key:generate
