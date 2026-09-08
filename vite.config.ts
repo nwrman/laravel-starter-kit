@@ -113,4 +113,12 @@ export default defineConfig({
       formVariants: true,
     }),
   ],
+  server: {
+    watch: {
+      // None of these can affect the browser bundle, and all of them churn:
+      // vendor/ on every composer run, the agent directories on every rule or
+      // skill edit. Watching them costs file handles and wakes HMR for nothing.
+      ignored: ['**/.agents/**', '**/.ai/**', '**/.claude/**', '**/.cursor/**', '**/vendor/**'],
+    },
+  },
 });
