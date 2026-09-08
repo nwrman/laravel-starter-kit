@@ -9,12 +9,13 @@
 #                         exist. `application_id` is written back here once resolved.
 #
 #   .cloud/provision.json This project's provisioning inputs: repository, names, region,
-#                         database and instance sizing, and an optional custom domain.
-#                         Values are chosen per project, not inherited from a template —
-#                         list what Cloud actually offers before filling it in.
+#                         database and instance sizing, an optional queue worker, and an
+#                         optional custom domain. Values are chosen per project, not inherited
+#                         from a template — list what Cloud actually offers before filling it in.
 #
-# Creates, if missing: application, environment, database cluster + schema, app instance, and
-# (only when `domain` is set) a custom domain. Wires the environment to the committed build and
+# Creates, if missing: application, environment, database cluster + schema, app instance,
+# (only when `worker_size` is set) a queue worker instance, and (only when `domain` is set) a
+# custom domain. Wires the environment to the committed build and
 # deploy scripts, sets APP_KEY, loads environment variables, and derives APP_URL.
 #
 # Never deploys, deletes, renames, or resizes. Re-running fills gaps only, so it is safe to run
@@ -228,6 +229,36 @@ if [ -z "$INSTANCE_ID" ]; then
     cloud_json cloud instance:create "$ENV_ID" --type app --size "$INSTANCE_SIZE" --json -n >/dev/null
 else
     note "Reusing app instance $INSTANCE_ID (size unchanged — resize in the dashboard)"
+fi
+
+# --- queue worker instance (optional) -------------------------------------------------------------
+#
+# An app instance serves HTTP and nothing else. Without a worker, every queued job lands in the
+# jobs table and stays there — no error, no failed_jobs row, just work that never happens. Laravel
+# has no "cloud" queue driver, so there is nothing to misconfigure and nothing that fails loudly:
+# QUEUE_CONNECTION=database is valid on its own, and only the missing consumer makes it useless.
+#
+# Optional, and omitted by default, because a worker is billable compute that an app dispatching
+# no jobs should not pay for. Set `worker_size` in provision.json to provision one; the key
+# follows `domain`'s pattern — add it later and re-run to create the worker then.
+
+WORKER_SIZE=$(jfile "$PROVISION_FILE" worker_size)
+
+if [ -n "$WORKER_SIZE" ]; then
+    note "Ensuring queue worker instance..."
+    WORKER_ID=$(cloud_json cloud instance:list "$ENV_ID" --json -n | php -r '
+        $d = json_decode(stream_get_contents(STDIN), true) ?: [];
+        foreach ($d as $i) { if (($i["type"] ?? "") === "worker") { echo $i["id"]; break; } }
+    ')
+
+    if [ -z "$WORKER_ID" ]; then
+        note "Creating queue worker instance ($WORKER_SIZE)..."
+        cloud_json cloud instance:create "$ENV_ID" --type worker --size "$WORKER_SIZE" --json -n >/dev/null
+    else
+        note "Reusing queue worker instance $WORKER_ID (size unchanged — resize in the dashboard)"
+    fi
+else
+    note "No worker_size configured; queued jobs will accumulate unprocessed (see config/queue.php)"
 fi
 
 # --- wire the environment to the committed pipeline ------------------------------------------------
