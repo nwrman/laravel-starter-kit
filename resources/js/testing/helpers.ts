@@ -53,7 +53,9 @@ export function getPageUrl(): string {
  */
 export function createUser(overrides?: Partial<User>): User {
   return {
-    id: 1,
+    // A real ULID shape, not '1' — a fixture that cannot occur in production
+    // is a fixture that hides bugs the production shape would surface.
+    id: '01JXKQ8Z4M7N2P5R9T3V6W1Y8B',
     name: 'Test User',
     email: 'test@example.com',
     avatar: undefined,
