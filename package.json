@@ -17,7 +17,7 @@
         "test:ui:watch": "vitest",
         "test:coverage": "vitest run --coverage",
         "prepare": "vp config || true",
-        "postinstall": "[ \"$PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD\" = \"1\" ] || playwright install chromium"
+        "postinstall": "[ -n \"$PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD\" ] || playwright install chromium"
     },
     "devDependencies": {
         "@laravel/vite-plugin-wayfinder": "^0.1.7",
