@@ -1,6 +1,9 @@
-import { router } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
+import type { ReactNode } from 'react';
 import DashboardController from '@/actions/App/Http/Controllers/DashboardController';
 import { Button } from '@/components/button';
+import AppLayout from '@/layouts/app-layout';
+import type { User } from '@/types';
 
 type ErrorStatus = 403 | 404 | 500 | 503;
 
@@ -41,3 +44,21 @@ export default function Error({ status }: { status: ErrorStatus }) {
     </div>
   );
 }
+
+/**
+ * The one page a guest can reach that the global default layout would wrap in the
+ * authenticated shell. Omitting `.layout` does not opt out of `app.tsx`'s default —
+ * it selects it — and the shell's NavUser dereferences `auth.user`, which is null
+ * for guests. So the chrome branches on auth state here, and guests get the bare page.
+ */
+export function ErrorLayout({ children }: { children: ReactNode }) {
+  const user: User | null = usePage().props.auth.user;
+
+  return user ? (
+    <AppLayout>{children}</AppLayout>
+  ) : (
+    <main className="flex min-h-svh items-center justify-center bg-background p-6">{children}</main>
+  );
+}
+
+Error.layout = ErrorLayout;

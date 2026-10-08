@@ -12,6 +12,14 @@ export type User = {
   [key: string]: unknown;
 };
 
+/**
+ * Non-nullable on purpose: every page but one sits behind the auth middleware, and
+ * typing `user` as nullable would force a guard into every consumer of the shell.
+ * The server does share `null` for guests, though, and `usePage<T>()` cannot widen
+ * it back (the intersection collapses to `User`). The one guest-reachable page that
+ * reads it — `pages/error.tsx` — annotates `User | null` itself. Any new page a guest
+ * can reach must do the same.
+ */
 export type Auth = {
   user: User;
 };
