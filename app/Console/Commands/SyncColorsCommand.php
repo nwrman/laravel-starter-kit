@@ -18,6 +18,10 @@ use Illuminate\Console\Command;
  *     projects extend BRAND_NAMES and add --color-<name>: ...; tokens to app.css.
  *   - `chart` palette: extracts numeric --chart-N tokens verbatim (matches both
  *     Minuta's ladder and the starter's --chart-1..5 tokens).
+ *
+ * COVERAGE-EXCLUDED: build tooling that composer hooks run, not application behaviour;
+ * SyncColorsCommandTest covers its output contract, not every branch.
+ * Remove when: that test reaches every branch — then drop the phpunit.xml entry with this line.
  */
 #[Description('Generate Filament color config from the main app CSS variables')]
 #[Signature('filament:sync-colors

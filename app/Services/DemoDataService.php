@@ -13,6 +13,9 @@ use Illuminate\Support\Sleep;
  *   DEMO_LATENCY_CHARTS_MS, DEMO_LATENCY_FEED_MS, DEMO_LATENCY_TABLE_MS, DEMO_LATENCY_DETAIL_MS
  *
  * Latency is disabled automatically in the testing environment.
+ *
+ * COVERAGE-EXCLUDED: hardcoded demo fixtures for the starter's sample screens, not real behaviour.
+ * Remove when: the demo screens are replaced by real data — delete this file and its phpunit.xml entry.
  */
 final class DemoDataService
 {

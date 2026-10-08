@@ -8,6 +8,10 @@ use App\Services\DemoDataService;
 use Inertia\Inertia;
 use Inertia\Response;
 
+/**
+ * COVERAGE-EXCLUDED: renders the starter's demo dashboard from DemoDataService fixtures.
+ * Remove when: the dashboard shows real data — then cover it and drop the phpunit.xml entry.
+ */
 final readonly class DashboardController
 {
     public function __construct(private DemoDataService $demo)

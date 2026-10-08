@@ -14,3 +14,5 @@ These four cost a descendant a week (SEAPTIdev/anidigraf-members#51). None of th
 - A lane that copies `.env.example` inherits its driver. Any lane without a database service must neutralise it after the copy, or it goes red the first time something queries at boot.
 
 Also here: `restore-keys` must share the primary key's prefix. `${{ runner.os }}-bun-` can never match a key saved under `${{ github.repository }}-bun-`, so partial restores silently never happen.
+
+`tests/Unit/Scaffolding/WorkflowTest.php` asserts the first four (and that every coverage run passes `--ci`), so a regression turns the suite red instead of staying silent. The `restore-keys` prefix is not checked.
