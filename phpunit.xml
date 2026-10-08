@@ -19,6 +19,10 @@
         <include>
             <directory>app</directory>
         </include>
+        <!-- Every <file> here carries a COVERAGE-EXCLUDED: line stating why and a
+             "Remove when:" condition. tests/Unit/Scaffolding/CoverageExclusionsTest.php
+             enforces both directions: an entry without the line fails, and so does
+             the line without an entry. -->
         <exclude>
             <directory>app/Filament</directory>
             <directory>app/Providers/Filament</directory>
