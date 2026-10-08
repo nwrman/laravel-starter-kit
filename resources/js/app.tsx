@@ -3,7 +3,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import AppLayout from '@/layouts/app-layout';
+import DefaultLayout from '@/layouts/default-layout';
 import { resolvePage } from '@/lib/resolve-page';
 import { initSessionExpiredHandler } from '@/lib/session-expired-handler';
 import '../css/app.css';
@@ -13,7 +13,7 @@ const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 void createInertiaApp({
   title: (title) => (title ? `${title} - ${appName}` : appName),
   resolve: resolvePage,
-  layout: () => AppLayout,
+  layout: () => DefaultLayout,
   setup({ el, App, props }) {
     const root = createRoot(el);
 

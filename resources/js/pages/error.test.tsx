@@ -1,18 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import Error, { ErrorLayout } from './error';
-
-const pageProps = vi.hoisted(() => ({ auth: { user: null as { name: string } | null } }));
+import Error from './error';
 
 vi.mock('@inertiajs/react', () => ({
   router: { visit: vi.fn() },
-  usePage: () => ({ props: pageProps }),
-}));
-
-vi.mock('@/layouts/app-layout', () => ({
-  default: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="app-shell">{children}</div>
-  ),
 }));
 
 vi.mock('@/actions/App/Http/Controllers/DashboardController', () => ({
@@ -85,36 +76,5 @@ describe('Error page', () => {
     await user.click(screen.getByRole('button', { name: 'Ir al inicio' }));
 
     expect(router.visit).toHaveBeenCalledWith('/dashboard');
-  });
-});
-
-describe('ErrorLayout', () => {
-  it('renders a guest the bare page, outside the authenticated shell', () => {
-    pageProps.auth.user = null;
-
-    render(
-      <ErrorLayout>
-        <Error status={404} />
-      </ErrorLayout>,
-    );
-
-    expect(screen.queryByTestId('app-shell')).not.toBeInTheDocument();
-    expect(screen.getByRole('heading')).toHaveTextContent('Página no encontrada');
-  });
-
-  it('renders a signed-in user the page inside the authenticated shell', () => {
-    pageProps.auth.user = { name: 'Ada' };
-
-    render(
-      <ErrorLayout>
-        <Error status={404} />
-      </ErrorLayout>,
-    );
-
-    expect(screen.getByTestId('app-shell')).toHaveTextContent('Página no encontrada');
-  });
-
-  it('is the layout the error page declares, so the global default never applies', () => {
-    expect(Error.layout).toBe(ErrorLayout);
   });
 });
