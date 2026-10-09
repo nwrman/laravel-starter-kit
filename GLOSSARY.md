@@ -1,7 +1,8 @@
 # Starter Kit — Domain Context
 
 Vocabulary for the starter itself and every app cloned from it. App-specific terms live in
-each app's own CONTEXT.md (see `caudal/docs/CONTEXT.md`, `raudal/docs/CONTEXT.md`).
+each app's own `GLOSSARY.md` (caudal and raudal keep the pre-v1.3 `docs/CONTEXT.md` until
+they adopt mattpocock/skills v1.3).
 
 ## Language
 

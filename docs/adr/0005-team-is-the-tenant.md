@@ -26,7 +26,7 @@ shape, dormant UI in simple apps) versus opt-in at scaffold time.
 
 - **One entity: Team = tenant.** Every scoped record carries `team_id`. A User
   belongs to one or more Teams and acts within a current Team. Canonical
-  vocabulary lives in `CONTEXT.md`.
+  vocabulary lives in `GLOSSARY.md`.
 - **Single shared database, row-level scoping.** This is the starter's only
   isolation strategy. Products needing stronger isolation (caudal/raudal's
   DB-per-tenant) replace the strategy in their own codebase; the starter must not
