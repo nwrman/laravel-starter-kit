@@ -4,9 +4,9 @@ Machinery for building a project in slices, with one agent per ticket, each in i
 fully isolated environment. Ported from the ANIDIGRAF build and generalized so any
 descendant of this starter inherits it.
 
-The short version: **the issue tracker is the state machine, one worktree is one ticket,
-and every ticket ends in a PR that a human merges.** Nothing else tracks progress — the
-graph, the frontier and the lock all live in GitHub Issues.
+The short version: **the issue tracker is the state machine, one ticket is built at a time
+in its own workspace, and nothing reaches `main` without a human merging a PR.** Nothing
+else tracks progress — the graph, the frontier and the lock all live in GitHub Issues.
 
 | Piece | What it is |
 |---|---|
@@ -33,7 +33,8 @@ glossary): [`docs/agents/`](agents/).
 Read [`reference/spec-and-tickets.md`](../.ai/skills/build-ticket/reference/spec-and-tickets.md)
 and produce — by hand, or with the `to-spec` and `to-tickets` skills, which write this shape:
 
-1. **One spec issue** — stages → slices → gates, plus per-slice schema ownership.
+1. **One spec issue** — stages → slices → gates, its delivery mode (a PR per ticket, or one
+   integration branch), its testing decisions, and per-slice schema ownership.
 2. **One issue per ticket** — a sub-issue of the spec, titled `t<N>: <imperative>`, with
    GitHub's native "blocked by" dependencies and acceptance criteria.
 3. **Two labels**, created once per repo: `ready-for-agent` and `in-progress`.
@@ -58,8 +59,8 @@ off while you are still drafting and no agent will touch it.
 
 `in-progress` is the agent's, and it is a **lock**. Before doing anything, the agent adds it
 and comments which branch it took; while it is there, no other agent picks the ticket up.
-The agent removes it if the run ends without a merged PR, and closing the ticket after a
-merge releases it naturally.
+The agent removes it if the run ends without the ticket landing, and closing the ticket
+releases it naturally.
 
 ```bash
 gh label create ready-for-agent && gh label create in-progress   # once per repo
@@ -76,21 +77,39 @@ gh issue list --label ready-for-agent --state open               # see the candi
 Bare, it resolves the frontier itself: one candidate → it takes it and says so; several →
 it lists them and asks which; none → it reports what is blocking and stops.
 
-The skill runs seven steps and then stops:
+The skill runs seven steps:
 
-1. **Preflight** — resolve the ticket, confirm every blocker is closed, **claim it with
-   `in-progress`**, read the spec, the glossary and the matching rule files.
-2. **Worktree** — branch `t33-<slug>`, then `scripts/worktree-setup.sh`.
-3. **TDD implementation** — red-green-refactor against the acceptance criteria.
+1. **Preflight** — resolve the ticket, confirm every blocker is closed, pick the delivery
+   mode and the workspace, **claim it with `in-progress`**, read the spec, the glossary and
+   the matching rule files.
+2. **Workspace** — branch `t33-<slug>`, in a worktree provisioned by
+   `scripts/worktree-setup.sh` or in place.
+3. **TDD implementation** — red-green against the acceptance criteria.
 4. **Spec-conformance verification** — a *fresh-context* subagent that never saw the
    implementation reasoning attacks the result for divergence from the spec.
 5. **Impeccable self-review** — UI tickets only, against the running site.
-6. **Pull request** — after the human gate session, if the ticket has one.
-7. **Adversarial code review** — the `code-review` skill, findings routed to the implementer.
+6. **Adversarial code review** — the `code-review` skill, findings routed to the implementer.
+7. **Land** — after the human gate session, if the ticket has one.
 
-Then it reports and **waits**. Three guardrails hold throughout:
+### Two choices, made in Preflight
 
-- Agents never merge a PR and never push to `main`.
+**Workspace.** A worktree is the default: its own site, database and build caches, which
+is what makes parallel runs safe. Say "no worktree" or "in this session" and the ticket is
+built on a branch in the current checkout instead, against the main site and whatever dev
+server is already running — no provisioning, no teardown. In place is for one ticket at a
+time.
+
+**Delivery** is read from the ticket, never asked:
+
+| Mode | When | Lands as |
+|---|---|---|
+| PR (default) | The ticket names no integration branch | Its own PR off `main`; the agent stops and a human merges. |
+| Integration | The ticket's Parent section says "ships on `feature/x`" | Commits merged into that branch, which is pushed; the ticket is closed. The spec ships as one PR at the end. |
+
+Integration mode is the same model as the `implement-spec` skill, so the one loop covers
+both. Three guardrails hold throughout:
+
+- Agents never merge a PR and never push to `main` (integration branches are fine).
 - One writer per file — only the implementer edits; verifier and reviewers are read-only.
 - Every verify/fix cycle caps at **3 rounds**, then stops and reports.
 
@@ -150,7 +169,9 @@ Anything else aborts with a message telling you to add a branch to both scripts.
 
 ## After the merge
 
-Run in this order, and mind where you stand:
+PR mode with a worktree. In place, only `refresh-main.sh` applies; in integration mode the
+agent merges into the integration branch itself and then tears down. Run in this order, and
+mind where you stand:
 
 ```bash
 scripts/worktree-teardown.sh      # INSIDE the worktree — unlinks the site, drops its DBs
@@ -177,7 +198,8 @@ per worktree. Two shapes:
 - **Wide parallel stretches** — a coordinator session spawns one background worktree agent
   per frontier ticket (every blocker closed).
 
-Both end the same way: PRs stack up, a human merges them.
+Both end the same way: PRs stack up and a human merges them — or, on an
+integration-branch spec, one PR arrives when the last ticket closes.
 
 > **One agent per working tree.** Two agents sharing one checkout will switch branches out
 > from under each other. That collision is the whole reason the worktree scripts exist —

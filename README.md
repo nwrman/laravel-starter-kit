@@ -207,7 +207,7 @@ bun run test:lint      # Frontend
 
 ## Building With Agents
 
-A multi-agent build loop ships with the kit: one GitHub ticket per slice, one git worktree per ticket — each with its own Herd site, database and build caches — and a PR at the end that a human merges. The issue tracker's native "blocked by" dependencies are the only state machine.
+A multi-agent build loop ships with the kit: one GitHub ticket per slice, one git worktree per ticket — each with its own Herd site, database and build caches — and a PR at the end that a human merges. The issue tracker's native "blocked by" dependencies are the only state machine. A ticket can also be built in place on request, or land on a spec's integration branch that ships as one PR.
 
 The kit is preconfigured for [mattpocock/skills](https://github.com/mattpocock/skills) v1.3: `to-spec` and `to-tickets` write the graph `/build-ticket` reads, and [`docs/agents/`](docs/agents/) tells every engineering skill where issues, labels and the [`GLOSSARY.md`](GLOSSARY.md) live.
 
