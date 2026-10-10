@@ -1,22 +1,28 @@
 # The multi-agent build loop
 
-Machinery for building a project in slices, with one agent per ticket, each in its own
-fully isolated environment. Ported from the ANIDIGRAF build and generalized so any
-descendant of this starter inherits it.
+Machinery for building a project in slices, with one agent session per ticket, each in its
+own fully isolated environment. Ported from the ANIDIGRAF build, refined across its
+descendants, and generalized so any app cloned from this starter inherits it.
 
 The short version: **the issue tracker is the state machine, one ticket is built at a time
-in its own workspace, and nothing reaches `main` without a human merging a PR.** Nothing
-else tracks progress — the graph, the frontier and the lock all live in GitHub Issues.
+in its own workspace and its own session, and nothing reaches `main` without a human
+merging a PR.** Nothing else tracks progress — the graph, the frontier and the lock all live
+in GitHub Issues.
 
 | Piece | What it is |
 |---|---|
 | [`.ai/skills/build-ticket/SKILL.md`](../.ai/skills/build-ticket/SKILL.md) | The per-ticket loop. `/build-ticket 33`. |
+| [`.ai/skills/finish-ticket/SKILL.md`](../.ai/skills/finish-ticket/SKILL.md) | The cleanup after a ticket lands, run in the main checkout. Spawned for you. |
 | [`.ai/skills/build-ticket/reference/spec-and-tickets.md`](../.ai/skills/build-ticket/reference/spec-and-tickets.md) | How to write the spec issue and the tickets it fans out into. |
-| [`scripts/worktree-setup.sh`](../scripts/worktree-setup.sh) | Provisions a worktree: own Herd site, own database, cloned build caches. |
-| [`scripts/worktree-teardown.sh`](../scripts/worktree-teardown.sh) | Removes the site and databases after the PR merges. |
-| [`scripts/refresh-main.sh`](../scripts/refresh-main.sh) | Brings the main checkout back to the standing latest after each merge. |
+| [`scripts/start-ticket.sh`](../scripts/start-ticket.sh) | Creates a ticket's worktree and opens its session there. |
+| [`scripts/worktree-setup.sh`](../scripts/worktree-setup.sh) | Provisions a worktree: own Herd site, own database, cloned build caches, warm TIA cache. |
+| [`scripts/worktree-teardown.sh`](../scripts/worktree-teardown.sh) | Removes the site, databases and TIA cache after the ticket lands. |
+| [`scripts/handoff-to-main.sh`](../scripts/handoff-to-main.sh) | Hands the end of a ticket to `/finish-ticket` in the main checkout. |
+| [`scripts/refresh-main.sh`](../scripts/refresh-main.sh) | Brings the main checkout back to the standing latest and re-pins its TIA baseline. |
+| [`scripts/worktree-names.sh`](../scripts/worktree-names.sh), [`supacode-ids.sh`](../scripts/supacode-ids.sh), [`tia-helper.php`](../scripts/tia-helper.php) | Shared helpers the scripts source. |
 
-Why it exists and what was rejected: [ADR 0012](adr/0012-multi-agent-build-loop.md).
+Why it exists and what was rejected: [ADR 0012](adr/0012-multi-agent-build-loop.md); why
+the loop now runs in two sessions and pins tests last: [ADR 0014](adr/0014-build-loop-two-sessions-shape-before-tests.md).
 How the mattpocock/skills engineering skills are wired to this repo (tracker, labels,
 glossary): [`docs/agents/`](agents/).
 
@@ -24,9 +30,17 @@ glossary): [`docs/agents/`](agents/).
 
 - **Laravel Herd** — each worktree gets its own `.test` site.
 - **`gh`** — tickets and PRs live in GitHub Issues.
-- **Supacode** *(optional)* — worktree/tab management. Plain `git worktree` works everywhere
-  the skill mentions Supacode.
+- **Supacode** *(recommended)* — the scripts open each ticket's session in its own tab, and
+  the cleanup session in main, without you doing anything. Without it they create the
+  worktree with plain git and print the one command to paste into a new terminal.
 - A **database server** if the project is on Postgres or MySQL. Sqlite projects need nothing.
+
+Once per repo:
+
+```bash
+gh label create ready-for-agent && gh label create in-progress
+gh api -X PATCH repos/{owner}/{repo} -F allow_squash_merge=false -F allow_rebase_merge=false -F delete_branch_on_merge=true
+```
 
 ## Start of a build: write the graph once
 
@@ -37,15 +51,14 @@ and produce — by hand, or with the `to-spec` and `to-tickets` skills, which wr
    integration branch), its testing decisions, and per-slice schema ownership.
 2. **One issue per ticket** — a sub-issue of the spec, titled `t<N>: <imperative>`, with
    GitHub's native "blocked by" dependencies and acceptance criteria.
-3. **Two labels**, created once per repo: `ready-for-agent` and `in-progress`.
 
 Two markers in a ticket body change how the loop runs. They are read from the body at run
 time — never hardcoded into the skill:
 
 | Marker | Effect |
 |---|---|
-| `🛑 GATE` | Stop before the PR for a live UX session on the worktree's site. |
-| `🗄️ CLONE` | Provision the worktree against the real dev database, not demo seed data. |
+| `🛑 GATE` | The human reviews and accepts the built surface before the reviewers and the tests run. |
+| `🗄️ CLONE` | Provision the worktree against a copy of the real dev database and uploads, not demo seed data. |
 
 ## The frontier and the lock
 
@@ -62,12 +75,9 @@ and comments which branch it took; while it is there, no other agent picks the t
 The agent removes it if the run ends without the ticket landing, and closing the ticket
 releases it naturally.
 
-```bash
-gh label create ready-for-agent && gh label create in-progress   # once per repo
-gh issue list --label ready-for-agent --state open               # see the candidates
-```
-
 ## Running one ticket
+
+In a Claude Code session on the main checkout:
 
 ```
 /build-ticket 33      # this ticket
@@ -77,48 +87,90 @@ gh issue list --label ready-for-agent --state open               # see the candi
 Bare, it resolves the frontier itself: one candidate → it takes it and says so; several →
 it lists them and asks which; none → it reports what is blocking and stops.
 
-The skill runs seven steps:
+### Two sessions, on purpose
 
-1. **Preflight** — resolve the ticket, confirm every blocker is closed, pick the delivery
-   mode and the workspace, **claim it with `in-progress`**, read the spec, the glossary and
-   the matching rule files.
-2. **Workspace** — branch `t33-<slug>`, in a worktree provisioned by
-   `scripts/worktree-setup.sh` or in place.
-3. **TDD implementation** — red-green against the acceptance criteria.
-4. **Spec-conformance verification** — a *fresh-context* subagent that never saw the
-   implementation reasoning attacks the result for divergence from the spec.
-5. **Impeccable self-review** — UI tickets only, against the running site.
-6. **Adversarial code review** — the `code-review` skill, findings routed to the implementer.
-7. **Land** — after the human gate session, if the ticket has one.
+The session in main only picks the ticket, reads its delivery mode and names the branch. It
+then runs `scripts/start-ticket.sh`, which creates the worktree and opens a **new session
+inside it**. That session does the build. The reason is the MCP servers: they start with the
+session's directory and never move, so a session that started in main keeps getting answers
+about main — its URL, its database, its logs — even after it changes directory.
 
-### Two choices, made in Preflight
+Say **"no worktree"** (or "in this session") and the ticket is built in place instead: a
+branch in the current checkout, against the main site and whatever dev server is already
+running, in this same session. No provisioning, no teardown, and one ticket at a time.
 
-**Workspace.** A worktree is the default: its own site, database and build caches, which
-is what makes parallel runs safe. Say "no worktree" or "in this session" and the ticket is
-built on a branch in the current checkout instead, against the main site and whatever dev
-server is already running — no provisioning, no teardown. In place is for one ticket at a
-time.
+### The order, and why
 
-**Delivery** is read from the ticket, never asked:
+```
+brief → build → look at it → impeccable → walk it → you accept (gate tickets) → code review
+      → verify → TESTS → preflight → land → merge → what now exists
+```
+
+Everything that can still change the shape of the work runs before anything that pins it.
+Tests written first describe a shape that is still moving, and rewriting them is pure waste:
+on the ANIDIGRAF build, three test suites were written test-first and deleted with the
+structures they described, none because a behaviour was wrong. So the agent builds, you can
+watch it on the dev server, the design pass and the browser walk run, you accept it (gate
+tickets), the reviewers attack it — and only then are the tests written and the
+`composer preflight` gate run. Test-first is still used where the behaviour is fully pinned
+down and fiddly.
+
+Step by step, in the ticket's session:
+
+0. **Claim** — add `in-progress`, read the spec, the rules, the glossary and the ADRs.
+1. **Brief** — what will exist when the ticket is done, in plain words. **It waits for your
+   go.** If a criterion as written would ship a defect, it says so here.
+2. **Confirm the ground** — the branch, `.env` and the site are the worktree's own.
+3. **Build** — shape first, no tests yet, `bun run dev` running so you can watch.
+4. **`impeccable`** on any user-facing surface, before you see it.
+5. **Walk it in a browser** — every state, a keyboard-only pass, side effects checked in
+   the database, and what the deployed configuration does differently.
+6. **Gate tickets: you accept**, before anything is pinned.
+7. **Code review** on the branch.
+8. **Spec check** by a fresh-context agent, including that every deferred piece is owned by
+   an open ticket.
+9. **`impeccable` second look** at what changed since step 4.
+10. **Tests**, including at least one browser spec that earns its place.
+11. **`composer preflight`** — blocks until green; its table goes in the landing note.
+12. **Land** — a PR, or commits on the integration branch (below).
+13. **Report** what was built, against the brief — then hand off to main.
+
+Three guardrails hold throughout:
+
+- Agents never merge a PR and never push to `main` (integration branches are fine).
+- One writer per file — only the implementer edits; verifier and reviewers are read-only,
+  and isolated from each other.
+- Every verify/fix cycle caps at **3 rounds**, then stops and reports.
+
+### Delivery: a PR per ticket, or one integration branch
+
+Read from the ticket, never asked:
 
 | Mode | When | Lands as |
 |---|---|---|
-| PR (default) | The ticket names no integration branch | Its own PR off `main`; the agent stops and a human merges. |
+| PR (default) | The ticket names no integration branch | Its own PR off `main`; the agent stops and you merge it. |
 | Integration | The ticket's Parent section says "ships on `feature/x`" | Commits merged into that branch, which is pushed; the ticket is closed. The spec ships as one PR at the end. |
 
-Integration mode is the same model as the `implement-spec` skill, so the one loop covers
-both. Three guardrails hold throughout:
+Integration mode is the same model as the `implement-spec` skill, so this one loop covers
+both.
 
-- Agents never merge a PR and never push to `main` (integration branches are fine).
-- One writer per file — only the implementer edits; verifier and reviewers are read-only.
-- Every verify/fix cycle caps at **3 rounds**, then stops and reports.
+## Your touchpoints
+
+1. **The brief — every ticket.** Read what it says will exist and say go (or correct it).
+2. **Gate tickets** — a live session on the ticket's site, after the design pass and the
+   walk and before the reviewers and the tests. Iterate there until you sign off.
+3. **The merge — every PR.** The body opens with what now exists, then the acceptance
+   checklist, the green preflight table, the verdicts and the browser-spec claim. Merge with
+   a merge commit, never a squash, and tell the agent "merged".
 
 ## Provisioning a worktree
 
+`start-ticket.sh` runs this as the new session's first command; by hand, from inside the
+worktree:
+
 ```bash
-# from inside the worktree
 scripts/worktree-setup.sh          # seed mode (default)
-scripts/worktree-setup.sh clone    # copy main's dev database instead
+scripts/worktree-setup.sh clone    # copy main's dev database and uploads instead
 ```
 
 Idempotent — safe to re-run. It:
@@ -126,30 +178,39 @@ Idempotent — safe to re-run. It:
 1. Clones `vendor/` and `node_modules/` from the main checkout with APFS copy-on-write
    (`cp -Rc`, near-instant and near-free on disk), then trues up with `composer install`
    and `bun install`.
-2. Copies main's `.env` and overrides `APP_URL` and the database.
+2. Copies main's `.env` and points `APP_URL` and the database at the worktree — on every
+   run, because a new Supacode worktree arrives with main's ignored files already in it.
 3. Creates the app database (and a test database, on server engines).
 4. Writes a per-worktree `.env.testing` — **non-sqlite projects only**.
 5. Links the Herd site and runs a first `bun run build`.
+6. Copies main's TIA cache in, so the first `composer preflight` replays instead of
+   running the whole suite.
 
 ### Naming
 
-Everything derives from the **main checkout's directory name**, so nothing is
-project-specific. For a repo in `laravel-starter-kit/` on branch `t33-user-import`:
+Everything derives from the **main checkout's directory name** and the branch
+(`scripts/worktree-names.sh`), so nothing is project-specific. For a repo in
+`laravel-starter-kit/` on branch `feature/t33-user-import`:
 
 | | |
 |---|---|
-| Site | `http://laravel-starter-kit-t-33.test` |
+| Site | `http://t33.laravel-starter-kit.test` |
 | App database | `laravel_starter_kit_t33` |
 | Test database | `laravel_starter_kit_t33_test` |
 
-Branches not matching `t<N>-…` fall back to a slugified branch name.
+The site is a **subdomain** of the main site on purpose: browsers then treat every worktree
+as the same site for saved passwords, so a login saved once is offered on every ticket.
+Sessions stay separate, because the session cookie is pinned to the exact host. The type
+prefix never reaches the names; branches without a `t<N>` fall back to a slug of the whole
+branch name.
 
 ### Modes
 
-- **`seed`** (default) — migrate from zero, then `DatabaseSeeder`. The normal case.
-- **`clone`** — copy the main checkout's dev database, then run this branch's migrations on
-  top. For slices that only mean anything against real content, where demo data would prove
-  nothing. Destructive: it drops and recreates the worktree's app database.
+- **`seed`** (default) — migrate, then `DatabaseSeeder`, only when the database is new. A
+  re-run just migrates.
+- **`clone`** — copy the main checkout's dev database and `storage/app` uploads, then run
+  this branch's migrations on top. For slices that only mean anything against real content.
+  Destructive: it drops and recreates the worktree's app database.
 
 ### Database engines
 
@@ -167,39 +228,36 @@ runs against the dev database (see the test-isolation section of
 
 Anything else aborts with a message telling you to add a branch to both scripts.
 
-## After the merge
+## After the ticket lands
 
-PR mode with a worktree. In place, only `refresh-main.sh` applies; in integration mode the
-agent merges into the integration branch itself and then tears down. Run in this order, and
-mind where you stand:
+Nothing for you to type. The ticket's session runs, inside its worktree:
 
 ```bash
-scripts/worktree-teardown.sh      # INSIDE the worktree — unlinks the site, drops its DBs
+scripts/worktree-teardown.sh      # site, every database it owns (parallel test copies too), TIA cache
+scripts/handoff-to-main.sh <N>    # opens /finish-ticket in the main checkout
 ```
 
-```bash
-supacode worktree delete          # OUTSIDE it — or: git worktree remove <path>
-scripts/refresh-main.sh           # on the main checkout
-```
-
-Teardown deliberately does **not** delete the worktree. Removing the directory you are
-standing in kills the session — Supacode CLI included. That is a separate step, from
-outside.
+`/finish-ticket` then, from main: proves the work landed (it refuses to delete unmerged
+commits), deletes the worktree — which ends the ticket's session, as expected — prunes the
+remote branch, runs `scripts/refresh-main.sh`, and closes the ticket with the account from
+the landing note. It finishes by naming the tickets that just became unblocked.
 
 `refresh-main.sh` pulls, installs, migrates and builds, so the main checkout's site stays
-the standing latest for everyone looking at the project.
+the standing latest — and it re-pins main's TIA baseline to HEAD, so the next worktree diffs
+against main rather than re-running tests for work already merged. It migrates but never
+re-seeds: if a ticket ships new seed data, its handoff names the command that writes it.
 
 ## Running several tickets at once
 
 Isolation is what makes this safe: separate site, separate database, separate build caches
 per worktree. Two shapes:
 
-- **Serial stretches** — a human starts one `/build-ticket` session at a time.
-- **Wide parallel stretches** — a coordinator session spawns one background worktree agent
-  per frontier ticket (every blocker closed).
+- **Serial stretches** — you start one `/build-ticket` at a time.
+- **Wide parallel stretches** — tell one session in main to coordinate: run
+  `start-ticket.sh` for each frontier ticket and report as PRs open.
 
-Both end the same way: PRs stack up and a human merges them — or, on an
-integration-branch spec, one PR arrives when the last ticket closes.
+Both end the same way: PRs stack up and you merge them — or, on an integration-branch spec,
+one PR arrives when the last ticket closes.
 
 > **One agent per working tree.** Two agents sharing one checkout will switch branches out
 > from under each other. That collision is the whole reason the worktree scripts exist —
@@ -208,10 +266,12 @@ integration-branch spec, one PR arrives when the last ticket closes.
 ## If something jams
 
 - **A verify/fix cycle stalls.** It caps at 3 rounds — the agent stops and reports rather
-  than thrashing. Read the findings and decide.
+  than thrashing, and asks whether to keep the worktree for inspection or tear it down.
 - **A ticket is stuck on `in-progress` with no one working it.** A session died before
   releasing its claim. The claim comment names the branch, so check whether that branch has
   anything on it, then `gh issue edit <N> --remove-label in-progress` to put it back on the
   frontier.
 - **A worktree is left over from a dead session.** Run `scripts/worktree-teardown.sh` inside
-  it, then `git worktree remove <path>` from outside (or `supacode worktree delete`).
+  it, then `/finish-ticket <N>` from main — it checks for unmerged commits before deleting.
+- **Teardown says it could not drop a database.** Something still holds it open; everything
+  else is torn down. Re-run the script once it is idle.
