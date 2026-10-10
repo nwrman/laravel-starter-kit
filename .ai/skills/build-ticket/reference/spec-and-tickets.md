@@ -90,16 +90,19 @@ Put them on their own line in the acceptance criteria so `gh issue view` shows t
 
 ## 5 · Running the graph
 
-- **Serial stretches** — the human starts one `build-ticket` session per ticket.
-- **Wide parallel stretches** — a coordinator session spawns background worktree agents,
-  one per frontier ticket. Each is fully isolated by `worktree-setup.sh`: own site, own
-  database, own build caches, and each claims its ticket with `in-progress` before starting,
-  so two agents never land on the same one. Parallel runs need worktrees; in place is for
-  one ticket at a time.
-- **PR mode** — agents open PRs and stop. The human merges. After each merge:
-  teardown → delete worktree → `scripts/refresh-main.sh`.
-- **Integration mode** — agents merge into the integration branch, push it and close
-  their ticket; the human reviews the single PR when the spec is done.
+- **Serial stretches** — the human types `/build-ticket <N>` (or bare) in the main checkout.
+  It names the branch and runs `scripts/start-ticket.sh`, which opens the ticket's own
+  session in a fresh worktree. Building in place is one ticket at a time.
+- **Wide parallel stretches** — a coordinator session in main runs `start-ticket.sh` once per
+  frontier ticket. Each worktree is fully isolated by `worktree-setup.sh`: own site, own
+  database, own build caches. Each session claims its ticket with `in-progress` before
+  starting, so two agents never land on the same one.
+- **PR mode** — each session opens its PR and stops. The human merges. The session then runs
+  `worktree-teardown.sh` and `handoff-to-main.sh`, and `/finish-ticket` in main deletes the
+  worktree, prunes the branch, runs `refresh-main.sh` and closes the ticket.
+- **Integration mode** — each session lands on the integration branch, pushes it and closes
+  its ticket, then hands off the same way; the human reviews the single PR when the spec is
+  done.
 
 ## 6 · Worked example
 
