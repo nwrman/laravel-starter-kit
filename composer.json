@@ -139,11 +139,11 @@
             "@php artisan toolkit:report --no-interaction"
         ],
         "test:ci": [
-            "@test:type-coverage",
-            "XDEBUG_MODE=\"coverage\" pest --parallel --coverage --exactly=100.0",
-            "bun run test:coverage",
             "@test:lint",
-            "@test:types"
+            "@test:types",
+            "@test:type-coverage",
+            "XDEBUG_MODE=\"coverage\" pest --parallel --coverage --exactly=100.0 --no-tia",
+            "bun run test:coverage"
         ],
         "test:report": [
             "Composer\\Config::disableProcessTimeout",
