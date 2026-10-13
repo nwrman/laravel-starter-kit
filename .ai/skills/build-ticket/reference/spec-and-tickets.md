@@ -3,10 +3,16 @@
 `build-ticket` runs one node of a graph. This is how the graph gets built. Do this once,
 before any implementation, and the state machine takes care of itself afterwards.
 
-**There is no extra state file.** The issue tracker *is* the state machine: `Blocked by`
-edges are the graph, labels are the frontier and the lock, and a ticket on the frontier is
-one that is open, `ready-for-agent`, not `in-progress`, and has every blocker closed.
-Nothing else tracks progress — no `PLAN.md`, no checklist file, no orchestrator database.
+The `to-spec` and `to-tickets` skills (mattpocock/skills) produce this shape: `to-spec`
+writes the spec issue, `to-tickets` fans it out into sub-issues with native dependencies and
+the `ready-for-agent` label. Writing them by hand works too, as long as the result matches
+what follows.
+
+**There is no extra state file.** The issue tracker *is* the state machine: native
+"blocked by" dependencies are the graph, labels are the frontier and the lock, and a
+ticket on the frontier is one that is open, `ready-for-agent`, not `in-progress`, and has
+every blocker closed. Nothing else tracks progress — no `PLAN.md`, no checklist file, no
+orchestrator database. Commands for all of it: `docs/agents/issue-tracker.md`.
 
 ## 1 · One spec issue
 
@@ -31,11 +37,13 @@ Also record in the spec:
 
 ## 2 · One issue per ticket
 
-Each ticket is a GitHub issue with:
+Each ticket is a GitHub issue, linked to the spec as a **sub-issue**, with:
 
 - **Title** — `t<N>: <short imperative>` matching the branch it will get (`t33-user-import`).
-- **Blocked by** — a line per upstream ticket (`Blocked by #31`). GitHub renders these as
-  real edges; closing the blockers is what puts a ticket on the frontier.
+- **Blocked by** — GitHub's native issue dependencies, the canonical edges: closing the
+  blockers is what puts a ticket on the frontier. Mirror them as a `## Blocked by` list in
+  the body for readers. Where native dependencies are unavailable, a `Blocked by #31` line
+  in the body *is* the edge, and `build-ticket` reads it.
 - **Scope** — what this slice owns, including its tables.
 - **Acceptance criteria** — the checklist the implementer tests against and the verifier
   attacks. Two criteria are mandatory on any ticket that introduces a model:
@@ -52,7 +60,7 @@ The tracker holds the lock as well as the graph. Create both labels once, per re
 
 | Label | Meaning |
 | --- | --- |
-| `ready-for-agent` | This ticket is written well enough for an agent to pick up unaided. Without it a ticket never enters the frontier, so it is also the "not yet, I'm still drafting this" switch. |
+| `ready-for-agent` | This ticket is written well enough for an agent to pick up unaided. Without it a ticket never enters the frontier, so it is also the "not yet, I'm still drafting this" switch. It is also one of the five triage roles (`docs/agents/triage-labels.md`). |
 | `in-progress` | **Claimed.** An agent added it and commented which branch it took. No other agent touches the ticket while it is there. |
 
 `in-progress` is a lock, so it must be released or the ticket falls out of the frontier for

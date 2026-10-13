@@ -17,6 +17,8 @@ graph, the frontier and the lock all live in GitHub Issues.
 | [`scripts/refresh-main.sh`](../scripts/refresh-main.sh) | Brings the main checkout back to the standing latest after each merge. |
 
 Why it exists and what was rejected: [ADR 0012](adr/0012-multi-agent-build-loop.md).
+How the mattpocock/skills engineering skills are wired to this repo (tracker, labels,
+glossary): [`docs/agents/`](agents/).
 
 ## Prerequisites
 
@@ -29,11 +31,11 @@ Why it exists and what was rejected: [ADR 0012](adr/0012-multi-agent-build-loop.
 ## Start of a build: write the graph once
 
 Read [`reference/spec-and-tickets.md`](../.ai/skills/build-ticket/reference/spec-and-tickets.md)
-and produce:
+and produce — by hand, or with the `to-spec` and `to-tickets` skills, which write this shape:
 
 1. **One spec issue** — stages → slices → gates, plus per-slice schema ownership.
-2. **One issue per ticket** — titled `t<N>: <imperative>`, carrying `Blocked by #<M>` lines
-   and acceptance criteria.
+2. **One issue per ticket** — a sub-issue of the spec, titled `t<N>: <imperative>`, with
+   GitHub's native "blocked by" dependencies and acceptance criteria.
 3. **Two labels**, created once per repo: `ready-for-agent` and `in-progress`.
 
 Two markers in a ticket body change how the loop runs. They are read from the body at run
@@ -47,7 +49,9 @@ time — never hardcoded into the skill:
 ## The frontier and the lock
 
 A ticket is **on the frontier** when it is open, labelled `ready-for-agent`, *not* labelled
-`in-progress`, and every one of its `Blocked by` issues is closed.
+`in-progress`, and every one of its blockers is closed. Blockers are GitHub's native issue
+dependencies (`issue_dependencies_summary.blocked_by` counts the open ones); a hand-written
+`Blocked by #<M>` line in the body counts too.
 
 `ready-for-agent` is yours: it says the ticket is written well enough to hand over. Leave it
 off while you are still drafting and no agent will touch it.
@@ -75,7 +79,7 @@ it lists them and asks which; none → it reports what is blocking and stops.
 The skill runs seven steps and then stops:
 
 1. **Preflight** — resolve the ticket, confirm every blocker is closed, **claim it with
-   `in-progress`**, read the spec and the matching rule files.
+   `in-progress`**, read the spec, the glossary and the matching rule files.
 2. **Worktree** — branch `t33-<slug>`, then `scripts/worktree-setup.sh`.
 3. **TDD implementation** — red-green-refactor against the acceptance criteria.
 4. **Spec-conformance verification** — a *fresh-context* subagent that never saw the

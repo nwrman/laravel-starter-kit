@@ -9,7 +9,8 @@ Runs ONE GitHub ticket of a staged build through the agreed loop. The routing li
 here, in writing — agents fill the jobs, never the plan.
 
 Assumes the ticket graph described in `reference/spec-and-tickets.md`: one spec issue,
-one issue per ticket, `Blocked by` edges, and markers in the acceptance criteria.
+one issue per ticket (a GitHub sub-issue of the spec), native "blocked by" dependencies,
+and markers in the acceptance criteria. Issue-tracker commands: `docs/agents/issue-tracker.md`.
 
 **Hard rules (task-graph guardrails):**
 
@@ -23,12 +24,17 @@ one issue per ticket, `Blocked by` edges, and markers in the acceptance criteria
 ## 0 · Preflight
 
 1. **No ticket number given?** Compute the frontier: open `ready-for-agent` issues **without
-   the `in-progress` label** whose "Blocked by" issues are all closed. Exactly one → take it
+   the `in-progress` label** whose blockers are all closed. Exactly one → take it
    and say so. Several → list them one line each and ask which (one question, options, no
    essay). None → report what's blocking and stop.
-2. `gh issue view <N>` — read the full ticket. Confirm every "Blocked by" issue is CLOSED;
-   if not, stop and say which blockers are open. If it already carries `in-progress`,
-   **stop — another agent owns it** (unless a human explicitly says to take it over).
+2. `gh issue view <N>` — read the full ticket. Confirm every blocker is CLOSED; if not,
+   stop and say which are open. If it already carries `in-progress`, **stop — another
+   agent owns it** (unless a human explicitly says to take it over).
+
+   Blockers are GitHub's native issue dependencies — `to-tickets` writes them that way:
+   `gh api repos/{owner}/{repo}/issues/<N> --jq .issue_dependencies_summary.blocked_by`
+   counts the open ones, and must be 0. A ticket written by hand may carry a `Blocked by #M`
+   line in its body instead; treat each issue it names the same way.
 3. **Claim it** before touching anything:
    `gh issue edit <N> --add-label in-progress` and comment
    `Claimed — branch t<N>-<name>, <date>`. The label is the lock; the comment says who to
@@ -39,6 +45,7 @@ one issue per ticket, `Blocked by` edges, and markers in the acceptance criteria
    acceptance criteria name.
 5. Read the project's standing rules: every file whose globs match the paths in scope per
    `.ai/rules/index.md` if that directory exists, otherwise `CLAUDE.md` and `.ai/guidelines/`.
+   Read `GLOSSARY.md` for the domain language and the ADRs in `docs/adr/` that touch the area.
 6. Note the two body markers: `🛑 GATE` (human UX session before the PR) and `🗄️ CLONE`
    (provision the worktree against real data instead of demo seed data).
 
@@ -55,7 +62,7 @@ Branch name: `t<N>-<short-kebab-name>` (e.g. `t33-user-import`).
 
 ## 2 · TDD implementation
 
-Invoke the `tdd` skill and work red-green-refactor against the ticket's acceptance criteria.
+Call the Skill tool with `tdd` and work red-green-refactor against the ticket's acceptance criteria.
 Non-negotiables from the standing contracts:
 
 - The tests rules bind: Feature is the default suite, Unit for pure logic,
@@ -77,7 +84,7 @@ implementer fixes; re-verify. Max 3 rounds.
 
 ## 4 · Impeccable self-review (UI tickets only)
 
-If the ticket has a user-facing surface: invoke the `impeccable` skill against the running
+If the ticket has a user-facing surface: call the Skill tool with `impeccable` against the running
 Herd site. Fix findings. Record the final verdict — it goes in the PR body. No human in
 this step; the human reviews UX only at `🛑 GATE` tickets.
 
@@ -86,12 +93,13 @@ this step; the human reviews UX only at `🛑 GATE` tickets.
 - `🛑 GATE` tickets: **stop here first** — live session with the human on the worktree
   site; iterate until sign-off; only then continue.
 - Open the PR with the `finish-feature-branch` skill (or `gh pr create`): title
-  `t<N>: <ticket title>`, body linking the ticket, the acceptance criteria as a checked
-  list, the verifier's verdict, and the impeccable verdict.
+  `t<N>: <ticket title>`. Call the Skill tool with `pr` for the body's shape, and include
+  the link to the ticket, the acceptance criteria as a checked list, the verifier's
+  verdict, and the impeccable verdict.
 
 ## 6 · Adversarial code review
 
-Run the `code-review` skill against the PR (Standards + Spec axes). The implementer fixes
+Call the Skill tool with `code-review` against the PR (Standards + Spec axes). The implementer fixes
 confirmed findings; re-review. Max 3 rounds; unresolved PLAUSIBLE findings get listed in a
 PR comment for the human's judgment.
 
