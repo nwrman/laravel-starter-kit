@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "php \"$CLAUDE_PROJECT_DIR/.claude/hooks/enforce-test-command.php\""
+            "command": "php \"$CLAUDE_PROJECT_DIR/vendor/nwrman/laravel-toolkit/bin/enforce-test-command.php\""
           }
         ]
       }
