@@ -223,8 +223,8 @@ branch name.
 The sqlite row is why a fresh starter project needs no database server: the file lives
 inside the worktree, so isolation is free, and the test database is already `:memory:`.
 The `.env.testing` step exists only for the other engines — without it, `composer test:*`
-runs against the dev database (see the test-isolation section of
-`.ai/guidelines/enforce-tests.blade.php`).
+runs against the dev database (see the test-isolation section of the toolkit's
+"Running Tests" guideline, `vendor/nwrman/laravel-toolkit/resources/boost/guidelines/core.blade.php`).
 
 Anything else aborts with a message telling you to add a branch to both scripts.
 

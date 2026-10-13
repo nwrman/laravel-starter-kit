@@ -8,6 +8,9 @@
     "guidelines": true,
     "mcp": true,
     "nightwatch_mcp": false,
+    "packages": [
+        "nwrman/laravel-toolkit"
+    ],
     "sail": false,
     "skills": [
         "infer-conventions",

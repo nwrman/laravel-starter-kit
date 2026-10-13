@@ -34,10 +34,10 @@
         "laravel/tinker": "^3.0.2",
         "mockery/mockery": "^1.6.12",
         "nunomaduro/collision": "^8.9.5",
-        "pestphp/pest": "^5.1",
-        "pestphp/pest-plugin-browser": "^5.0.1",
+        "pestphp/pest": "^5.3.2",
+        "pestphp/pest-plugin-browser": "^5.1.2",
         "pestphp/pest-plugin-laravel": "^5.0.1",
-        "pestphp/pest-plugin-type-coverage": "^5.0.2",
+        "pestphp/pest-plugin-type-coverage": "^5.0.3",
         "rector/rector": "^2.6.1",
         "roave/security-advisories": "dev-latest"
     },
@@ -67,10 +67,13 @@
             "@php artisan package:discover --ansi",
             "@php artisan filament:upgrade"
         ],
+        "patch": "test -f vendor/laravel/wayfinder/resources/js/wayfinder.ts && (grep -q '\"query\"' vendor/laravel/wayfinder/resources/js/wayfinder.ts || (cd vendor/laravel/wayfinder && patch -p1 --silent < ../../../patches/wayfinder-query-method.patch)) || true",
         "post-install-cmd": [
+            "@patch",
             "@php artisan filament:sync-colors --ansi"
         ],
         "post-update-cmd": [
+            "@patch",
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
             "@php artisan clear",
             "@php artisan filament:sync-colors --ansi"
@@ -139,11 +142,11 @@
             "@php artisan toolkit:report --no-interaction"
         ],
         "test:ci": [
-            "@test:type-coverage",
-            "XDEBUG_MODE=\"coverage\" pest --parallel --coverage --exactly=100.0",
-            "bun run test:coverage",
             "@test:lint",
-            "@test:types"
+            "@test:types",
+            "@test:type-coverage",
+            "XDEBUG_MODE=\"coverage\" pest --parallel --coverage --exactly=100.0 --no-tia",
+            "bun run test:coverage"
         ],
         "test:report": [
             "Composer\\Config::disableProcessTimeout",

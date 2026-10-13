@@ -46,8 +46,8 @@ without explicit approval.**
 
 For each approved item: inspect the upstream diff (`git -C "$SCRATCHPAD/upstream" show <sha>`),
 adapt it to this repo's conventions (bun/oxlint, Pest, our passkeys implementation —
-port *ideas*, not files, where implementations differ), add/update tests, and run the
-narrowest relevant suite plus `composer preflight` before finishing.
+port *ideas*, not files, where implementations differ), add/update tests, and check them in
+the "Running Tests" order: the touched tests, `composer test`, then one `composer preflight`.
 
 ### Step 5 — Update the state file
 
