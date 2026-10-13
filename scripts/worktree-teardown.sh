@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Tear down what worktree-setup.sh provisioned for THIS worktree: the Herd site
-# and, on server databases, both of its databases. Run from inside the worktree
-# AFTER its PR merged, BEFORE deleting the worktree itself.
+# Tear down what worktree-setup.sh provisioned for THIS worktree: the Herd site,
+# on server databases every database it owns, and its TIA cache. Run from
+# inside the worktree AFTER its ticket landed, BEFORE deleting the worktree.
 #
-# Deleting the worktree is deliberately not done here — do it from outside
-# (`supacode worktree delete`, or `git worktree remove`), since removing the
-# tree you are standing in kills the session.
+# Deleting the worktree is deliberately not done here — removing the tree you
+# are standing in kills the session. scripts/handoff-to-main.sh hands that to
+# /finish-ticket in the main checkout.
 
 # Re-exec if invoked as `sh script` / `zsh script` — see worktree-setup.sh.
 [ -n "${BASH_VERSION:-}" ] || exec bash "$0" "$@"
@@ -20,24 +20,10 @@ if [ "$MAIN" = "$WT_ROOT" ]; then
   exit 1
 fi
 
-kebab() { printf '%s' "$1" | tr -cs 'a-zA-Z0-9' '-' | tr '[:upper:]' '[:lower:]' | sed 's/^-//;s/-$//'; }
-snake() { printf '%s' "$1" | tr -cs 'a-zA-Z0-9' '_' | tr '[:upper:]' '[:lower:]' | sed 's/^_//;s/_$//'; }
-
-PROJECT="$(kebab "$(basename "$MAIN")")"
-DB_PREFIX="$(snake "$(basename "$MAIN")")"
-
-# Must derive the exact same names as worktree-setup.sh — see the note there.
-BRANCH="$(git branch --show-current)"
-TICKET="$(printf '%s' "$BRANCH" | sed -n 's/^t\([0-9][0-9]*\).*$/\1/p')"
-if [ -n "$TICKET" ]; then
-  SLUG="t-${TICKET}"
-  DBSLUG="t${TICKET}"
-else
-  SLUG="$(kebab "$BRANCH")"
-  DBSLUG="$(snake "$BRANCH")"
-fi
-SITE="${PROJECT}-${SLUG}"
-DB="${DB_PREFIX}_${DBSLUG}"
+# The same names worktree-setup.sh derived — one source, so they cannot drift.
+# shellcheck source=scripts/worktree-names.sh
+source "$WT_ROOT/scripts/worktree-names.sh"
+worktree_names "$MAIN" "$(git branch --show-current)"
 
 # An absent key is normal — see the note in worktree-setup.sh.
 envval() {
@@ -48,36 +34,55 @@ envval() {
 
 CONNECTION="$(envval DB_CONNECTION)"; CONNECTION="${CONNECTION:-sqlite}"
 
+# Both names, on purpose. A worktree created before the subdomain scheme is
+# still linked under the legacy name, and would otherwise be left standing.
+# `herd unlink` on a name that was never linked exits 0, so asking twice is free.
 herd unlink "$SITE" 2>/dev/null || true
+herd unlink "$LEGACY_SITE" 2>/dev/null || true
 
+# Pest --parallel clones the test database once per process
+# (`<db>_test_test_7`), so dropping only the two names setup created leaves a
+# dozen behind. Drop the whole family.
+DROPPED=''
+FAILED=''
 case "$CONNECTION" in
   sqlite)
     # The sqlite file lives inside the worktree and dies with it.
-    echo "✓ torn down: site $SITE (sqlite file goes with the worktree)"
     ;;
 
   pgsql)
-    export PGHOST="$(envval DB_HOST)"; PGHOST="${PGHOST:-127.0.0.1}"
-    export PGPORT="$(envval DB_PORT)"; PGPORT="${PGPORT:-5432}"
-    export PGUSER="$(envval DB_USERNAME)"; PGUSER="${PGUSER:-postgres}"
-    PGPASS="$(envval DB_PASSWORD)"
-    if [ -n "$PGPASS" ]; then export PGPASSWORD="$PGPASS"; fi
+    PGHOST="$(envval DB_HOST)"; export PGHOST="${PGHOST:-127.0.0.1}"
+    PGPORT="$(envval DB_PORT)"; export PGPORT="${PGPORT:-5432}"
+    PGUSER="$(envval DB_USERNAME)"; export PGUSER="${PGUSER:-postgres}"
+    DB_PASS="$(envval DB_PASSWORD)"
+    if [ -n "$DB_PASS" ]; then export PGPASSWORD="$DB_PASS"; fi
 
-    dropdb --if-exists "$DB"
-    dropdb --if-exists "${DB}_test"
-    echo "✓ torn down: site $SITE, dbs $DB / ${DB}_test"
+    # `_` is a LIKE wildcard, hence the backslash.
+    DBS="$(psql -Atc "select datname from pg_database where datname = '$DB' or datname like '${DB}\_test%'" postgres)"
+    # --force terminates open connections first. Without it a single live
+    # client — the worktree's own session holding a Boost query open is enough —
+    # fails the drop, and `set -e` would abandon the rest of the teardown with
+    # the site already unlinked. That is how a descendant left 36 databases
+    # standing across two tickets.
+    while IFS= read -r db; do
+      [ -n "$db" ] || continue
+      if dropdb --force --if-exists "$db"; then DROPPED="$DROPPED $db"; else FAILED="$FAILED $db"; fi
+    done <<< "$DBS"
     ;;
 
   mysql|mariadb)
     MYSQL_HOST="$(envval DB_HOST)"; MYSQL_HOST="${MYSQL_HOST:-127.0.0.1}"
     MYSQL_PORT="$(envval DB_PORT)"; MYSQL_PORT="${MYSQL_PORT:-3306}"
     MYSQL_USER="$(envval DB_USERNAME)"; MYSQL_USER="${MYSQL_USER:-root}"
-    MYSQL_PASS="$(envval DB_PASSWORD)"
-    if [ -n "$MYSQL_PASS" ]; then export MYSQL_PWD="$MYSQL_PASS"; fi
+    DB_PASS="$(envval DB_PASSWORD)"
+    if [ -n "$DB_PASS" ]; then export MYSQL_PWD="$DB_PASS"; fi
+    MYSQL_ARGS=(--host="$MYSQL_HOST" --port="$MYSQL_PORT" --user="$MYSQL_USER")
 
-    mysql --host="$MYSQL_HOST" --port="$MYSQL_PORT" --user="$MYSQL_USER" \
-      -e "DROP DATABASE IF EXISTS \`$DB\`; DROP DATABASE IF EXISTS \`${DB}_test\`;"
-    echo "✓ torn down: site $SITE, dbs $DB / ${DB}_test"
+    DBS="$(mysql "${MYSQL_ARGS[@]}" -N -e "SHOW DATABASES" | grep -E "^${DB}(_test.*)?$" || true)"
+    while IFS= read -r db; do
+      [ -n "$db" ] || continue
+      if mysql "${MYSQL_ARGS[@]}" -e "DROP DATABASE IF EXISTS \`$db\`"; then DROPPED="$DROPPED $db"; else FAILED="$FAILED $db"; fi
+    done <<< "$DBS"
     ;;
 
   *)
@@ -85,4 +90,20 @@ case "$CONNECTION" in
     ;;
 esac
 
-echo "  now delete the worktree from outside: supacode worktree delete  (or git worktree remove '$WT_ROOT')"
+# The TIA cache lives outside the repo, in ~/.pest/tia/, keyed by this
+# worktree's own path. Nothing will ever read it once the tree is gone. Ask
+# Pest for the directory rather than reconstructing the key.
+TIA_DIR="$(php "$WT_ROOT/scripts/tia-helper.php" dir "$WT_ROOT" 2>/dev/null || true)"
+if [ -n "$TIA_DIR" ] && [ -d "$TIA_DIR" ]; then
+  rm -rf "$TIA_DIR"
+  echo "✓ removed TIA cache: $TIA_DIR"
+fi
+
+if [ -n "$FAILED" ]; then
+  echo "⚠ could not drop:$FAILED — something still holds them open." >&2
+  echo "  Everything else is torn down; re-run this script once they are idle." >&2
+  exit 1
+fi
+
+echo "✓ torn down: site $SITE (and legacy $LEGACY_SITE, if it existed), databases:${DROPPED:- none}"
+echo "  now hand off to main: scripts/handoff-to-main.sh <ticket>"

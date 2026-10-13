@@ -125,7 +125,23 @@ Staying on branch <name>. Use land-feature-branch to merge after approval.
 
 ## Merge Convention
 
-This project uses **merge commits** (not squash) to preserve the full commit history and decision trail. This is configured at the GitHub repo level, not enforced by this skill.
+This project uses **merge commits** to preserve the full commit history and decision trail — a ticket
+lands as several commits on purpose, and squashing throws that trail away.
+
+It is enforced at the GitHub repo level, not by this skill, and a new repo does not have it yet. Set it
+once per repo:
+
+```bash
+gh api -X PATCH repos/{owner}/{repo} -F allow_squash_merge=false -F allow_rebase_merge=false -F delete_branch_on_merge=true
+```
+
+With squash and rebase off, the UI offers merge commits only. `delete_branch_on_merge` makes GitHub delete
+the remote branch the moment the PR merges, which keeps a branch from surviving when the merge could not
+pass `--delete-branch` (see `land-feature-branch`, worktree caveat). Verify with:
+
+```bash
+gh api repos/{owner}/{repo} --jq '{allow_merge_commit, allow_squash_merge, allow_rebase_merge, delete_branch_on_merge}'
+```
 
 ## Common Mistakes
 
