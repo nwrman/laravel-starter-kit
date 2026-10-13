@@ -16,7 +16,8 @@
 #
 # Database engines: sqlite (default), pgsql, mysql/mariadb. For sqlite the test
 # database is phpunit's forced :memory:, so no test DB and no .env.testing are
-# provisioned — see the test-isolation section of .ai/guidelines/enforce-tests.
+# provisioned — see the test-isolation section of the toolkit's "Running Tests"
+# guideline (vendor/nwrman/laravel-toolkit/resources/boost/guidelines/core.blade.php).
 #
 # Usage: scripts/worktree-setup.sh [seed|clone]
 
