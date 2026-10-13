@@ -1,0 +1,19 @@
+Wayfinder's TypeScript runtime does not know the QUERY verb that Laravel 13.35
+added: Route::redirect() and Route::any() now register it, the generated route
+files emit "query", and `bun run test:types` fails on the union below. Backport
+of laravel/wayfinder#324 (issue #326), the stub hunk only.
+
+Retire when: laravel/wayfinder >= 0.1.22
+
+--- a/resources/js/wayfinder.ts
++++ b/resources/js/wayfinder.ts
+@@ -9,7 +9,8 @@
+         | QueryParams;
+ };
+ 
+-type Method = "get" | "post" | "put" | "delete" | "patch" | "head" | "options";
++type Method =
++    "get" | "post" | "put" | "delete" | "patch" | "head" | "options" | "query";
+ type UrlDefaults = Record<string, unknown>;
+ 
+ let urlDefaults: () => UrlDefaults = () => ({});
