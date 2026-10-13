@@ -16,6 +16,8 @@
 .env
 .env.backup
 .env.production
+# Generated per worktree (and for main, off sqlite) from .env.testing.example by the build-loop scripts.
+.env.testing
 .phpactor.json
 .phpunit.result.cache
 Homestead.json
@@ -49,3 +51,6 @@ public/css/filament
 public/js/filament
 public/fonts/filament
 config/filament-colors.php
+
+# impeccable live mode: its config and its session journal. Personal tooling, machine-local.
+.impeccable/

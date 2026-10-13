@@ -1,17 +1,18 @@
 #!/usr/bin/env bash
 # Provision this git worktree as a self-contained dev environment:
-# its own database(s), its own Herd site, cloned build caches.
+# its own database(s), its own Herd site, cloned build caches, a warm TIA cache.
 #
-# Run from INSIDE the worktree root (a Supacode setup script, the build-ticket
-# loop, or by hand). Idempotent — safe to re-run.
+# Run from INSIDE the worktree root (the tab scripts/start-ticket.sh opens, or
+# by hand). Idempotent — safe to re-run.
 #
-# Naming is derived from the MAIN checkout's directory name, so nothing here is
-# project-specific:  <project>-t-<N>.test  /  <project>_t<N>  /  <project>_t<N>_test
+# Names come from scripts/worktree-names.sh: ticket 33 on a repo in
+# `<project>/` gets http://t33.<project>.test and <project>_t33 (+ _test).
 #
 # Modes (content for the app database):
-#   seed  (default)  migrate from zero + DatabaseSeeder
-#   clone            copy the MAIN checkout's dev database — for phases that
-#                    must run against real content instead of demo data
+#   seed  (default)  migrate, then DatabaseSeeder — only when the database is
+#                    new, so a re-run just migrates instead of seeding twice
+#   clone            copy the MAIN checkout's dev database AND its uploaded
+#                    files — for tickets that must run against real content
 #
 # Database engines: sqlite (default), pgsql, mysql/mariadb. For sqlite the test
 # database is phpunit's forced :memory:, so no test DB and no .env.testing are
@@ -39,34 +40,16 @@ if [ "$MAIN" = "$WT_ROOT" ]; then
   exit 1
 fi
 
-kebab() { printf '%s' "$1" | tr -cs 'a-zA-Z0-9' '-' | tr '[:upper:]' '[:lower:]' | sed 's/^-//;s/-$//'; }
-snake() { printf '%s' "$1" | tr -cs 'a-zA-Z0-9' '_' | tr '[:upper:]' '[:lower:]' | sed 's/^_//;s/_$//'; }
-
-# Herd names a site after its directory, so the main checkout's basename is the prefix.
-PROJECT="$(kebab "$(basename "$MAIN")")"
-DB_PREFIX="$(snake "$(basename "$MAIN")")"
-
-# Slug from the branch: t33-user-import → t-33 → site <project>-t-33, db <project>_t33
-# Extracted with sed rather than [[ =~ ]] + BASH_REMATCH: under a non-bash shell the
-# capture would come back empty and EVERY ticket would collide on <project>-t-.
-BRANCH="$(git branch --show-current)"
-TICKET="$(printf '%s' "$BRANCH" | sed -n 's/^t\([0-9][0-9]*\).*$/\1/p')"
-if [ -n "$TICKET" ]; then
-  SLUG="t-${TICKET}"
-  DBSLUG="t${TICKET}"
-else
-  SLUG="$(kebab "$BRANCH")"
-  DBSLUG="$(snake "$BRANCH")"
-fi
-SITE="${PROJECT}-${SLUG}"
-DB="${DB_PREFIX}_${DBSLUG}"
-DB_TEST="${DB}_test"
+# shellcheck source=scripts/worktree-names.sh
+source "$WT_ROOT/scripts/worktree-names.sh"
+worktree_names "$MAIN" "$(git branch --show-current)"
 
 # --- env helpers -------------------------------------------------------------
 
 # envval KEY [FILE] — read a key from an env file (defaults to main's .env).
 # An absent key is normal (the starter ships DB_DATABASE commented out), so the
 # trailing `|| true` keeps grep's exit 1 from tripping `set -e` at the call site.
+# POSIX classes, not `\s`: BSD grep has none, and keys can carry leading space.
 envval() {
   local file="${2:-$MAIN/.env}"
   [ -f "$file" ] || return 0
@@ -103,10 +86,46 @@ composer install --quiet
 bun install --silent
 
 # 2. .env: copy main's, override the per-worktree keys. ------------------------
+# The overrides run on every pass, not only when the file is created: a new
+# worktree is not a clean checkout. Supacode copies untracked and ignored files
+# across from the source checkout, so .env can arrive already pointing at main.
 if [ ! -f .env ]; then
   cp "$MAIN/.env" .env
 fi
 setenv APP_URL "http://${SITE}.test" .env
+php artisan storage:link --quiet 2>/dev/null || true
+
+# Clone main's uploaded files onto this worktree's disks (clone mode only).
+#
+# A database carries paths, not bytes. Clone the rows alone and every upload
+# they name 404s — which is precisely what a clone-mode ticket exists to look
+# at. `cp -Rc` is an APFS copy-on-write clone: gigabytes cost no disk and no
+# measurable time until a file diverges. A copy and not a symlink, deliberately
+# — deleting an upload in this worktree must not reach into main's files.
+clone_storage() {
+  local sub
+  for sub in private public; do
+    [ -d "$MAIN/storage/app/$sub" ] || continue
+    echo "→ cloning storage/app/$sub from main ($(du -sh "$MAIN/storage/app/$sub" | cut -f1 | tr -d ' \t'))"
+    rm -rf "${WT_ROOT:?}/storage/app/$sub"
+    mkdir -p "$WT_ROOT/storage/app"
+    if ! cp -Rc "$MAIN/storage/app/$sub" "$WT_ROOT/storage/app/$sub" 2>/dev/null; then
+      # Different volume, or no clonefile(2): a real copy rather than a
+      # half-cloned tree.
+      rm -rf "${WT_ROOT:?}/storage/app/$sub"
+      cp -R "$MAIN/storage/app/$sub" "$WT_ROOT/storage/app/$sub"
+    fi
+  done
+}
+
+# migrate_and_seed FRESH — seed only a database this run created.
+migrate_and_seed() {
+  if [ "$1" = 1 ]; then
+    php artisan migrate --force --seed
+  else
+    php artisan migrate --force
+  fi
+}
 
 # 3. Databases. ---------------------------------------------------------------
 case "$CONNECTION" in
@@ -127,8 +146,9 @@ case "$CONNECTION" in
 
     case "$MODE" in
       seed)
-        [ -f "$WT_SQLITE" ] || touch "$WT_SQLITE"
-        php artisan migrate --force --seed
+        FRESH=0
+        if [ ! -f "$WT_SQLITE" ]; then touch "$WT_SQLITE"; FRESH=1; fi
+        migrate_and_seed "$FRESH"
         ;;
       clone)
         if [ ! -f "$MAIN_SQLITE" ]; then
@@ -137,37 +157,38 @@ case "$CONNECTION" in
         echo "→ cloning $MAIN_SQLITE → $WT_SQLITE"
         cp "$MAIN_SQLITE" "$WT_SQLITE"
         php artisan migrate --force   # branch migrations on top of the clone
+        clone_storage
         ;;
     esac
     ;;
 
   pgsql)
-    export PGHOST="$(envval DB_HOST)"; PGHOST="${PGHOST:-127.0.0.1}"
-    export PGPORT="$(envval DB_PORT)"; PGPORT="${PGPORT:-5432}"
-    export PGUSER="$(envval DB_USERNAME)"; PGUSER="${PGUSER:-postgres}"
+    PGHOST="$(envval DB_HOST)"; export PGHOST="${PGHOST:-127.0.0.1}"
+    PGPORT="$(envval DB_PORT)"; export PGPORT="${PGPORT:-5432}"
+    PGUSER="$(envval DB_USERNAME)"; export PGUSER="${PGUSER:-postgres}"
     # `[ -n "$x" ] && export …` would be a failing AND-list under `set -e` when empty.
-    PGPASS="$(envval DB_PASSWORD)"
-    if [ -n "$PGPASS" ]; then export PGPASSWORD="$PGPASS"; fi
+    DB_PASS="$(envval DB_PASSWORD)"
+    if [ -n "$DB_PASS" ]; then export PGPASSWORD="$DB_PASS"; fi
     MAIN_DB="$(envval DB_DATABASE)"
 
     setenv DB_DATABASE "$DB" .env
 
-    createdb_if_missing() {
-      psql -tAc "SELECT 1 FROM pg_database WHERE datname='$1'" postgres | grep -q 1 || createdb "$1"
-    }
-    createdb_if_missing "$DB_TEST"
+    pg_exists() { psql -tAc "SELECT 1 FROM pg_database WHERE datname='$1'" postgres | grep -q 1; }
+    pg_exists "$DB_TEST" || createdb "$DB_TEST"
 
     case "$MODE" in
       seed)
-        createdb_if_missing "$DB"
-        php artisan migrate --force --seed
+        FRESH=0
+        if ! pg_exists "$DB"; then createdb "$DB"; FRESH=1; fi
+        migrate_and_seed "$FRESH"
         ;;
       clone)
-        dropdb --if-exists "$DB"
+        dropdb --force --if-exists "$DB"
         createdb "$DB"
         echo "→ cloning $MAIN_DB → $DB"
         pg_dump "$MAIN_DB" | psql -q "$DB"
         php artisan migrate --force
+        clone_storage
         ;;
     esac
     ;;
@@ -176,25 +197,30 @@ case "$CONNECTION" in
     MYSQL_HOST="$(envval DB_HOST)"; MYSQL_HOST="${MYSQL_HOST:-127.0.0.1}"
     MYSQL_PORT="$(envval DB_PORT)"; MYSQL_PORT="${MYSQL_PORT:-3306}"
     MYSQL_USER="$(envval DB_USERNAME)"; MYSQL_USER="${MYSQL_USER:-root}"
-    MYSQL_PASS="$(envval DB_PASSWORD)"
-    if [ -n "$MYSQL_PASS" ]; then export MYSQL_PWD="$MYSQL_PASS"; fi
+    DB_PASS="$(envval DB_PASSWORD)"
+    if [ -n "$DB_PASS" ]; then export MYSQL_PWD="$DB_PASS"; fi
     MAIN_DB="$(envval DB_DATABASE)"
     MYSQL_ARGS=(--host="$MYSQL_HOST" --port="$MYSQL_PORT" --user="$MYSQL_USER")
 
     setenv DB_DATABASE "$DB" .env
 
+    mysql_exists() { [ -n "$(mysql "${MYSQL_ARGS[@]}" -N -e "SHOW DATABASES LIKE '$1'")" ]; }
     mysql "${MYSQL_ARGS[@]}" -e "CREATE DATABASE IF NOT EXISTS \`$DB_TEST\`"
 
     case "$MODE" in
       seed)
-        mysql "${MYSQL_ARGS[@]}" -e "CREATE DATABASE IF NOT EXISTS \`$DB\`"
-        php artisan migrate --force --seed
+        FRESH=0
+        if ! mysql_exists "$DB"; then
+          mysql "${MYSQL_ARGS[@]}" -e "CREATE DATABASE \`$DB\`"; FRESH=1
+        fi
+        migrate_and_seed "$FRESH"
         ;;
       clone)
         mysql "${MYSQL_ARGS[@]}" -e "DROP DATABASE IF EXISTS \`$DB\`; CREATE DATABASE \`$DB\`;"
         echo "→ cloning $MAIN_DB → $DB"
         mysqldump "${MYSQL_ARGS[@]}" "$MAIN_DB" | mysql "${MYSQL_ARGS[@]}" "$DB"
         php artisan migrate --force
+        clone_storage
         ;;
     esac
     ;;
@@ -215,12 +241,63 @@ if [ "$CONNECTION" != "sqlite" ]; then
     setenv APP_ENV testing .env.testing
   fi
   setenv DB_DATABASE "$DB_TEST" .env.testing
+  setenv APP_URL "http://${SITE}.test" .env.testing
+  # The template ships likely defaults, not this machine's. Carry over what
+  # the database step just connected with, or the suite talks to a different
+  # server than the one holding its database.
+  for KEY in DB_HOST DB_PORT DB_USERNAME DB_PASSWORD; do
+    VALUE="$(envval "$KEY")"
+    if [ -n "$VALUE" ]; then setenv "$KEY" "$VALUE" .env.testing; fi
+  done
 fi
 
-# 5. Herd site + a first build. -----------------------------------------------
+# 5. Warm this worktree's TIA cache from main's. --------------------------------
+#
+# Pest keys the Test Impact Analysis cache by repository identity, read from
+# `<root>/.git/config` — and in a git worktree `.git` is a FILE, so the lookup
+# fails and the key falls back to the worktree's own path. Every ticket would
+# otherwise start with an empty graph, rebuild it from a full run, and throw it
+# away at teardown.
+#
+# Both files or neither: Pest re-records whenever the coverage cache is
+# missing, even with a valid graph on disk, so graph.json alone would leave
+# `composer preflight` running the whole suite regardless.
+warm_tia() {
+  local helper main_dir wt_dir
+
+  # MAIN's copy, by absolute path: a tree cut from an older main may not carry
+  # the helper, and with a relative path that failure reads exactly like
+  # "main has no graph".
+  helper="$MAIN/scripts/tia-helper.php"
+
+  if [ ! -f "$helper" ]; then
+    echo "⚠ $helper is missing — skipping the TIA warm." >&2
+    return 0
+  fi
+
+  # `valid` exits 1 for an absent or stale graph — an answer, not a failure.
+  if ! php "$helper" valid "$MAIN"; then
+    echo "⚠ main has no usable TIA graph — skipping the warm."
+    echo "  The first 'composer preflight' here will record one: slow, once."
+    echo "  Warm the source with: scripts/refresh-main.sh"
+    return 0
+  fi
+
+  main_dir="$(php "$helper" dir "$MAIN")"
+  wt_dir="$(php "$helper" dir "$WT_ROOT")"
+
+  mkdir -p "$wt_dir"
+  cp "$main_dir/graph.json" "$main_dir/coverage.bin.gz" "$wt_dir/"
+  echo "→ TIA warmed from main ($(du -sh "$wt_dir" | cut -f1 | tr -d ' \t'))"
+}
+
+# 6. Herd site + a first build. -----------------------------------------------
 if [ ! -e "$HOME/Library/Application Support/Herd/config/valet/Sites/$SITE" ]; then
   herd link "$SITE"
 fi
 bun run build
+
+# After composer install, so Pest's own classes are importable.
+warm_tia
 
 echo "✓ ready: http://${SITE}.test"

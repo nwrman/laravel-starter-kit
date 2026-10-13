@@ -19,6 +19,10 @@ Single-context: `GLOSSARY.md` at the repo root, decisions in `docs/adr/`. See `d
 
 ### Build loop
 
-Tickets are built one at a time with the `build-ticket` skill (`.ai/skills/build-ticket/`): claim, worktree, TDD,
-spec verification, UX review, code review, then a PR for a human to merge. `to-spec` and `to-tickets` produce the
+Tickets are built one at a time with the `build-ticket` skill (`.ai/skills/build-ticket/`). Invoked in the main
+checkout, it names the branch and runs `scripts/start-ticket.sh`, which opens the ticket's own session in a fresh
+worktree (or, on request, builds in place). That session opens with a brief the human approves, settles the shape
+(design pass, browser walk, gate acceptance, code review, spec check) before writing the tests and running
+`composer preflight`, then lands the ticket: a PR for a human to merge, or commits on the spec's integration branch
+when the ticket names one. `finish-ticket` cleans up from main afterwards. `to-spec` and `to-tickets` produce the
 graph it reads; `docs/build-loop.md` is the operator's manual.
