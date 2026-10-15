@@ -49,8 +49,7 @@ describe('ErrorBoundary', () => {
     );
 
     expect(screen.getByText('Detalles del error (Development)')).toBeInTheDocument();
-    // Error message appears in the details section
-    expect(screen.getAllByText(/Test error/).length).toBeGreaterThan(0);
+    expect(screen.getByText('Test error')).toBeInTheDocument();
   });
 
   it('displays "Intentar de nuevo" button that calls router.reload', () => {

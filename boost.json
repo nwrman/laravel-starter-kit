@@ -20,6 +20,7 @@
         "wayfinder-development",
         "inertia-react-development",
         "tailwindcss-development",
+        "test-quality",
         "build-ticket",
         "create-feature-branch",
         "finish-feature-branch",

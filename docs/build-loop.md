@@ -103,7 +103,7 @@ running, in this same session. No provisioning, no teardown, and one ticket at a
 
 ```
 brief → build → look at it → impeccable → walk it → you accept (gate tickets) → code review
-      → verify → TESTS → preflight → land → merge → what now exists
+      → verify → TESTS → test review → preflight → land → merge → what now exists
 ```
 
 Everything that can still change the shape of the work runs before anything that pins it.
@@ -131,6 +131,8 @@ Step by step, in the ticket's session:
    an open ticket.
 9. **`impeccable` second look** at what changed since step 4.
 10. **Tests**, including at least one browser spec that earns its place.
+    **10b. Test review** by a fresh-context agent against the `test-quality` checklist: what
+    wrong code would each new test catch?
 11. **`composer preflight`** — blocks until green; its table goes in the landing note.
 12. **Land** — a PR, or commits on the integration branch (below).
 13. **Report** what was built, against the brief — then hand off to main.

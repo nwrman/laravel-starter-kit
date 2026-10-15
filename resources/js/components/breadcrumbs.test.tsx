@@ -22,9 +22,10 @@ describe('Breadcrumbs', () => {
   });
 
   it('renders a single item as the current page', () => {
-    render(<Breadcrumbs breadcrumbs={[{ title: 'Home', href: '/' }]} />);
+    const { container } = render(<Breadcrumbs breadcrumbs={[{ title: 'Home', href: '/' }]} />);
 
-    expect(screen.getAllByText('Home').length).toBeGreaterThan(0);
+    expect(desktopTrail(container).getByText('Home')).toHaveAttribute('aria-current', 'page');
+    expect(mobileTrail(container).getByText('Home')).toHaveAttribute('aria-current', 'page');
   });
 
   it('renders the whole trail on desktop', () => {
