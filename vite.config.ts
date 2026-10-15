@@ -37,8 +37,25 @@ export default defineConfig({
     overrides: [
       {
         files: ['**/*.test.ts', '**/*.test.tsx'],
+        plugins: ['vitest'],
         rules: {
           'typescript/unbound-method': 'off',
+          'vitest/expect-expect': 'error',
+          'vitest/no-conditional-expect': 'error',
+          'vitest/require-mock-type-parameters': 'off',
+          'vitest/no-restricted-matchers': [
+            'error',
+            {
+              toBeTruthy: 'Assert the exact value: toBe(true), toBe(<value>).',
+              toBeFalsy: 'Assert the exact value: toBe(false), toBeNull(), toBe(0).',
+              toBeDefined: 'Assert the exact value with toBe() or toEqual().',
+              toBeGreaterThan: 'You arranged the data — assert the exact number with toBe().',
+              toBeGreaterThanOrEqual:
+                'You arranged the data — assert the exact number with toBe().',
+              toBeLessThan: 'You arranged the data — assert the exact number with toBe().',
+              toBeLessThanOrEqual: 'You arranged the data — assert the exact number with toBe().',
+            },
+          ],
         },
       },
     ],

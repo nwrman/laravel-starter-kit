@@ -11,7 +11,7 @@ describe('AppHeader', () => {
   it('renders the Inicio nav item', () => {
     render(<AppHeader />);
 
-    expect(screen.getAllByText('Inicio').length).toBeGreaterThan(0);
+    expect(screen.getByRole('link', { name: 'Inicio' })).toBeInTheDocument();
   });
 
   it('renders the user avatar trigger', () => {
@@ -39,6 +39,6 @@ describe('AppHeader', () => {
     );
 
     // The mobile and desktop trails both render; CSS shows one per breakpoint.
-    expect(screen.getAllByText('Settings').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Settings')).toHaveLength(2);
   });
 });

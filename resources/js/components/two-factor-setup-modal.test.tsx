@@ -109,17 +109,14 @@ describe('TwoFactorSetupModal', () => {
     // Go to verification step
     await user.click(screen.getByText('Continuar'));
 
-    const form = document.querySelector('form');
-    expect(form).toBeInTheDocument();
+    const form = document.querySelector('form') as HTMLFormElement;
 
     // Trigger form submit; mock calls onSuccess
-    if (form) {
-      await act(async () => {
-        form.requestSubmit();
-      });
-    }
+    await act(async () => {
+      form.requestSubmit();
+    });
 
-    expect(defaultProps.onClose).toHaveBeenCalled();
+    expect(defaultProps.onClose).toHaveBeenCalledOnce();
   });
 
   it('triggers onClose when clicking Atrás on Verification step', async () => {

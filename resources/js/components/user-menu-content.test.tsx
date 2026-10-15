@@ -47,11 +47,8 @@ describe('UserMenuContent', () => {
     const user = userEvent.setup();
     renderInMenu();
 
-    const logoutButton = document.querySelector('[data-test="logout-button"]');
-    expect(logoutButton).toBeInTheDocument();
-    if (logoutButton) {
-      await user.click(logoutButton);
-      expect(router.flushAll).toHaveBeenCalled();
-    }
+    await user.click(screen.getByRole('menuitem', { name: 'Cerrar sesión' }));
+
+    expect(router.flushAll).toHaveBeenCalledOnce();
   });
 });

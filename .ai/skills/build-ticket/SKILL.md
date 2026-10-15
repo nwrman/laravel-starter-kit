@@ -21,7 +21,7 @@ anything that pins it:
 
 ```
 brief → build → look at it → impeccable → walk it → the human accepts → code review
-      → verify → TESTS → preflight → land → merge
+      → verify → TESTS → test review → preflight → land → merge
 ```
 
 Tests, the gate and the PR are downstream of every reviewer for one reason: a finding that
@@ -401,6 +401,10 @@ than re-running the whole pass.
 
 **Everything above settled the shape. This is where it gets pinned.**
 
+**Call the Skill tool with `test-quality` and with `testing-best-practices` before writing the
+first test.** The always-on "What a Good Test Is" guideline is the short form; those two are
+the checklists step 10b grades against, so write to them rather than discover them there.
+
 Everything the project's test rules ask for applies in full; it applies here rather than at
 the start:
 
@@ -415,6 +419,21 @@ the start:
 - **Assert what the page receives, not what the session holds.** `assertSessionHasErrors(...)`
   passes whether or not any page reads the bag.
 - An assertion that compares a value with itself proves nothing.
+
+## 10b · Tear the tests apart (fresh context)
+
+The implementer grades its own tests generously: they pass, coverage rises, and nothing asks
+what they would catch. So spawn a **subagent that did not write them**. Its instructions:
+call the Skill tool with `test-quality` first, then review **only the tests this branch adds
+or changes** (`git diff <base>...HEAD -- tests resources/js/**/*.test.*`) against the code
+they exercise — for each test, name the wrong implementation it catches, then check every
+item of the checklist. It reports findings in the skill's format and edits nothing.
+
+The implementer fixes confirmed findings; re-review. Max 3 rounds. Unresolved PLAUSIBLE
+findings go into the landing note at step 12 for the human's judgment.
+
+**After the code review, deliberately.** The shape is settled by now, so a finding here costs
+a test rewrite and nothing else — the cheapest point in the loop to make the tests honest.
 
 ## 11 · The green gate — `composer preflight`
 

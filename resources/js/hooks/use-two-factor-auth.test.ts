@@ -183,7 +183,7 @@ describe('useTwoFactorAuth', () => {
       await result.current.fetchQrCode();
     });
 
-    expect(result.current.errors.length).toBeGreaterThan(0);
+    expect(result.current.errors).toEqual(['Failed to fetch QR code']);
 
     act(() => {
       result.current.clearErrors();
