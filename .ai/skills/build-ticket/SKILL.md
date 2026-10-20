@@ -492,8 +492,11 @@ landing note its content, with `Closes #<N>`. A PR without a green preflight tab
 ready to open.
 
 **Integration mode** — merge the ticket branch into the integration branch and push it
-(never `main`): from a worktree, do it from a clean checkout of the integration branch, or
-let `/finish-ticket` do it; in place, the commits are already there. Post the landing note
+(never `main`), before teardown: from a worktree, do it from a clean checkout of the
+integration branch (a throwaway `git worktree add` of it works); in place, the commits are
+already there. Teardown publishes the ticket's TIA baseline only once its commits are on the
+integration branch, then deletes the cache, so a merge left for later costs the next ticket a
+full run. Post the landing note
 as a comment on the ticket, tick its acceptance criteria, and close it — closing is what
 moves the next tickets onto the frontier. No PR per ticket: the integration branch ships as
 one PR when the spec is done.

@@ -38,7 +38,9 @@ gh issue view <N> --json body,state,labels
   `git log --oneline origin/<integration-branch>..<branch>` (empty once landed). If it is
   not empty and the ticket is closed with its landing note, build-ticket left the merge to
   you: merge `<branch>` into `<integration-branch>` from a clean checkout of it, push the
-  integration branch (never `main`), and continue.
+  integration branch (never `main`), and continue. Teardown already ran, so this ticket
+  published no TIA baseline; say so in the report — the next ticket on that branch starts
+  with a full run.
 
 Then:
 
