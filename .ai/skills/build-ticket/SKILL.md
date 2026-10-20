@@ -113,9 +113,10 @@ nothing, and never runs a command aimed at another directory.
    narrate the loop you are not running.
 
 **In place instead?** When the human says "no worktree" or "in this session", do steps 1–4,
-then create the branch here (`git switch -c <branch> <base>`; in integration mode with the
-integration branch already checked out, work directly on it) and continue with Phase B in
-this session. No provisioning, no new tab. The site is the main checkout's own
+then create the branch here (`git switch -c <branch> <base>`, then
+`git config branch.<branch>.tiaBase <base>` so the TIA commands know its base; in integration
+mode with the integration branch already checked out, work directly on it) and continue with
+Phase B in this session. No provisioning, no new tab. The site is the main checkout's own
 `http://<project>.test`, and in place is one ticket at a time — parallel tickets need
 worktrees.
 
@@ -194,6 +195,17 @@ looking at different databases. A new worktree is not a clean checkout: Supacode
 untracked and ignored files across from main, `.env` included.
 
 In place, confirm only the branch: `git branch --show-current`.
+
+Then the TIA baseline, in both cases:
+
+```bash
+php artisan toolkit:tia inherit
+```
+
+It copies the baseline the last landed ticket published for this branch's base, or says the
+branch already has one. When neither exists it says so, and the first `composer test` does the
+full run. Either outcome is fine; what it prevents is a ticket diffing against a stale or empty
+baseline without anyone noticing.
 
 Record the ticket's rules while you are at it: `record-rule` writes to the checkout this
 session launched in, so a rule recorded during the ticket lands on the branch and ships
@@ -515,7 +527,7 @@ throws that trail away.
 to main and dies — it cannot delete the tree it is standing in.
 
 ```bash
-scripts/worktree-teardown.sh      # this worktree's Herd site, databases and TIA cache
+scripts/worktree-teardown.sh      # publishes the TIA baseline; removes site, databases, TIA cache
 scripts/handoff-to-main.sh <N>    # opens /finish-ticket in a main-checkout session
 ```
 
@@ -530,8 +542,9 @@ session dies mid-sentence when it does**, which is fine and expected. Nothing yo
 already written to GitHub survives, which is why the account lives in the landing note: that
 is where `/finish-ticket` reads it.
 
-**In place**, there is nothing to tear down: stop the dev server if you started one, switch
-back to the base branch after the merge, and run `scripts/refresh-main.sh`.
+**In place**, there is nothing to tear down: stop the dev server if you started one, publish the
+ticket's TIA baseline for the next ticket on its base (`php artisan toolkit:tia publish --base=<base>`,
+still on the ticket's branch), switch back to the base branch, and run `scripts/refresh-main.sh`.
 
 ### If the ticket stalls instead
 

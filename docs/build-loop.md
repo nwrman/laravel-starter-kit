@@ -14,12 +14,12 @@ in GitHub Issues.
 | [`.ai/skills/build-ticket/SKILL.md`](../.ai/skills/build-ticket/SKILL.md) | The per-ticket loop. `/build-ticket 33`. |
 | [`.ai/skills/finish-ticket/SKILL.md`](../.ai/skills/finish-ticket/SKILL.md) | The cleanup after a ticket lands, run in the main checkout. Spawned for you. |
 | [`.ai/skills/build-ticket/reference/spec-and-tickets.md`](../.ai/skills/build-ticket/reference/spec-and-tickets.md) | How to write the spec issue and the tickets it fans out into. |
-| [`scripts/start-ticket.sh`](../scripts/start-ticket.sh) | Creates a ticket's worktree and opens its session there. |
-| [`scripts/worktree-setup.sh`](../scripts/worktree-setup.sh) | Provisions a worktree: own Herd site, own database, cloned build caches, warm TIA cache. |
-| [`scripts/worktree-teardown.sh`](../scripts/worktree-teardown.sh) | Removes the site, databases and TIA cache after the ticket lands. |
+| [`scripts/start-ticket.sh`](../scripts/start-ticket.sh) | Fast-forwards the base, creates a ticket's worktree and opens its session there. |
+| [`scripts/worktree-setup.sh`](../scripts/worktree-setup.sh) | Provisions a worktree: own Herd site, own database, cloned build caches, the base's TIA baseline. |
+| [`scripts/worktree-teardown.sh`](../scripts/worktree-teardown.sh) | Publishes the ticket's TIA baseline, then removes the site, databases and TIA cache after the ticket lands. |
 | [`scripts/handoff-to-main.sh`](../scripts/handoff-to-main.sh) | Hands the end of a ticket to `/finish-ticket` in the main checkout. |
-| [`scripts/refresh-main.sh`](../scripts/refresh-main.sh) | Brings the main checkout back to the standing latest and re-pins its TIA baseline. |
-| [`scripts/worktree-names.sh`](../scripts/worktree-names.sh), [`supacode-ids.sh`](../scripts/supacode-ids.sh), [`tia-helper.php`](../scripts/tia-helper.php) | Shared helpers the scripts source. |
+| [`scripts/refresh-main.sh`](../scripts/refresh-main.sh) | Brings the main checkout back to the standing latest. |
+| [`scripts/worktree-names.sh`](../scripts/worktree-names.sh), [`supacode-ids.sh`](../scripts/supacode-ids.sh) | Shared helpers the scripts source. |
 
 Why it exists and what was rejected: [ADR 0012](adr/0012-multi-agent-build-loop.md); why
 the loop now runs in two sessions and pins tests last: [ADR 0014](adr/0014-build-loop-two-sessions-shape-before-tests.md).
@@ -185,8 +185,10 @@ Idempotent — safe to re-run. It:
 3. Creates the app database (and a test database, on server engines).
 4. Writes a per-worktree `.env.testing` — **non-sqlite projects only**.
 5. Links the Herd site and runs a first `bun run build`.
-6. Copies main's TIA cache in, so the first `composer preflight` replays instead of
-   running the whole suite.
+6. Inherits the TIA baseline the last landed ticket published for its base
+   (`php artisan toolkit:tia inherit`), so the first `composer test` and the final
+   `composer preflight` replay only what the ticket changes. With none on file, the first
+   `composer test` does the full run; nothing is recorded during setup.
 
 ### Naming
 
@@ -235,7 +237,7 @@ Anything else aborts with a message telling you to add a branch to both scripts.
 Nothing for you to type. The ticket's session runs, inside its worktree:
 
 ```bash
-scripts/worktree-teardown.sh      # site, every database it owns (parallel test copies too), TIA cache
+scripts/worktree-teardown.sh      # publishes its TIA baseline; site, every database (parallel copies too), TIA cache
 scripts/handoff-to-main.sh <N>    # opens /finish-ticket in the main checkout
 ```
 
@@ -245,8 +247,8 @@ remote branch, runs `scripts/refresh-main.sh`, and closes the ticket with the ac
 the landing note. It finishes by naming the tickets that just became unblocked.
 
 `refresh-main.sh` pulls, installs, migrates and builds, so the main checkout's site stays
-the standing latest — and it re-pins main's TIA baseline to HEAD, so the next worktree diffs
-against main rather than re-running tests for work already merged. It migrates but never
+the standing latest. It runs no tests: the TIA baseline the next ticket needs was already
+published by this ticket's teardown (ADR 0015). It migrates but never
 re-seeds: if a ticket ships new seed data, its handoff names the command that writes it.
 
 ## Running several tickets at once

@@ -27,38 +27,8 @@ if [ -n "$CONNECTION" ] && [ "$CONNECTION" != "sqlite" ] && [ ! -f .env.testing 
   echo "✓ wrote .env.testing (main checkout) — create its database if it does not exist yet"
 fi
 
-# Keep main's TIA graph warm AND pinned to HEAD. Every new worktree copies it,
-# and the sha it carries is the baseline those worktrees diff against.
-#
-# Two reasons to re-record:
-#
-#  1. The fingerprint is stale — a changed composer.lock, phpunit.xml, vite
-#     config or bun.lock. Pest invalidates the graph itself on these.
-#
-#  2. The baseline sha has fallen behind HEAD. Pest has every branch read the
-#     default branch's baseline, so a worktree cut from main diffs its working
-#     tree against that sha, not against the commit it branched from. Left
-#     behind, every ticket opens by re-running tests for work that already
-#     merged — measured in a descendant: 32 commits back, 185 affected test
-#     files on a tree that had changed nothing.
-#
-# Re-pin here, never by re-stamping the sha in a worktree: Pest replays cached
-# results for tests it skips, so a sha advanced without a run that re-measured
-# would report green from the old measurement.
-#
-# A coverage run cannot record the graph, so this is a plain TIA run:
-# composer test:fast, not composer preflight.
-BRANCH="$(git branch --show-current)"
-PINNED="$(php scripts/tia-helper.php sha "$(pwd)" "$BRANCH" 2>/dev/null || true)"
-if ! php scripts/tia-helper.php valid "$(pwd)" 2>/dev/null; then
-  echo "→ recording main's TIA graph (stale or missing; new worktrees copy this)"
-  composer test:fast
-elif [ "$PINNED" != "$(git rev-parse HEAD)" ]; then
-  echo "→ re-pinning main's TIA baseline to $(git rev-parse --short HEAD) (was ${PINNED:0:7})"
-  echo "  so the next worktree diffs against main, not against work already merged"
-  composer test:fast
-else
-  echo "✓ TIA graph is current"
-fi
+# No TIA run here. A new ticket inherits the TIA baseline the last ticket that
+# landed on its base published at teardown, so re-recording main would be a
+# full run nobody reads. See docs/adr/0015.
 
 echo "✓ $(basename "$MAIN").test is at $(git rev-parse --short HEAD)"
