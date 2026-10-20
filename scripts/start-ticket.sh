@@ -72,6 +72,50 @@ existing_worktree_path() {
   return 1
 }
 
+# Cut the ticket from the latest base, not from whatever the local branch last
+# saw. An integration branch only moves locally when something pulls it, so an
+# earlier ticket merged and pushed from another checkout would otherwise be
+# missing here — and the TIA baseline published for that base, which already
+# contains it, would sit outside the new branch's history and be ignored.
+# Fast-forward only: a base that has diverged from origin needs a human.
+sync_base() {
+  if ! git fetch --quiet origin "$BASE" 2>/dev/null; then
+    echo "⚠ could not fetch $BASE from origin — cutting from the local $BASE"
+    return 0
+  fi
+
+  if ! git show-ref --verify --quiet "refs/heads/$BASE"; then
+    git branch --quiet --track "$BASE" "origin/$BASE"
+    return 0
+  fi
+
+  # Up to date, or ahead with commits not pushed yet: the local branch is newest.
+  if git merge-base --is-ancestor "origin/$BASE" "$BASE"; then
+    return 0
+  fi
+
+  if ! git merge-base --is-ancestor "$BASE" "origin/$BASE"; then
+    echo "Local $BASE and origin/$BASE have diverged. Reconcile them, then start the ticket." >&2
+    exit 1
+  fi
+
+  # `fetch origin X:X` refuses to move a branch checked out here, hence the merge.
+  if [ "$(git branch --show-current)" = "$BASE" ]; then
+    git merge --quiet --ff-only "origin/$BASE"
+    echo "→ fast-forwarded $BASE to $(git rev-parse --short HEAD) (scripts/refresh-main.sh rebuilds main's site)"
+  else
+    git fetch --quiet origin "$BASE:$BASE"
+    echo "→ fast-forwarded $BASE to $(git rev-parse --short "$BASE")"
+  fi
+}
+
+# Which branch the ticket was cut from, for `php artisan toolkit:tia`: setup
+# inherits that branch's TIA baseline, teardown publishes back to it. Branch
+# config lives in the shared .git/config and goes when the branch is deleted.
+record_base() {
+  git config "branch.$BRANCH.tiaBase" "$BASE"
+}
+
 # The tab's first command provisions the tree, so this script never aims
 # anything at another directory. `&&` keeps Claude from starting on a
 # half-provisioned tree — the error stays on screen.
@@ -82,9 +126,10 @@ if ! supacode_available; then
     echo "→ reattaching to the existing worktree for t$TICKET ($WT_PATH)"
   else
     WT_PATH="$(dirname "$MAIN")/$(basename "$MAIN")-$NAME"
+    sync_base
     echo "→ creating worktree $WT_PATH on $BRANCH (from $BASE)"
-    git fetch --quiet origin "$BASE" 2>/dev/null || true
     git worktree add "$WT_PATH" -b "$BRANCH" "$BASE"
+    record_base
   fi
   echo
   echo "No Supacode session — open a new terminal and run:"
@@ -99,6 +144,7 @@ if WT_PATH="$(existing_worktree_path)"; then
   WT_ID="$(supacode_id_for_path "$WT_PATH")"
   echo "→ reattaching to the existing worktree for t$TICKET ($(basename "$WT_PATH"))"
 else
+  sync_base
   echo "→ creating worktree $NAME on $BRANCH (from $BASE)"
   # --repo is passed explicitly: its default, $SUPACODE_REPO_ID, goes stale and
   # has aimed a worktree at an unrelated repository. See scripts/supacode-ids.sh.
@@ -107,8 +153,8 @@ else
     --branch "$BRANCH" \
     --base "$BASE" \
     --name "$NAME" \
-    --fetch \
     --background)"
+  record_base
 fi
 
 if [ -z "$WT_ID" ]; then

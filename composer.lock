@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "289a4f121dd015738aa037c489543717",
+    "content-hash": "9eddfc0702eaee952d87113359585292",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -4772,16 +4772,16 @@
         },
         {
             "name": "nwrman/laravel-toolkit",
-            "version": "v0.3.0",
+            "version": "v0.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nwrman/laravel-toolkit.git",
-                "reference": "8e4e6c83dbed57bb2f80909d88e57b1c164caa2d"
+                "reference": "d0920377c816e976a207f0aacad7336a5a7d02a6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nwrman/laravel-toolkit/zipball/8e4e6c83dbed57bb2f80909d88e57b1c164caa2d",
-                "reference": "8e4e6c83dbed57bb2f80909d88e57b1c164caa2d",
+                "url": "https://api.github.com/repos/nwrman/laravel-toolkit/zipball/d0920377c816e976a207f0aacad7336a5a7d02a6",
+                "reference": "d0920377c816e976a207f0aacad7336a5a7d02a6",
                 "shasum": ""
             },
             "require": {
@@ -4838,9 +4838,9 @@
             ],
             "support": {
                 "issues": "https://github.com/nwrman/laravel-toolkit/issues",
-                "source": "https://github.com/nwrman/laravel-toolkit/tree/v0.3.0"
+                "source": "https://github.com/nwrman/laravel-toolkit/tree/v0.4.0"
             },
-            "time": "2026-10-15T19:31:37+00:00"
+            "time": "2026-10-20T01:58:09+00:00"
         },
         {
             "name": "openspout/openspout",
@@ -17428,7 +17428,6 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "nwrman/laravel-toolkit": 20,
         "roave/security-advisories": 20
     },
     "prefer-stable": true,

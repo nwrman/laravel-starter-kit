@@ -96,6 +96,7 @@ export default defineConfig({
       'package.json',
       'composer.json',
       '.ai/**',
+      '.claude/**',
       '.mcp.json',
       '.oxlintrc.json',
       '*.md',

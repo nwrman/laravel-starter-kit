@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Provision this git worktree as a self-contained dev environment:
-# its own database(s), its own Herd site, cloned build caches, a warm TIA cache.
+# its own database(s), its own Herd site, cloned build caches, the base branch's TIA baseline.
 #
 # Run from INSIDE the worktree root (the tab scripts/start-ticket.sh opens, or
 # by hand). Idempotent — safe to re-run.
@@ -252,53 +252,24 @@ if [ "$CONNECTION" != "sqlite" ]; then
   done
 fi
 
-# 5. Warm this worktree's TIA cache from main's. --------------------------------
-#
-# Pest keys the Test Impact Analysis cache by repository identity, read from
-# `<root>/.git/config` — and in a git worktree `.git` is a FILE, so the lookup
-# fails and the key falls back to the worktree's own path. Every ticket would
-# otherwise start with an empty graph, rebuild it from a full run, and throw it
-# away at teardown.
-#
-# Both files or neither: Pest re-records whenever the coverage cache is
-# missing, even with a valid graph on disk, so graph.json alone would leave
-# `composer preflight` running the whole suite regardless.
-warm_tia() {
-  local helper main_dir wt_dir
-
-  # MAIN's copy, by absolute path: a tree cut from an older main may not carry
-  # the helper, and with a relative path that failure reads exactly like
-  # "main has no graph".
-  helper="$MAIN/scripts/tia-helper.php"
-
-  if [ ! -f "$helper" ]; then
-    echo "⚠ $helper is missing — skipping the TIA warm." >&2
-    return 0
-  fi
-
-  # `valid` exits 1 for an absent or stale graph — an answer, not a failure.
-  if ! php "$helper" valid "$MAIN"; then
-    echo "⚠ main has no usable TIA graph — skipping the warm."
-    echo "  The first 'composer preflight' here will record one: slow, once."
-    echo "  Warm the source with: scripts/refresh-main.sh"
-    return 0
-  fi
-
-  main_dir="$(php "$helper" dir "$MAIN")"
-  wt_dir="$(php "$helper" dir "$WT_ROOT")"
-
-  mkdir -p "$wt_dir"
-  cp "$main_dir/graph.json" "$main_dir/coverage.bin.gz" "$wt_dir/"
-  echo "→ TIA warmed from main ($(du -sh "$wt_dir" | cut -f1 | tr -d ' \t'))"
-}
-
-# 6. Herd site + a first build. -----------------------------------------------
+# 5. Herd site + a first build. -----------------------------------------------
 if [ ! -e "$HOME/Library/Application Support/Herd/config/valet/Sites/$SITE" ]; then
   herd link "$SITE"
 fi
 bun run build
 
-# After composer install, so Pest's own classes are importable.
-warm_tia
+# 6. Inherit the base branch's TIA baseline. ----------------------------------
+#
+# The last ticket that landed on this branch's base published its final
+# preflight cache — a complete baseline at a commit already in this branch's
+# history. Inheriting it means the first `composer test` replays only what this
+# ticket changes, and preflight replays instead of re-recording. Nothing is
+# recorded here: with no usable baseline on file, the first `composer test`
+# does the full run. See docs/adr/0015.
+#
+# Pest keys the cache by the worktree's own path (`.git` is a file here), so
+# this tree starts with an empty one either way. Runs last: artisan needs
+# composer install and .env in place.
+php artisan toolkit:tia inherit
 
 echo "✓ ready: http://${SITE}.test"

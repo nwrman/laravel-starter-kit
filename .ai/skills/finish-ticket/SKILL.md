@@ -82,8 +82,8 @@ assume; check.
 scripts/refresh-main.sh
 ```
 
-The main checkout's site becomes the standing latest, and main's TIA baseline is
-re-pinned so the next worktree starts level with it.
+The main checkout's site becomes the standing latest. There is no TIA step: the ticket's
+teardown already published its baseline for the next ticket on its base.
 
 ## 5 · Close the ticket with the account from the landing note
 

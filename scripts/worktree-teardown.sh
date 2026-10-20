@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Tear down what worktree-setup.sh provisioned for THIS worktree: the Herd site,
-# on server databases every database it owns, and its TIA cache. Run from
+# on server databases every database it owns, and its TIA cache — after
+# publishing the ticket's TIA baseline for the next ticket on its base. Run from
 # inside the worktree AFTER its ticket landed, BEFORE deleting the worktree.
 #
 # Deleting the worktree is deliberately not done here — removing the tree you
@@ -90,14 +91,23 @@ case "$CONNECTION" in
     ;;
 esac
 
-# The TIA cache lives outside the repo, in ~/.pest/tia/, keyed by this
+# Hand this ticket's final TIA baseline to its base branch before the cache
+# goes, so the next ticket cut from it inherits instead of re-recording. The
+# toolkit publishes only a complete baseline whose commit is merged into the
+# base, so a stalled ticket publishes nothing. See docs/adr/0015.
+php artisan toolkit:tia publish || echo "⚠ could not publish the TIA baseline — the next ticket records its own" >&2
+
+# The cache itself lives outside the repo, in ~/.pest/tia/, keyed by this
 # worktree's own path. Nothing will ever read it once the tree is gone. Ask
-# Pest for the directory rather than reconstructing the key.
-TIA_DIR="$(php "$WT_ROOT/scripts/tia-helper.php" dir "$WT_ROOT" 2>/dev/null || true)"
-if [ -n "$TIA_DIR" ] && [ -d "$TIA_DIR" ]; then
-  rm -rf "$TIA_DIR"
-  echo "✓ removed TIA cache: $TIA_DIR"
-fi
+# Pest for the directory rather than reconstructing the key; PAO_DISABLE keeps
+# laravel/pao from wrapping the path in JSON when an agent runs this.
+TIA_DIR="$(PAO_DISABLE=1 vendor/bin/pest --baseline 2>/dev/null | tail -1 || true)"
+case "$TIA_DIR" in
+  "$HOME"/.pest/tia/?*)
+    rm -rf "$TIA_DIR"
+    echo "✓ removed TIA cache: $TIA_DIR"
+    ;;
+esac
 
 if [ -n "$FAILED" ]; then
   echo "⚠ could not drop:$FAILED — something still holds them open." >&2
