@@ -24,6 +24,7 @@ until chosen and built.
 | [0010](0010-upstream-sync-curated-review.md) | Upstream sync: scheduled curated review, not maestro | Accepted |
 | [0011](0011-cloud-provisioning-distribution.md) | Laravel Cloud provisioning: toolkit stub plus a wizard skill | Accepted |
 | [0012](0012-multi-agent-build-loop.md) | Multi-agent build loop: worktrees, the issue tracker as state machine | Accepted |
-| [0013](0013-sqlite-default-postgres-shipped.md) | sqlite is the default test driver, and the Postgres path ships complete | Accepted |
+| [0013](0013-sqlite-default-postgres-shipped.md) | sqlite is the default test driver, and the Postgres path ships complete | Superseded by 0016 |
 | [0014](0014-build-loop-two-sessions-shape-before-tests.md) | Build loop: two sessions per ticket, and the shape settles before the tests | Accepted (amends 0012) |
 | [0015](0015-tia-baselines-flow-from-landed-tickets.md) | TIA baselines flow from landed tickets, and the coverage gate stays unfiltered | Accepted (amends 0014) |
+| [0016](0016-postgres-is-the-only-database.md) | Postgres is the only database | Accepted (supersedes 0013) |

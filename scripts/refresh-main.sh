@@ -18,13 +18,15 @@ bun install --silent
 php artisan migrate --force
 bun run build
 
-# On a server database the main checkout needs its own .env.testing like any
-# worktree, or the suite resolves the development database. Sqlite projects run
-# on phpunit's forced :memory: and need none.
-CONNECTION="$(grep -E '^[[:space:]]*DB_CONNECTION=' .env 2>/dev/null | tail -1 | sed 's/^[^=]*=//' || true)"
-if [ -n "$CONNECTION" ] && [ "$CONNECTION" != "sqlite" ] && [ ! -f .env.testing ] && [ -f .env.testing.example ]; then
-  cp .env.testing.example .env.testing
-  echo "✓ wrote .env.testing (main checkout) — create its database if it does not exist yet"
+# The main checkout needs its own .env.testing like any worktree, or the suite
+# resolves the development database (Tests\TestCase refuses to run then). Write
+# it once, naming <app database>_test, and let migrate create that database.
+if [ ! -f .env.testing ]; then
+  APP_DB="$(grep -E '^DB_DATABASE=' .env | tail -1 | cut -d= -f2- || true)"
+  [ -n "$APP_DB" ] || { echo "✗ .env names no DB_DATABASE — cannot name main's test database" >&2; exit 1; }
+  sed "s|^DB_DATABASE=.*|DB_DATABASE=${APP_DB}_test|" .env.testing.example > .env.testing
+  php artisan migrate --env=testing --force
+  echo "✓ wrote .env.testing (main checkout) for ${APP_DB}_test"
 fi
 
 # No TIA run here. A new ticket inherits the TIA baseline the last ticket that

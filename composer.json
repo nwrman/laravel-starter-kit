@@ -81,13 +81,16 @@
         ],
         "post-create-project-cmd": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
+            "@php -r \"file_exists('.env.testing') || copy('.env.testing.example', '.env.testing');\"",
+            "@php -r '$db = strtolower(preg_replace(\"/[^A-Za-z0-9]+/\", \"_\", basename(getcwd()))); foreach ([\".env\" => $db, \".env.testing\" => $db.\"_test\"] as $file => $name) { file_put_contents($file, preg_replace(\"/^DB_DATABASE=.*$/m\", \"DB_DATABASE=\".$name, file_get_contents($file))); }'",
             "@php artisan key:generate --ansi",
-            "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
-            "@php artisan migrate --seed --graceful --ansi",
+            "@php artisan migrate --seed --force --graceful --ansi",
+            "@php artisan migrate --env=testing --force --graceful --ansi",
+            "@php artisan migrate:status --env=testing > /dev/null 2>&1 || php -r \"echo PHP_EOL . chr(27) . '[33m  Postgres was not reachable. Start it (DBngin), then: php artisan migrate --seed && php artisan migrate --env=testing' . chr(27) . '[0m' . PHP_EOL;\"",
             "git init --quiet",
             "git add .",
             "git commit -m \"Initial commit\" --quiet",
-            "@php -r \"echo PHP_EOL . '\\033[32m  Git repository initialized with initial commit.\\033[0m' . PHP_EOL;\""
+            "@php -r \"echo PHP_EOL . chr(27) . '[32m  Git repository initialized with initial commit.' . chr(27) . '[0m' . PHP_EOL;\""
         ],
         "update:requirements": [
             "composer bump",
@@ -108,15 +111,15 @@
         "test:type-coverage": "pest --type-coverage --min=100",
         "test:unit": [
             "Composer\\Config::disableProcessTimeout",
-            "@php artisan toolkit:report --no-interaction --suite=unit"
+            "@php artisan toolkit:report --no-interaction --suite=unit --env=testing"
         ],
         "test:feature": [
             "Composer\\Config::disableProcessTimeout",
-            "@php artisan toolkit:report --no-interaction --suite=feature"
+            "@php artisan toolkit:report --no-interaction --suite=feature --env=testing"
         ],
         "test:browser": [
             "Composer\\Config::disableProcessTimeout",
-            "@php artisan toolkit:report --no-interaction --suite=browser"
+            "@php artisan toolkit:report --no-interaction --suite=browser --env=testing"
         ],
         "test:fast": [
             "Composer\\Config::disableProcessTimeout",
@@ -124,7 +127,7 @@
         ],
         "test:frontend": [
             "Composer\\Config::disableProcessTimeout",
-            "@php artisan toolkit:report --no-interaction --suite=frontend"
+            "@php artisan toolkit:report --no-interaction --suite=frontend --env=testing"
         ],
         "test:lint": [
             "pint --parallel --test",
@@ -137,7 +140,7 @@
         ],
         "test": [
             "Composer\\Config::disableProcessTimeout",
-            "@php artisan toolkit:report --no-interaction"
+            "@php artisan toolkit:report --no-interaction --env=testing"
         ],
         "test:ci": [
             "@test:lint",
@@ -148,12 +151,12 @@
         ],
         "test:report": [
             "Composer\\Config::disableProcessTimeout",
-            "@php artisan toolkit:report"
+            "@php artisan toolkit:report --env=testing"
         ],
-        "test:retry": "@php artisan toolkit:retry",
+        "test:retry": "@php artisan toolkit:retry --env=testing",
         "preflight": [
             "Composer\\Config::disableProcessTimeout",
-            "@php artisan toolkit:preflight"
+            "@php artisan toolkit:preflight --env=testing"
         ],
         "optimize": [
             "@php artisan optimize",

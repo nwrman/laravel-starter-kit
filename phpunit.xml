@@ -38,8 +38,11 @@
         <env name="BCRYPT_ROUNDS" value="4" force="true"/>
         <env name="BROADCAST_CONNECTION" value="null" force="true"/>
         <env name="CACHE_STORE" value="array" force="true"/>
-        <env name="DB_CONNECTION" value="sqlite" force="true"/>
-        <env name="DB_DATABASE" value=":memory:" force="true"/>
+        <!-- Postgres, forced (docs/adr/0016). DB_DATABASE is deliberately NOT forced: it comes
+             from this checkout's .env.testing, so parallel worktrees never share a test
+             database. Do not "fix" that by pinning it. Tests\TestCase refuses to run unless
+             the name it resolves to ends in _test. -->
+        <env name="DB_CONNECTION" value="pgsql" force="true"/>
         <env name="MAIL_MAILER" value="array" force="true"/>
         <env name="PULSE_ENABLED" value="false" force="true"/>
         <env name="QUEUE_CONNECTION" value="sync" force="true"/>

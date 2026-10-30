@@ -5,6 +5,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | Applies to | Rule file |
 | --- | --- |
 | phpunit.xml, ** | .ai/rules/general.md |
+| phpunit.xml, .env.example, .env.testing.example, herd.yml, tests/TestCase.php, .github/workflows/** | .ai/rules/database.md |
 | patches/** | .ai/rules/patches.md |
 | scripts/** | .ai/rules/scripts.md |
 | tests/Pest.php | .ai/rules/tests.md |

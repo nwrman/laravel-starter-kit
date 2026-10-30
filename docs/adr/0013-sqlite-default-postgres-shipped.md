@@ -4,7 +4,11 @@ Date: 2026-08-13
 
 ## Status
 
-Accepted
+Superseded by [0016](0016-postgres-is-the-only-database.md).
+
+Two notes for readers of the text below: the worktree provisioning it attributes to
+`worktree-setup.sh` now lives in `herd.yml` (ADR 0014, ADR 0015), and ADR 0012's "the test
+database is phpunit's forced `:memory:`" no longer holds — 0016 says what replaced it.
 
 ## Context
 

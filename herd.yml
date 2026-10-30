@@ -1,7 +1,11 @@
 # How a Build ticket's worktree is set up and torn down. The factory's build-ticket creates the
 # worktree with `git worktree add` and runs `herd workspace` inside it; Herd serves it at
 # https://<branch, with / as ->.<site>.test, copies .env, vendor, node_modules and the built assets from the
-# main checkout, gives it its own database and migrates an empty one.
+# main checkout, gives it its own Postgres database and migrates an empty one.
+#
+# Herd falls back to SHARING the main checkout's database when it cannot create one, with only a
+# printed note. after_create refuses that first: a worktree that seeds or tests against main's
+# database destroys work. Then it writes .env.testing for <worktree db>_test and creates it.
 #
 # Herd runs a hook line by line and carries on after a failing one without a word, so each hook is
 # ONE line: a strict bash script whose trace goes to a log. after_create's last command leaves the
@@ -11,13 +15,24 @@ workspaces:
   hooks:
     after_create: >-
       bash -c 'set -eux;
+      parent_db="$(grep -E "^DB_DATABASE=" "$HERD_WORKSPACE_PARENT_PATH/.env" | cut -d= -f2-)";
+      test -n "$HERD_WORKSPACE_DATABASE";
+      test "$HERD_WORKSPACE_DATABASE" != "$parent_db";
+      grep -qx "DB_DATABASE=$HERD_WORKSPACE_DATABASE" .env;
       composer install --no-interaction --quiet;
       bun install --silent;
       php artisan storage:link --quiet || true;
+      sed "s|^DB_DATABASE=.*|DB_DATABASE=${HERD_WORKSPACE_DATABASE}_test|" .env.testing.example > .env.testing;
+      php artisan migrate --env=testing --force;
       if [ "$HERD_WORKSPACE_DATABASE_MODE" = empty ]; then php artisan db:seed --force; fi;
       php artisan toolkit:tia inherit;
       touch "$(git rev-parse --absolute-git-dir)/factory-setup-done"'
       > storage/logs/herd-after-create.log 2>&1
     before_delete: >-
-      bash -c 'set -ux; php artisan toolkit:tia publish || true'
+      bash -c 'set -ux; php artisan toolkit:tia publish || true;
+      env_testing() { grep -E "^$1=" .env.testing | cut -d= -f2-; };
+      test_db="$(env_testing DB_DATABASE)";
+      case "$test_db" in *_test) ;; *) echo "refusing to drop $test_db: not a *_test database"; exit 0;; esac;
+      export PGHOST="$(env_testing DB_HOST)" PGPORT="$(env_testing DB_PORT)" PGUSER="$(env_testing DB_USERNAME)" PGPASSWORD="$(env_testing DB_PASSWORD)";
+      for db in $(psql -d postgres -Atc "SELECT datname FROM pg_database WHERE datname = \$\$${test_db}\$\$ OR starts_with(datname, \$\$${test_db}_test_\$\$)"); do dropdb --force "$db"; done'
       > /tmp/herd-before-delete-$HERD_WORKSPACE_HOST.log 2>&1

@@ -34,7 +34,8 @@ glossary): [`docs/agents/`](agents/).
 - **Herdr** — the terminal every session runs in; a ticket's worktree session opens in its
   own tab, and the factory reads live session state from it.
 - **`gh`** — tickets and PRs live in GitHub Issues.
-- A **database server** if the project is on Postgres or MySQL. Sqlite projects need nothing.
+- **Postgres** (DBngin, on its defaults) — every checkout and worktree has its own database
+  and its own `_test` database (ADR 0016).
 
 Once per repo:
 
@@ -200,8 +201,9 @@ both.
    login saved once is offered on every ticket, while each session cookie stays on its own
    host), copies `.env`, `vendor`, `node_modules` and the built assets from main, rewrites
    `APP_URL`, and gives it its own database: empty and migrated, or a copy of main's.
-3. The Product's `herd.yml` `after_create` does the rest — seed a fresh database, the test
-   database on server engines, the TIA baseline the last landed ticket published for the base
+3. The Product's `herd.yml` `after_create` does the rest — refuse a worktree Herd left on
+   main's database, the `_test` database and its `.env.testing`, seed a fresh database, the
+   TIA baseline the last landed ticket published for the base
    — and leaves a marker. **Herd runs a failing hook line and carries on without a word**, so
    the marker is the only proof setup finished: without it the ticket does not start, and the
    failing command is printed.
@@ -211,29 +213,20 @@ A worktree that already exists for the branch is reattached: only the tab opens 
 
 ### A Product's `herd.yml`
 
-```yaml
-workspaces:
-  database: empty
-  hooks:
-    after_create: >-
-      bash -c 'set -eux;
-      composer install --no-interaction --quiet;
-      bun install --silent;
-      if [ "$HERD_WORKSPACE_DATABASE_MODE" = empty ]; then php artisan db:seed --force; fi;
-      php artisan toolkit:tia inherit;
-      touch "$(git rev-parse --absolute-git-dir)/factory-setup-done"'
-      > storage/logs/herd-after-create.log 2>&1
-    before_delete: >-
-      bash -c 'set -ux; php artisan toolkit:tia publish || true'
-      > /tmp/herd-before-delete-$HERD_WORKSPACE_HOST.log 2>&1
-```
+The starter's is [`herd.yml`](../herd.yml); read it rather than a copy here. Each hook is **one
+line**, a strict bash script with its trace in a log, because of how Herd treats a failing line.
 
-Each hook is **one line** — a strict bash script with its trace in a log — because of how Herd
-treats a failing line. That is this starter's; a Postgres Product's also creates
-`<db>_test` and writes a `.env.testing` pointing at it in `after_create`, and drops every
-`<db>_test*` (parallel copies included) in `before_delete`. Herd drops the app database itself.
+- `after_create` fails first if Herd did not give the worktree its own database. When Herd
+  cannot create one it quietly shares main's, and a worktree seeding or testing against main's
+  database destroys work. It then writes `.env.testing` for `<worktree db>_test`, creates it
+  with `migrate --env=testing`, seeds a fresh database, inherits the TIA baseline and leaves
+  the marker.
+- `before_delete` publishes the TIA baseline and drops the `_test` database and its
+  `--parallel` copies. Herd drops the app database itself.
+
 The hooks see `HERD_WORKSPACE_DATABASE`, `HERD_WORKSPACE_DATABASE_MODE`, `HERD_WORKSPACE_BRANCH`,
-`HERD_WORKSPACE_PATH` and `HERD_WORKSPACE_PARENT_PATH`.
+`HERD_WORKSPACE_PATH` and `HERD_WORKSPACE_PARENT_PATH`. [`.ai/rules/database.md`](../.ai/rules/database.md)
+has the whole database arrangement.
 
 ## After the ticket lands
 
