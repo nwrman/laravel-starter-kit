@@ -1,0 +1,23 @@
+# How a Build ticket's worktree is set up and torn down. The factory's build-ticket creates the
+# worktree with `git worktree add` and runs `herd workspace` inside it; Herd serves it at
+# https://<branch>.<site>.test, copies .env, vendor, node_modules and the built assets from the
+# main checkout, gives it its own database and migrates an empty one.
+#
+# Herd runs a hook line by line and carries on after a failing one without a word, so each hook is
+# ONE line: a strict bash script whose trace goes to a log. after_create's last command leaves the
+# marker the factory checks before the ticket's session starts.
+workspaces:
+  database: empty
+  hooks:
+    after_create: >-
+      bash -c 'set -eux;
+      composer install --no-interaction --quiet;
+      bun install --silent;
+      php artisan storage:link --quiet || true;
+      if [ "$HERD_WORKSPACE_DATABASE_MODE" = empty ]; then php artisan db:seed --force; fi;
+      php artisan toolkit:tia inherit;
+      touch "$(git rev-parse --absolute-git-dir)/factory-setup-done"'
+      > storage/logs/herd-after-create.log 2>&1
+    before_delete: >-
+      bash -c 'set -ux; php artisan toolkit:tia publish || true'
+      > /tmp/herd-before-delete-$HERD_WORKSPACE_HOST.log 2>&1
