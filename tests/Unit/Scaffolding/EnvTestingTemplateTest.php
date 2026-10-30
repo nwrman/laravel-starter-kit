@@ -18,9 +18,9 @@ it('carries every key the CI workflow rewrites in .env.testing', function (): vo
     foreach (glob($root.'/.github/workflows/*.{yml,yaml}', GLOB_BRACE) ?: [] as $path) {
         foreach (Yaml::parseFile($path)['jobs'] ?? [] as $job) {
             foreach ($job['steps'] ?? [] as $step) {
-                preg_match_all('/s\|\^([A-Z0-9_]+)=.*\.env\.testing$/m', (string) ($step['run'] ?? ''), $matches);
+                preg_match_all('/s(.)\^([A-Z0-9_]+)=.*?\1.*\.env\.testing$/m', (string) ($step['run'] ?? ''), $matches);
 
-                array_push($targeted, ...$matches[1]);
+                array_push($targeted, ...$matches[2]);
             }
         }
     }

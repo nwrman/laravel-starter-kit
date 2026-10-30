@@ -14,7 +14,7 @@ use Symfony\Component\Process\Process;
  * broken guard cannot touch data.
  */
 
-it('refuses to boot the suite against a database not named *_test', function (string $key, string $value): void {
+it('refuses to boot the suite against a database not named *_test', function (string $key, string $value, string $database): void {
     $process = new Process(
         [PHP_BINARY, 'vendor/bin/pest', '--filter=EnvTestingTemplateTest'],
         dirname(__DIR__, 3),
@@ -33,8 +33,9 @@ it('refuses to boot the suite against a database not named *_test', function (st
     $process->run();
 
     expect($process->isSuccessful())->toBeFalse()
-        ->and($process->getOutput())->toContain("Refusing to run the suite against 'acme_dev'");
+        ->and($process->getOutput())->toContain("Refusing to run the suite against '{$database}'");
 })->with([
-    'DB_DATABASE names it' => ['DB_DATABASE', 'acme_dev'],
-    'a DB_URL overrides DB_DATABASE' => ['DB_URL', 'pgsql://postgres@127.0.0.1:5432/acme_dev'],
+    'DB_DATABASE names it' => ['DB_DATABASE', 'acme_dev', 'acme_dev'],
+    '_test inside the name is not the suffix' => ['DB_DATABASE', 'acme_test_copy', 'acme_test_copy'],
+    'a DB_URL overrides DB_DATABASE' => ['DB_URL', 'pgsql://postgres@127.0.0.1:5432/acme_dev', 'acme_dev'],
 ]);
