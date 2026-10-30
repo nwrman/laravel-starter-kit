@@ -46,6 +46,7 @@ export function DataTableColumnHeader<TData extends RowData, TValue extends Cell
             size="sm"
             className={cn(
               '-ml-2 h-8 px-2 text-xs font-medium tracking-wide text-muted-foreground uppercase',
+              sorted && 'text-foreground',
               className,
             )}
             onClick={() => column.toggleSorting(sorted === 'asc')}
