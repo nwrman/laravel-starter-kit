@@ -1,5 +1,7 @@
 import type { RowData } from '@tanstack/react-table';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import * as React from 'react';
+import { flushSync } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import type { DataTableInstance } from './features';
 
@@ -18,14 +20,28 @@ export function DataTablePagination<TData extends RowData>({
   const selectedCount = table.getFilteredSelectedRowModel().rows.length;
   // The size picker stays while a smaller size could still split the rows, so choosing a
   // size that fits everything on one page never takes away the way back.
+  const pageIndex = table.state.pagination.pageIndex;
+  const previousRef = React.useRef<HTMLButtonElement>(null);
+  const nextRef = React.useRef<HTMLButtonElement>(null);
+  // A page button disables itself at the end it moves to, and a disabled button drops
+  // keyboard focus to <body>. Commit the move, then hand focus to the button pointing
+  // the other way, which is enabled by then.
+  const goTo = (target: number) => {
+    flushSync(() => table.setPageIndex(target));
+    if (target === 0) {
+      nextRef.current?.focus();
+    } else if (target === pageCount - 1) {
+      previousRef.current?.focus();
+    }
+  };
   const showPageSize = totalRows > Math.min(...pageSizeOptions);
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-xs text-muted-foreground">
       <div className="whitespace-nowrap">
         {selectedCount > 0
-          ? `${selectedCount} de ${totalRows} seleccionados`
-          : `${totalRows} resultados`}
+          ? `${selectedCount} de ${totalRows} ${selectedCount === 1 ? 'seleccionado' : 'seleccionados'}`
+          : `${totalRows} ${totalRows === 1 ? 'resultado' : 'resultados'}`}
       </div>
       <div className="flex items-center gap-4">
         {showPageSize ? (
@@ -48,7 +64,7 @@ export function DataTablePagination<TData extends RowData>({
         {pageCount > 1 ? (
           <>
             <span className="whitespace-nowrap">
-              Página {table.state.pagination.pageIndex + 1} de {pageCount}
+              Página {pageIndex + 1} de {pageCount}
             </span>
             <div className="flex items-center gap-1">
               <Button
@@ -56,7 +72,7 @@ export function DataTablePagination<TData extends RowData>({
                 size="icon-sm"
                 className="hidden sm:inline-flex"
                 aria-label="Primera página"
-                onClick={() => table.setPageIndex(0)}
+                onClick={() => goTo(0)}
                 disabled={!table.getCanPreviousPage()}
               >
                 <ChevronsLeft className="size-4" />
@@ -64,8 +80,9 @@ export function DataTablePagination<TData extends RowData>({
               <Button
                 variant="outline"
                 size="icon-sm"
+                ref={previousRef}
                 aria-label="Página anterior"
-                onClick={() => table.previousPage()}
+                onClick={() => goTo(pageIndex - 1)}
                 disabled={!table.getCanPreviousPage()}
               >
                 <ChevronLeft className="size-4" />
@@ -73,8 +90,9 @@ export function DataTablePagination<TData extends RowData>({
               <Button
                 variant="outline"
                 size="icon-sm"
+                ref={nextRef}
                 aria-label="Página siguiente"
-                onClick={() => table.nextPage()}
+                onClick={() => goTo(pageIndex + 1)}
                 disabled={!table.getCanNextPage()}
               >
                 <ChevronRight className="size-4" />
@@ -84,7 +102,7 @@ export function DataTablePagination<TData extends RowData>({
                 size="icon-sm"
                 className="hidden sm:inline-flex"
                 aria-label="Última página"
-                onClick={() => table.setPageIndex(pageCount - 1)}
+                onClick={() => goTo(pageCount - 1)}
                 disabled={!table.getCanNextPage()}
               >
                 <ChevronsRight className="size-4" />

@@ -23,6 +23,7 @@ export function DataTableToolbar<TData extends RowData>({
   className,
 }: Props<TData>) {
   const [searchValue, setSearchValue] = React.useState('');
+  const searchRef = React.useRef<HTMLInputElement>(null);
   const isFiltered = table.state.columnFilters.length > 0 || searchValue.length > 0;
 
   const handleSearch = (value: string) => {
@@ -41,6 +42,8 @@ export function DataTableToolbar<TData extends RowData>({
     setSearchValue('');
     table.resetColumnFilters();
     table.setGlobalFilter('');
+    // The button unmounts once nothing is filtered; keep keyboard focus in the toolbar.
+    searchRef.current?.focus();
   };
 
   return (
@@ -49,6 +52,7 @@ export function DataTableToolbar<TData extends RowData>({
         <div className="relative">
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
+            ref={searchRef}
             value={searchValue}
             onChange={(event) => handleSearch(event.target.value)}
             placeholder={searchPlaceholder}
