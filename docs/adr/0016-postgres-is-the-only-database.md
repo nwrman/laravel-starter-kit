@@ -53,8 +53,8 @@ writing every migration portably or running a second CI lane, which 0013 already
 
 - **A fresh clone needs Postgres running** before `composer test` passes. With DBngin on the
   defaults (`127.0.0.1:5432`, user `postgres`), `create-project` does the rest.
-- **The suite now proves driver-specific behaviour.** Accent folding, `timestamptz` and
-  functional indexes are tested where they run.
+- **The suite can now prove driver-specific behaviour.** The starter uses none yet; an app
+  that relies on accent folding, `timestamptz` or functional indexes tests them where they run.
 - **Tests are slower than `:memory:`.** Accepted: the descendants already pay it and the
   suite runs through TIA.
 - **ADR 0012's free per-worktree database is gone.** It relied on sqlite making the database
