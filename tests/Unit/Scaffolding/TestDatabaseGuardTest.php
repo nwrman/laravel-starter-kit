@@ -18,7 +18,16 @@ it('refuses to boot the suite against a database not named *_test', function (st
     $process = new Process(
         [PHP_BINARY, 'vendor/bin/pest', '--filter=EnvTestingTemplateTest'],
         dirname(__DIR__, 3),
-        [$key => $value, 'XDEBUG_MODE' => 'off', 'LARAVEL_PARALLEL_TESTING' => false, 'TEST_TOKEN' => false, 'PARATEST' => false],
+        [
+            $key => $value,
+            'XDEBUG_MODE' => 'off',
+            'LARAVEL_PARALLEL_TESTING' => false,
+            'TEST_TOKEN' => false,
+            'PARATEST' => false,
+            // Its own Playwright state file: on exit the browser plugin deletes the one it
+            // used, and the shared default belongs to the run this test is part of.
+            'PEST_BROWSER_STATE_FILE' => sys_get_temp_dir().'/pest-browser-guard-test-'.getmypid().'.json',
+        ],
     );
 
     $process->run();
