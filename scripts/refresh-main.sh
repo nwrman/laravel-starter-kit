@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Keep the main checkout — http://<project>.test — the standing latest.
-# Run on the MAIN checkout after every merge (/finish-ticket calls this).
+# Run on the MAIN checkout after every merge (the factory plugin's factory-teardown calls this).
 #
 # It migrates but never re-seeds: a ticket that ships new seed or import data
 # leaves main's database with the new columns and none of the new rows. Name

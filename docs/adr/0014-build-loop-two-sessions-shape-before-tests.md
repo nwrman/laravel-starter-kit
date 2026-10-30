@@ -80,3 +80,11 @@ unrelated project.
   prompts sets `BUILD_LOOP_CLAUDE=claude`.
 - **Branches merge with merge commits only**, and the repo should be configured to enforce
   it (`docs/build-loop.md`, Prerequisites). A ticket lands as several commits on purpose.
+
+## Amended 2026-10-30
+
+The loop moved out of this kit into the software factory's `factory` plugin; the kit keeps `herd.yml`. The two
+sessions and the order stand. What changed: `start-ticket.sh`, `worktree-setup.sh`, `handoff-to-main.sh` and
+`/finish-ticket` are gone. The plugin's `factory-start-ticket` creates the worktree with `git worktree add`, Herd
+adopts and serves it, and a Herdr tab opens its session; after the merge that session runs `factory-teardown`
+itself, with no second session in main. A worktree is now the default, in place only when asked.

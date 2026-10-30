@@ -93,8 +93,9 @@ git branch -d <feature-branch>
 
 If the branch can't be deleted (not fully merged), report the issue and stop — don't force delete.
 
-A branch held by a worktree cannot be deleted either. For a build-loop ticket, `/finish-ticket` deletes
-the worktree and its branch together, and this step becomes a no-op.
+A branch held by a worktree cannot be deleted either. For a build-loop ticket, the ticket's session runs
+the factory plugin's `factory-teardown`, which deletes the worktree and its branch together, and this step
+becomes a no-op.
 
 ### 6. Prune Stale Remote Refs
 
@@ -120,7 +121,7 @@ You're on main, up to date.
 | Verify mergeable | `gh pr view --json` | Yes | same |
 | Merge | `gh pr merge --merge --delete-branch` | Yes | drop `--delete-branch` |
 | Switch | `git checkout main && git pull` | Yes | `scripts/refresh-main.sh` |
-| Local cleanup | `git branch -d <branch>` | Report only | `/finish-ticket` does it |
+| Local cleanup | `git branch -d <branch>` | Report only | `factory-teardown` does it |
 | Remote cleanup | `git remote prune origin` | — | same |
 
 The fourth column is what to do instead when the branch lives in a git worktree.

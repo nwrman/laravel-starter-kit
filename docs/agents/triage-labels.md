@@ -14,4 +14,4 @@ When a skill mentions a role (e.g. "apply the AFK-ready triage label"), use the 
 
 Edit the "Label in our tracker" column to match whatever vocabulary you actually use.
 
-One more label lives in this tracker and is not a triage role: `in-progress` is the build loop's lock. `build-ticket` adds it when it claims a `ready-for-agent` ticket and removes it when the run ends without the ticket landing (`.ai/skills/build-ticket/reference/spec-and-tickets.md`). Leave it alone during triage.
+One more label lives in this tracker and is not a triage role: `in-progress` is the build loop's lock. `build-ticket` adds it when it claims a `ready-for-agent` ticket and removes it when the run ends without the ticket landing (the factory plugin's `build-ticket`, `reference/spec-and-tickets.md`). Leave it alone during triage.
