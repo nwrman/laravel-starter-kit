@@ -14,12 +14,7 @@
 :root,
 body,
 .fi-body {
-  font-family:
-    'Noto Sans Variable',
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    sans-serif;
+  font-family: 'Noto Sans Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 
 h1,
