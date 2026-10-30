@@ -21,8 +21,8 @@ Nothing records a baseline up front, and `refresh-main.sh` runs no tests. Pest k
 ## refresh-main migrates but never re-seeds
 `scripts/refresh-main.sh` pulls, installs, migrates and builds. It does not seed or import, deliberately: re-running seeders or importers on every merge would overwrite what people typed. A ticket that ships new seed or import data therefore leaves main with the new columns and none of the new rows — the screen looks broken while every test is green. Whoever lands such a ticket names the command that writes the data in the handoff; do not add it to refresh-main.sh.
 
-## Teardown drops the whole database family, forcefully
-Pest --parallel clones the test database once per process (`<db>_test_test_7`), so dropping only the app and test names leaves a dozen behind. A Postgres Product's `herd.yml` `before_delete` lists every `<db>_test*` and drops each with `dropdb --force`, because one live connection — the worktree's own session holding a Boost query open is enough — otherwise fails the drop. Herd drops the app database itself.
+## Teardown drops the whole test-database family, forcefully
+Pest --parallel clones the test database once per process (`<db>_test_test_7`), so dropping only the test database leaves a dozen behind. `herd.yml`'s `before_delete` lists the test database and every `<test db>_test_*` and drops each with `dropdb --force`, because one live connection — the worktree's own session holding a Boost query open is enough — otherwise fails the drop. It reads the name from the worktree's `.env.testing` and refuses one that does not end in `_test`. Herd drops the app database itself. `.ai/rules/database.md` has the rest of the arrangement.
 
 ## The build-loop scripts ship executable
 The starter once committed its worktree scripts and `refresh-main.sh` as 100644, so the loop's first command failed with "permission denied" in every fresh clone, and each descendant fixed it on its own. This repo's git has `core.fileMode=false`, so `chmod +x` alone is invisible to git: use `git update-index --chmod=+x <file>`. Check with `git ls-files -s scripts/` — the mode must read 100755.

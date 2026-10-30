@@ -83,7 +83,7 @@ New users will then be redirected to `/email/verify` after registration, and mus
 
 - [Laravel Herd](https://herd.laravel.com/) (recommended) or any PHP 8.5+ environment
 - Bun (package manager)
-- SQLite, PostgreSQL, or MySQL
+- PostgreSQL 18, running ([DBngin](https://dbngin.com/) on its defaults: `127.0.0.1:5432`, user `postgres`)
 - Xdebug (for coverage reports)
 
 ### Create a New Project
@@ -92,7 +92,7 @@ New users will then be redirected to `/email/verify` after registration, and mus
 composer create-project nwrman/laravel-starter-kit my-app --stability=dev
 ```
 
-This automatically runs the full setup: environment configuration, key generation, database migration with seeding, and initializes a git repository with an initial commit.
+This automatically runs the full setup: environment configuration, key generation, a `my_app` database (migrated and seeded) and a `my_app_test` database, both created on your Postgres server, and a git repository with an initial commit. If Postgres isn't running, setup finishes and says what to run once it is.
 
 ### Start Developing
 
@@ -217,7 +217,7 @@ The kit is preconfigured for [mattpocock/skills](https://github.com/mattpocock/s
 /factory:build-ticket 33 in place    # …or in this session, on a new branch
 ```
 
-Branch `feature/t33-user-import` is served at `https://feature-t33-user-import.<project>.test`. Sqlite projects need no database server — the file lives inside the worktree.
+Branch `feature/t33-user-import` is served at `https://feature-t33-user-import.<project>.test`. It gets its own Postgres database and its own `_test` database, both dropped when the ticket is torn down.
 
 Full guide: [`docs/build-loop.md`](docs/build-loop.md). Why it works this way: [ADR 0012](docs/adr/0012-multi-agent-build-loop.md) and [ADR 0014](docs/adr/0014-build-loop-two-sessions-shape-before-tests.md).
 

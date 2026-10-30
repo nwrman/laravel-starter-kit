@@ -16,7 +16,7 @@
 .env
 .env.backup
 .env.production
-# Generated per worktree (and for main, off sqlite) from .env.testing.example by the build-loop scripts.
+# Written per checkout from .env.testing.example (create-project, herd.yml, scripts/refresh-main.sh).
 .env.testing
 .phpactor.json
 .phpunit.result.cache
