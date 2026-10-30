@@ -86,11 +86,11 @@
             "@php artisan key:generate --ansi",
             "@php artisan migrate --seed --force --graceful --ansi",
             "@php artisan migrate --env=testing --force --graceful --ansi",
-            "@php artisan migrate:status --env=testing > /dev/null 2>&1 || php -r \"echo PHP_EOL . '\\033[33m  Postgres was not reachable. Start it (DBngin), then: php artisan migrate --seed && php artisan migrate --env=testing\\033[0m' . PHP_EOL;\"",
+            "@php artisan migrate:status --env=testing > /dev/null 2>&1 || php -r \"echo PHP_EOL . chr(27) . '[33m  Postgres was not reachable. Start it (DBngin), then: php artisan migrate --seed && php artisan migrate --env=testing' . chr(27) . '[0m' . PHP_EOL;\"",
             "git init --quiet",
             "git add .",
             "git commit -m \"Initial commit\" --quiet",
-            "@php -r \"echo PHP_EOL . '\\033[32m  Git repository initialized with initial commit.\\033[0m' . PHP_EOL;\""
+            "@php -r \"echo PHP_EOL . chr(27) . '[32m  Git repository initialized with initial commit.' . chr(27) . '[0m' . PHP_EOL;\""
         ],
         "update:requirements": [
             "composer bump",
