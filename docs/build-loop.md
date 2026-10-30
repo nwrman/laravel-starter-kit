@@ -10,7 +10,7 @@ merging a PR.** Nothing else tracks progress — the graph, the frontier and the
 in GitHub Issues.
 
 The loop ships as a Claude Code plugin, `factory`, from nwrman's software factory
-(`~/projects/software-factory/plugins/factory`), switched on in each project's `.claude` settings. A
+(its `plugins/factory` folder), switched on in each project's `.claude` settings. A
 project keeps only its `herd.yml`, `composer preflight` and its Boost skills; this starter ships the
 `herd.yml`, so every app made from it can build in a worktree from its first day.
 
@@ -50,7 +50,7 @@ the repo once — an untrusted repo loads no project plugin:
 ```json
 {
   "extraKnownMarketplaces": {
-    "software-factory": { "source": { "source": "directory", "path": "/Users/nwrman/projects/software-factory" } }
+    "software-factory": { "source": { "source": "directory", "path": "/path/to/software-factory" } }
   },
   "enabledPlugins": { "factory@software-factory": true }
 }

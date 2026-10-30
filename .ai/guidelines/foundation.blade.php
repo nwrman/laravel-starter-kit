@@ -2,7 +2,7 @@
 /** @var \Laravel\Boost\Install\GuidelineAssist $assist */
 @endphp
 {{-- Overrides laravel/boost's .ai/foundation.blade.php, identical but for "Frontend Bundling": the agent owns its
-     dev server, nobody else runs one (nwrman/software-factory#30). Re-sync the rest when Boost changes it. --}}
+     dev server, nobody else runs one. Re-sync the rest when Boost changes it. --}}
 # Laravel Boost Guidelines
 
 ## Foundational Context
