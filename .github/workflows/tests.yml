@@ -91,12 +91,11 @@ jobs:
       - name: Install Composer Dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader --no-progress
 
-      # .env.example's driver comes along with the copy. No lane in this workflow
-      # runs a database service, but artisan does boot here (post-autoload-dump,
-      # key:generate, the Wayfinder build, PHPStan). Neutralise the driver so a
-      # boot-time query can never turn a lane red for a database it was never
-      # meant to reach — including after a descendant switches .env.example to
-      # Postgres, which is exactly how this surfaced downstream.
+      # A "no database" stub, not a sqlite path: .env.example's Postgres driver comes
+      # along with the copy, and artisan boots here (post-autoload-dump, key:generate,
+      # the Wayfinder build, PHPStan) without ever querying. Point it at in-memory
+      # sqlite so a boot-time query can never turn this lane red for a database it
+      # was never meant to reach. The suite itself reads .env.testing.
       - name: Copy Environment File
         run: |
           cp .env.example .env
@@ -139,6 +138,21 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # The suite runs on Postgres, always (docs/adr/0016) — the same major version as
+    # production's Neon Postgres 18.
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: laravel_starter_kit_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -180,12 +194,11 @@ jobs:
           key: ${{ github.repository }}-bun-${{ hashFiles('bun.lock') }}
           restore-keys: ${{ github.repository }}-bun-
 
-      # .env.example's driver comes along with the copy. No lane in this workflow
-      # runs a database service, but artisan does boot here (post-autoload-dump,
-      # key:generate, the Wayfinder build, PHPStan). Neutralise the driver so a
-      # boot-time query can never turn a lane red for a database it was never
-      # meant to reach — including after a descendant switches .env.example to
-      # Postgres, which is exactly how this surfaced downstream.
+      # A "no database" stub, not a sqlite path: .env.example's Postgres driver comes
+      # along with the copy, and artisan boots here (post-autoload-dump, key:generate,
+      # the Wayfinder build, PHPStan) without ever querying. Point it at in-memory
+      # sqlite so a boot-time query can never turn this lane red for a database it
+      # was never meant to reach. The suite itself reads .env.testing.
       - name: Copy Environment File
         run: |
           cp .env.example .env
@@ -194,6 +207,21 @@ jobs:
 
       - name: Generate Application Key
         run: php artisan key:generate
+
+      # phpunit.xml forces the driver but leaves DB_DATABASE to .env.testing, which is
+      # gitignored, so CI writes its own from the committed template and points it at the
+      # service container above. tests/Unit/Scaffolding/EnvTestingTemplateTest.php keeps
+      # every key these seds target present in the template — rename one and CI would
+      # otherwise silently keep the template's value. Tests\TestCase aborts the run unless
+      # the result names a *_test database.
+      - name: Generate Test Environment File
+        run: |
+          cp .env.testing.example .env.testing
+          sed -i "s|^DB_HOST=.*|DB_HOST=127.0.0.1|" .env.testing
+          sed -i "s|^DB_PORT=.*|DB_PORT=5432|" .env.testing
+          sed -i "s|^DB_USERNAME=.*|DB_USERNAME=postgres|" .env.testing
+          sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD=postgres|" .env.testing
+          sed -i "s|^DB_DATABASE=.*|DB_DATABASE=laravel_starter_kit_test|" .env.testing
 
       - name: Install Bun Dependencies
         run: bun install
@@ -331,12 +359,11 @@ jobs:
           key: ${{ github.repository }}-bun-${{ hashFiles('bun.lock') }}
           restore-keys: ${{ github.repository }}-bun-
 
-      # .env.example's driver comes along with the copy. No lane in this workflow
-      # runs a database service, but artisan does boot here (post-autoload-dump,
-      # key:generate, the Wayfinder build, PHPStan). Neutralise the driver so a
-      # boot-time query can never turn a lane red for a database it was never
-      # meant to reach — including after a descendant switches .env.example to
-      # Postgres, which is exactly how this surfaced downstream.
+      # A "no database" stub, not a sqlite path: .env.example's Postgres driver comes
+      # along with the copy, and artisan boots here (post-autoload-dump, key:generate,
+      # the Wayfinder build, PHPStan) without ever querying. Point it at in-memory
+      # sqlite so a boot-time query can never turn this lane red for a database it
+      # was never meant to reach. The suite itself reads .env.testing.
       - name: Copy Environment File
         run: |
           cp .env.example .env
