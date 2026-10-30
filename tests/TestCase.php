@@ -14,14 +14,14 @@ abstract class TestCase extends BaseTestCase
      * .env.testing, so each worktree owns its test database. The cost of that freedom
      * is that a missing or stale .env.testing resolves to the development database,
      * which RefreshDatabase would then wipe. This runs before the traits boot, so the
-     * run dies ahead of the first migration instead of after it.
+     * run dies ahead of the first migration instead of after it. It reads the name the
+     * connection resolves rather than the config key, because a DB_URL overrides DB_DATABASE.
      */
     protected function refreshApplication(): void
     {
         parent::refreshApplication();
 
-        $connection = config()->string('database.default');
-        $database = config()->string("database.connections.{$connection}.database");
+        $database = (string) $this->app->make('db')->connection()->getDatabaseName();
 
         throw_unless(
             str_ends_with($database, '_test'),
