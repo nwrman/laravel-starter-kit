@@ -108,15 +108,15 @@
         "test:type-coverage": "pest --type-coverage --min=100",
         "test:unit": [
             "Composer\\Config::disableProcessTimeout",
-            "@php artisan toolkit:report --no-interaction --suite=unit"
+            "@php artisan toolkit:report --no-interaction --suite=unit --env=testing"
         ],
         "test:feature": [
             "Composer\\Config::disableProcessTimeout",
-            "@php artisan toolkit:report --no-interaction --suite=feature"
+            "@php artisan toolkit:report --no-interaction --suite=feature --env=testing"
         ],
         "test:browser": [
             "Composer\\Config::disableProcessTimeout",
-            "@php artisan toolkit:report --no-interaction --suite=browser"
+            "@php artisan toolkit:report --no-interaction --suite=browser --env=testing"
         ],
         "test:fast": [
             "Composer\\Config::disableProcessTimeout",
@@ -124,7 +124,7 @@
         ],
         "test:frontend": [
             "Composer\\Config::disableProcessTimeout",
-            "@php artisan toolkit:report --no-interaction --suite=frontend"
+            "@php artisan toolkit:report --no-interaction --suite=frontend --env=testing"
         ],
         "test:lint": [
             "pint --parallel --test",
@@ -137,7 +137,7 @@
         ],
         "test": [
             "Composer\\Config::disableProcessTimeout",
-            "@php artisan toolkit:report --no-interaction"
+            "@php artisan toolkit:report --no-interaction --env=testing"
         ],
         "test:ci": [
             "@test:lint",
@@ -148,12 +148,12 @@
         ],
         "test:report": [
             "Composer\\Config::disableProcessTimeout",
-            "@php artisan toolkit:report"
+            "@php artisan toolkit:report --env=testing"
         ],
-        "test:retry": "@php artisan toolkit:retry",
+        "test:retry": "@php artisan toolkit:retry --env=testing",
         "preflight": [
             "Composer\\Config::disableProcessTimeout",
-            "@php artisan toolkit:preflight"
+            "@php artisan toolkit:preflight --env=testing"
         ],
         "optimize": [
             "@php artisan optimize",
