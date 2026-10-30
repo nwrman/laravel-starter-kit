@@ -15,7 +15,9 @@ const statusVariant: Record<string, 'default' | 'secondary' | 'outline' | 'destr
 
 const columns: DataTableColumnDef<TeamMember>[] = [
   {
-    accessorKey: 'name',
+    // The cell shows the email under the name, so search covers both.
+    id: 'name',
+    accessorFn: (row) => `${row.name} ${row.email}`,
     header: ({ column }) => <DataTableColumnHeader column={column} title="Nombre" />,
     cell: ({ row }) => (
       <div>
