@@ -207,21 +207,17 @@ bun run test:lint      # Frontend
 
 ## Building With Agents
 
-A multi-agent build loop ships with the kit: one GitHub ticket per slice, one git worktree and one agent session per ticket — each with its own Herd site, database and build caches — and a PR at the end that a human merges. The issue tracker's native "blocked by" dependencies are the only state machine. Each ticket opens with a brief you approve and settles its shape (design pass, browser walk, your acceptance on gate tickets, code review, spec check) before the tests are written and `composer preflight` gates it. A ticket can also be built in place on request, or land on a spec's integration branch that ships as one PR.
+A multi-agent build loop runs on apps made from this kit: one GitHub ticket per slice, one session per ticket — by default in its own git worktree with its own Herd site and database — and a PR at the end that a human merges. Each ticket opens with a brief you approve and settles its shape (design pass, browser walk, your walk, code review, spec check) before the tests are written and `composer preflight` gates it. The loop itself ships as the `factory` Claude Code plugin from nwrman's software factory; the kit ships the [`herd.yml`](herd.yml) that sets a worktree up and down.
 
-The kit is preconfigured for [mattpocock/skills](https://github.com/mattpocock/skills) v1.3: `to-spec` and `to-tickets` write the graph `/build-ticket` reads, and [`docs/agents/`](docs/agents/) tells every engineering skill where issues, labels and the [`GLOSSARY.md`](GLOSSARY.md) live.
+The kit is preconfigured for [mattpocock/skills](https://github.com/mattpocock/skills) v1.3: `to-spec` and `to-tickets` write the graph `/factory:build-ticket` reads, and [`docs/agents/`](docs/agents/) tells every engineering skill where issues, labels and the [`GLOSSARY.md`](GLOSSARY.md) live.
 
 ```bash
-/build-ticket 33                   # from the main checkout: opens ticket 33's own worktree session
-/build-ticket                      # …or take the next ready ticket off the frontier
-/build-ticket 33 no worktree       # …or build it in place, in this session
-
-scripts/start-ticket.sh            # what /build-ticket runs to create the worktree and its session
-scripts/worktree-setup.sh          # provision a worktree (seed | clone) — run for you
-scripts/refresh-main.sh            # bring the main checkout back to latest — run for you by /finish-ticket
+/factory:build-ticket 33             # in the main checkout, inside Herdr: ticket 33 in its own worktree and tab
+/factory:build-ticket 33 clone-db    # …the same, with a copy of main's database
+/factory:build-ticket 33 in place    # …or in this session, on a new branch
 ```
 
-Naming derives from the repo directory, so nothing is project-specific: branch `feature/t33-user-import` gets `http://t33.<project>.test`. Sqlite projects need no database server — the file lives inside the worktree. Supacode is recommended: with it each session opens in its own tab automatically; without it the scripts print the command to paste.
+Branch `feature/t33-user-import` is served at `https://feature-t33-user-import.<project>.test`. Sqlite projects need no database server — the file lives inside the worktree.
 
 Full guide: [`docs/build-loop.md`](docs/build-loop.md). Why it works this way: [ADR 0012](docs/adr/0012-multi-agent-build-loop.md) and [ADR 0014](docs/adr/0014-build-loop-two-sessions-shape-before-tests.md).
 

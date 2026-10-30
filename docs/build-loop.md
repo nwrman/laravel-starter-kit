@@ -9,30 +9,31 @@ in its own workspace and its own session, and nothing reaches `main` without a h
 merging a PR.** Nothing else tracks progress — the graph, the frontier and the lock all live
 in GitHub Issues.
 
+The loop ships as a Claude Code plugin, `factory`, from nwrman's software factory
+(`~/projects/software-factory/plugins/factory`), switched on in each project's `.claude` settings. A
+project keeps only its `herd.yml`, `composer preflight` and its Boost skills; this starter ships the
+`herd.yml`, so every app made from it can build in a worktree from its first day.
+
 | Piece | What it is |
 |---|---|
-| [`.ai/skills/build-ticket/SKILL.md`](../.ai/skills/build-ticket/SKILL.md) | The per-ticket loop. `/build-ticket 33`. |
-| [`.ai/skills/finish-ticket/SKILL.md`](../.ai/skills/finish-ticket/SKILL.md) | The cleanup after a ticket lands, run in the main checkout. Spawned for you. |
-| [`.ai/skills/build-ticket/reference/spec-and-tickets.md`](../.ai/skills/build-ticket/reference/spec-and-tickets.md) | How to write the spec issue and the tickets it fans out into. |
-| [`scripts/start-ticket.sh`](../scripts/start-ticket.sh) | Fast-forwards the base, creates a ticket's worktree and opens its session there. |
-| [`scripts/worktree-setup.sh`](../scripts/worktree-setup.sh) | Provisions a worktree: own Herd site, own database, cloned build caches, the base's TIA baseline. |
-| [`scripts/worktree-teardown.sh`](../scripts/worktree-teardown.sh) | Publishes the ticket's TIA baseline, then removes the site, databases and TIA cache after the ticket lands. |
-| [`scripts/handoff-to-main.sh`](../scripts/handoff-to-main.sh) | Hands the end of a ticket to `/finish-ticket` in the main checkout. |
+| The plugin's `build-ticket` skill | The per-ticket loop. `/factory:build-ticket 33`. Its `reference/spec-and-tickets.md` says how to write the spec issue and the tickets it fans out into. |
+| The plugin's agents | The Specialists the loop starts at its steps: UI Designer, Browser Walker, Code Reviewer, Spec Verifier, Test Reviewer. |
+| `factory-start-ticket` | Creates a ticket's worktree through Herd and opens its session in a Herdr tab. |
+| `factory-teardown` | Run by the ticket's session after the merge: deletes the worktree, site and databases, prunes the branch, refreshes main, closes the tab. |
+| [`herd.yml`](../herd.yml) | How this project's worktrees are set up and torn down. |
 | [`scripts/refresh-main.sh`](../scripts/refresh-main.sh) | Brings the main checkout back to the standing latest. |
-| [`scripts/worktree-names.sh`](../scripts/worktree-names.sh), [`supacode-ids.sh`](../scripts/supacode-ids.sh) | Shared helpers the scripts source. |
 
-Why it exists and what was rejected: [ADR 0012](adr/0012-multi-agent-build-loop.md); why
-the loop now runs in two sessions and pins tests last: [ADR 0014](adr/0014-build-loop-two-sessions-shape-before-tests.md).
+Why it exists and what was rejected: [ADR 0012](adr/0012-multi-agent-build-loop.md); why the loop
+pins tests last: [ADR 0014](adr/0014-build-loop-two-sessions-shape-before-tests.md).
 How the mattpocock/skills engineering skills are wired to this repo (tracker, labels,
 glossary): [`docs/agents/`](agents/).
 
 ## Prerequisites
 
-- **Laravel Herd** — each worktree gets its own `.test` site.
+- **Laravel Herd** — each worktree gets its own `.test` site and database.
+- **Herdr** — the terminal every session runs in; a ticket's worktree session opens in its
+  own tab, and the factory reads live session state from it.
 - **`gh`** — tickets and PRs live in GitHub Issues.
-- **Supacode** *(recommended)* — the scripts open each ticket's session in its own tab, and
-  the cleanup session in main, without you doing anything. Without it they create the
-  worktree with plain git and print the one command to paste into a new terminal.
 - A **database server** if the project is on Postgres or MySQL. Sqlite projects need nothing.
 
 Once per repo:
@@ -42,9 +43,25 @@ gh label create ready-for-agent && gh label create in-progress
 gh api -X PATCH repos/{owner}/{repo} -F allow_squash_merge=false -F allow_rebase_merge=false -F delete_branch_on_merge=true
 ```
 
+Then switch the plugin on in the repo's `.claude/settings.json` (or, for a public repo like this
+starter, the gitignored `.claude/settings.local.json`), and accept Claude Code's workspace trust for
+the repo once — an untrusted repo loads no project plugin:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "software-factory": { "source": { "source": "directory", "path": "/Users/nwrman/projects/software-factory" } }
+  },
+  "enabledPlugins": { "factory@software-factory": true }
+}
+```
+
+The plugin is read in place from the factory's checkout: an edit there reaches every project's
+next session (or `/reload-plugins`).
+
 ## Start of a build: write the graph once
 
-Read [`reference/spec-and-tickets.md`](../.ai/skills/build-ticket/reference/spec-and-tickets.md)
+Read the plugin's `reference/spec-and-tickets.md`
 and produce — by hand, or with the `to-spec` and `to-tickets` skills, which write this shape:
 
 1. **One spec issue** — stages → slices → gates, its delivery mode (a PR per ticket, or one
@@ -58,7 +75,7 @@ time — never hardcoded into the skill:
 | Marker | Effect |
 |---|---|
 | `🛑 GATE` | The human reviews and accepts the built surface before the reviewers and the tests run. |
-| `🗄️ CLONE` | Provision the worktree against a copy of the real dev database and uploads, not demo seed data. |
+| `🗄️ CLONE` | Build the worktree against a copy of the main checkout's database, not demo seed data — as if you had typed `clone-db`. |
 
 ## The frontier and the lock
 
@@ -77,27 +94,32 @@ releases it naturally.
 
 ## Running one ticket
 
-In a Claude Code session on the main checkout:
+In a Claude Code session on the main checkout, inside Herdr:
 
 ```
-/build-ticket 33      # this ticket
-/build-ticket         # whatever is next on the frontier
+/factory:build-ticket 33             # in a worktree, with a fresh, seeded database
+/factory:build-ticket 33 clone-db    # in a worktree, with a copy of main's database
+/factory:build-ticket 33 in place    # in this session, on a new branch
+/factory:build-ticket                # whatever is next on the frontier
 ```
 
-Bare, it resolves the frontier itself: one candidate → it takes it and says so; several →
-it lists them and asks which; none → it reports what is blocking and stops.
+Nothing else is asked. Bare, it resolves the frontier itself: one candidate → it takes it and
+says so; several → it lists them and asks which; none → it reports what is blocking and stops.
+The ticket's branch is cut from **the branch the main checkout is on**, from its local state;
+starting from another ticket's branch is refused. A project with no `herd.yml` builds in place.
 
 ### Two sessions, on purpose
 
 The session in main only picks the ticket, reads its delivery mode and names the branch. It
-then runs `scripts/start-ticket.sh`, which creates the worktree and opens a **new session
-inside it**. That session does the build. The reason is the MCP servers: they start with the
+then runs `factory-start-ticket`, which creates the worktree and opens a **new session inside
+it**, in a Herdr tab beside yours that does not take focus. That session does the build, and
+its Brief is the first thing you see there. The reason is the MCP servers: they start with the
 session's directory and never move, so a session that started in main keeps getting answers
-about main — its URL, its database, its logs — even after it changes directory.
+about main — its URL, its database, its logs — even after it changes directory. And the context
+the Brief loads stays in the session that builds the ticket.
 
-Say **"no worktree"** (or "in this session") and the ticket is built in place instead: a
-branch in the current checkout, against the main site and whatever dev server is already
-running, in this same session. No provisioning, no teardown, and one ticket at a time.
+In place, the same session cuts the branch and carries on: against the main site, its database
+and whatever dev server is already running. One ticket at a time.
 
 ### The order, and why
 
@@ -118,28 +140,30 @@ down and fiddly.
 Step by step, in the ticket's session:
 
 0. **Claim** — add `in-progress`, read the spec, the rules, the glossary and the ADRs.
-1. **Brief** — what will exist when the ticket is done, in plain words. **It waits for your
+1. **Brief** — how the ticket will be built (where, which branch from which base, which site
+   and database), then what will exist when it is done, in plain words. **It waits for your
    go.** If a criterion as written would ship a defect, it says so here.
 2. **Confirm the ground** — the branch, `.env` and the site are the worktree's own.
 3. **Build** — shape first, no tests yet, `bun run dev` running so you can watch.
-4. **`impeccable`** on any user-facing surface, before you see it.
-5. **Walk it in a browser** — every state, a keyboard-only pass, side effects checked in
+4. **The UI Designer** runs `impeccable` on any user-facing surface, before you see it.
+5. **The Browser Walker walks it** — every state, a keyboard-only pass, side effects checked in
    the database, and what the deployed configuration does differently.
 6. **Gate tickets: you accept**, before anything is pinned.
-7. **Code review** on the branch.
-8. **Spec check** by a fresh-context agent, including that every deferred piece is owned by
+7. **Code review** on the branch, by the Code Reviewer, once per axis.
+8. **Spec check** by the Spec Verifier, in a fresh context, including that every deferred piece is owned by
    an open ticket.
 9. **`impeccable` second look** at what changed since step 4.
 10. **Tests**, including at least one browser spec that earns its place.
-    **10b. Test review** by a fresh-context agent against the `test-quality` checklist: what
+    **10b. Test review** by the Test Reviewer, in a fresh context, against the `test-quality` checklist: what
     wrong code would each new test catch?
 11. **`composer preflight`** — blocks until green; its table goes in the landing note.
 12. **Land** — a PR, or commits on the integration branch (below).
-13. **Report** what was built, against the brief — then hand off to main.
+13. **Report** what was built, against the brief — then, after the merge, tear down.
 
 Three guardrails hold throughout:
 
-- Agents never merge a PR and never push to `main` (integration branches are fine).
+- Agents merge a PR only when nwrman tells them to, for that PR, and never push to `main`
+  (integration branches are fine).
 - One writer per file — only the implementer edits; verifier and reviewers are read-only,
   and isolated from each other.
 - Every verify/fix cycle caps at **3 rounds**, then stops and reports.
@@ -167,105 +191,81 @@ both.
 
 ## Provisioning a worktree
 
-`start-ticket.sh` runs this as the new session's first command; by hand, from inside the
-worktree:
+`factory-start-ticket`, run by the session in main, in order:
 
-```bash
-scripts/worktree-setup.sh          # seed mode (default)
-scripts/worktree-setup.sh clone    # copy main's dev database and uploads instead
+1. `git worktree add -b <branch> ~/.worktrees/<repo>/<branch, / as -> <base>` — out of
+   `~/projects` and out of the repo. It records the base in `branch.<branch>.tiaBase`.
+2. `herd workspace --database=empty|clone`, **inside** the worktree, so Herd adopts it: it
+   serves it at `https://<branch, / as ->.<project>.test` (a subdomain of the main site, so a
+   login saved once is offered on every ticket, while each session cookie stays on its own
+   host), copies `.env`, `vendor`, `node_modules` and the built assets from main, rewrites
+   `APP_URL`, and gives it its own database: empty and migrated, or a copy of main's.
+3. The Product's `herd.yml` `after_create` does the rest — seed a fresh database, the test
+   database on server engines, the TIA baseline the last landed ticket published for the base
+   — and leaves a marker. **Herd runs a failing hook line and carries on without a word**, so
+   the marker is the only proof setup finished: without it the ticket does not start, and the
+   failing command is printed.
+4. A Herdr tab `t<N>` opens beside yours, in the background, with Claude on the ticket.
+
+A worktree that already exists for the branch is reattached: only the tab opens again.
+
+### A Product's `herd.yml`
+
+```yaml
+workspaces:
+  database: empty
+  hooks:
+    after_create: >-
+      bash -c 'set -eux;
+      composer install --no-interaction --quiet;
+      bun install --silent;
+      if [ "$HERD_WORKSPACE_DATABASE_MODE" = empty ]; then php artisan db:seed --force; fi;
+      php artisan toolkit:tia inherit;
+      touch "$(git rev-parse --absolute-git-dir)/factory-setup-done"'
+      > storage/logs/herd-after-create.log 2>&1
+    before_delete: >-
+      bash -c 'set -ux; php artisan toolkit:tia publish || true'
+      > /tmp/herd-before-delete-$HERD_WORKSPACE_HOST.log 2>&1
 ```
 
-Idempotent — safe to re-run. It:
-
-1. Clones `vendor/` and `node_modules/` from the main checkout with APFS copy-on-write
-   (`cp -Rc`, near-instant and near-free on disk), then trues up with `composer install`
-   and `bun install`.
-2. Copies main's `.env` and points `APP_URL` and the database at the worktree — on every
-   run, because a new Supacode worktree arrives with main's ignored files already in it.
-3. Creates the app database (and a test database, on server engines).
-4. Writes a per-worktree `.env.testing` — **non-sqlite projects only**.
-5. Links the Herd site and runs a first `bun run build`.
-6. Inherits the TIA baseline the last landed ticket published for its base
-   (`php artisan toolkit:tia inherit`), so the first `composer test` and the final
-   `composer preflight` replay only what the ticket changes. With none on file, the first
-   `composer test` does the full run; nothing is recorded during setup.
-
-### Naming
-
-Everything derives from the **main checkout's directory name** and the branch
-(`scripts/worktree-names.sh`), so nothing is project-specific. For a repo in
-`laravel-starter-kit/` on branch `feature/t33-user-import`:
-
-| | |
-|---|---|
-| Site | `http://t33.laravel-starter-kit.test` |
-| App database | `laravel_starter_kit_t33` |
-| Test database | `laravel_starter_kit_t33_test` |
-
-The site is a **subdomain** of the main site on purpose: browsers then treat every worktree
-as the same site for saved passwords, so a login saved once is offered on every ticket.
-Sessions stay separate, because the session cookie is pinned to the exact host. The type
-prefix never reaches the names; branches without a `t<N>` fall back to a slug of the whole
-branch name.
-
-### Modes
-
-- **`seed`** (default) — migrate, then `DatabaseSeeder`, only when the database is new. A
-  re-run just migrates.
-- **`clone`** — copy the main checkout's dev database and `storage/app` uploads, then run
-  this branch's migrations on top. For slices that only mean anything against real content.
-  Destructive: it drops and recreates the worktree's app database.
-
-### Database engines
-
-| `DB_CONNECTION` | App DB | Test DB | `.env.testing` |
-|---|---|---|---|
-| `sqlite` (starter default) | worktree-local `database/database.sqlite` | none — phpunit force-pins `:memory:` | not written |
-| `pgsql` | `createdb`, `pg_dump` for clone | `<db>_test` | written |
-| `mysql` / `mariadb` | `CREATE DATABASE`, `mysqldump` for clone | `<db>_test` | written |
-
-The sqlite row is why a fresh starter project needs no database server: the file lives
-inside the worktree, so isolation is free, and the test database is already `:memory:`.
-The `.env.testing` step exists only for the other engines — without it, `composer test:*`
-runs against the dev database (see the test-isolation section of the toolkit's
-"Running Tests" guideline, `vendor/nwrman/laravel-toolkit/resources/boost/guidelines/core.blade.php`).
-
-Anything else aborts with a message telling you to add a branch to both scripts.
+Each hook is **one line** — a strict bash script with its trace in a log — because of how Herd
+treats a failing line. That is this starter's; a Postgres Product's also creates
+`<db>_test` and writes a `.env.testing` pointing at it in `after_create`, and drops every
+`<db>_test*` (parallel copies included) in `before_delete`. Herd drops the app database itself.
+The hooks see `HERD_WORKSPACE_DATABASE`, `HERD_WORKSPACE_DATABASE_MODE`, `HERD_WORKSPACE_BRANCH`,
+`HERD_WORKSPACE_PATH` and `HERD_WORKSPACE_PARENT_PATH`.
 
 ## After the ticket lands
 
-Nothing for you to type. The ticket's session runs, inside its worktree:
-
-```bash
-scripts/worktree-teardown.sh      # publishes its TIA baseline; site, every database (parallel copies too), TIA cache
-scripts/handoff-to-main.sh <N>    # opens /finish-ticket in the main checkout
-```
-
-`/finish-ticket` then, from main: proves the work landed (it refuses to delete unmerged
-commits), deletes the worktree — which ends the ticket's session, as expected — prunes the
-remote branch, runs `scripts/refresh-main.sh`, and closes the ticket with the account from
-the landing note. It finishes by naming the tickets that just became unblocked.
+Nothing for you to type. Once you merge, the ticket's session closes its ticket with the account
+from the landing note, releases the lock, and runs `factory-teardown`. It refuses while the
+branch has commits that are not on its base upstream. Otherwise, in a worktree: `herd
+workspace:delete` from the main checkout (the `before_delete` hook publishes the TIA baseline and
+drops the test databases; Herd removes the worktree, site, certificate and database), the branch
+is deleted locally and on GitHub if it survived, the main checkout runs its
+`scripts/refresh-main.sh`, and the Herdr tab closes last — which ends the session, as expected.
+In place it publishes the TIA baseline, switches back to the base and refreshes.
 
 `refresh-main.sh` pulls, installs, migrates and builds, so the main checkout's site stays
 the standing latest. It runs no tests: the TIA baseline the next ticket needs was already
-published by this ticket's teardown (ADR 0015). It migrates but never
-re-seeds: if a ticket ships new seed data, its handoff names the command that writes it.
+published by this ticket's teardown ([ADR 0015](adr/0015-tia-baselines-flow-from-landed-tickets.md)). It migrates but never
+re-seeds: if a ticket ships new seed data, its landing note names the command that writes it.
 
 ## Running several tickets at once
 
 Isolation is what makes this safe: separate site, separate database, separate build caches
 per worktree. Two shapes:
 
-- **Serial stretches** — you start one `/build-ticket` at a time.
+- **Serial stretches** — you start one `/factory:build-ticket` at a time.
 - **Wide parallel stretches** — tell one session in main to coordinate: run
-  `start-ticket.sh` for each frontier ticket and report as PRs open.
+  `factory-start-ticket` for each frontier ticket and report as PRs open.
 
 Both end the same way: PRs stack up and you merge them — or, on an integration-branch spec,
 one PR arrives when the last ticket closes.
 
 > **One agent per working tree.** Two agents sharing one checkout will switch branches out
-> from under each other. That collision is the whole reason the worktree scripts exist —
-> use them rather than juggling branches in a single tree.
+> from under each other. That collision is the whole reason worktrees exist — use them
+> rather than juggling branches in a single tree.
 
 ## If something jams
 
@@ -275,7 +275,9 @@ one PR arrives when the last ticket closes.
   releasing its claim. The claim comment names the branch, so check whether that branch has
   anything on it, then `gh issue edit <N> --remove-label in-progress` to put it back on the
   frontier.
-- **A worktree is left over from a dead session.** Run `scripts/worktree-teardown.sh` inside
-  it, then `/finish-ticket <N>` from main — it checks for unmerged commits before deleting.
-- **Teardown says it could not drop a database.** Something still holds it open; everything
-  else is torn down. Re-run the script once it is idle.
+- **A worktree is left over from a dead session.** Open a tab in it and run
+  `factory-teardown` — it refuses while the branch has unlanded commits. Or by hand, from the
+  main checkout: `herd workspace:delete <branch, / as -> --force`, then `git branch -D <branch>`.
+- **A ticket won't start: its setup did not finish.** `factory-start-ticket` printed the failing
+  command from `herd.yml`. Fix it, delete the workspace from the main checkout, and start
+  again.
