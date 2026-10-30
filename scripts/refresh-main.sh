@@ -22,7 +22,8 @@ bun run build
 # resolves the development database (Tests\TestCase refuses to run then). Write
 # it once, naming <app database>_test, and let migrate create that database.
 if [ ! -f .env.testing ]; then
-  APP_DB="$(grep -E '^DB_DATABASE=' .env | tail -1 | cut -d= -f2-)"
+  APP_DB="$(grep -E '^DB_DATABASE=' .env | tail -1 | cut -d= -f2- || true)"
+  [ -n "$APP_DB" ] || { echo "✗ .env names no DB_DATABASE — cannot name main's test database" >&2; exit 1; }
   sed "s|^DB_DATABASE=.*|DB_DATABASE=${APP_DB}_test|" .env.testing.example > .env.testing
   php artisan migrate --env=testing --force
   echo "✓ wrote .env.testing (main checkout) for ${APP_DB}_test"
