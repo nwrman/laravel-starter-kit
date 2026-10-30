@@ -68,3 +68,11 @@ them to the ones a change can reach, which is the speed-up the exclusion was aft
   `composer test`, not during setup.
 - A Browser spec that times out under coverage fails preflight like any other failure. It is
   not a reason to filter the gate.
+
+## Amended 2026-10-30
+
+The build loop moved into the software factory's `factory` plugin. The mechanism here stands, with new hands:
+`herd.yml`'s `after_create` runs `toolkit:tia inherit` and its `before_delete` runs `toolkit:tia publish`;
+`start-ticket.sh`, `worktree-setup.sh`, `worktree-teardown.sh` and `finish-ticket` are gone. The plugin's
+`factory-start-ticket` cuts the worktree from the base's local state and no longer fast-forwards it: pull the base
+first when the inherited commit must be the latest.

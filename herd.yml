@@ -1,6 +1,6 @@
 # How a Build ticket's worktree is set up and torn down. The factory's build-ticket creates the
 # worktree with `git worktree add` and runs `herd workspace` inside it; Herd serves it at
-# https://<branch>.<site>.test, copies .env, vendor, node_modules and the built assets from the
+# https://<branch, with / as ->.<site>.test, copies .env, vendor, node_modules and the built assets from the
 # main checkout, gives it its own database and migrates an empty one.
 #
 # Herd runs a hook line by line and carries on after a failing one without a word, so each hook is
