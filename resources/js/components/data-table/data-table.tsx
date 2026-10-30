@@ -112,6 +112,13 @@ export function DataTable<TData extends RowData>({
     autoResetPageIndex: false,
   });
 
+  // With the reset off, a refresh that returns fewer rows can leave the page past the new
+  // last one, an empty table reading "Página 2 de 1". Step back to the last real page.
+  const lastPageIndex = Math.max(table.getPageCount() - 1, 0);
+  if (pagination.pageIndex > lastPageIndex) {
+    setPagination({ ...pagination, pageIndex: lastPageIndex });
+  }
+
   const handleRowClick = (row: Row<DataTableFeatures, TData>, event: React.MouseEvent) => {
     if (!onRowClick) return;
     // Ignore clicks that originated on an interactive element (checkbox, button, link).
