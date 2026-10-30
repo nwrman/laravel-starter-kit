@@ -16,7 +16,7 @@
         "inertiajs/inertia-laravel": "^3.0.0-beta",
         "laravel/fortify": "^1.38",
         "laravel/framework": "^13.25.0",
-        "laravel/wayfinder": "^0.1.21",
+        "laravel/wayfinder": "^0.1.23",
         "league/flysystem-aws-s3-v3": "^3.35.2",
         "nunomaduro/essentials": "^1.2.0",
         "nwrman/laravel-toolkit": "^0.4",
@@ -67,13 +67,10 @@
             "@php artisan package:discover --ansi",
             "@php artisan filament:upgrade"
         ],
-        "patch": "test -f vendor/laravel/wayfinder/resources/js/wayfinder.ts && (grep -q '\"query\"' vendor/laravel/wayfinder/resources/js/wayfinder.ts || (cd vendor/laravel/wayfinder && patch -p1 --silent < ../../../patches/wayfinder-query-method.patch)) || true",
         "post-install-cmd": [
-            "@patch",
             "@php artisan filament:sync-colors --ansi"
         ],
         "post-update-cmd": [
-            "@patch",
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
             "@php artisan clear",
             "@php artisan filament:sync-colors --ansi",

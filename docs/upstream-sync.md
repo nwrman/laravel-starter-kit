@@ -8,8 +8,8 @@ re-litigated.
 
 ## Marker
 
-- **Last reviewed upstream commit:** `87cce87` (2026-08-31)
-- **Last review date:** 2026-09-08
+- **Last reviewed upstream commit:** `98d9b82` (2026-10-29)
+- **Last review date:** 2026-10-29
 
 ## Standing auto-skips (from ADRs — do not re-propose)
 
@@ -46,3 +46,12 @@ _(append one row per reviewed upstream commit)_
 | 2026-09-08 | `e8fbfd7` | Add `composer.json` to formatter ignores | skipped | Already present, `vite.config.ts` `ignorePatterns`. |
 | 2026-09-08 | `0228716` | Strip passkey sections from Inertia auth types | skipped | A `chisel.php` installer change; we do not use chisel, and passkeys stay (ADR 0001). |
 | 2026-09-08 | `1e18ad7` | concurrently bump, optional `@laravel/multiplex` | noise | — |
+| 2026-10-29 | `bac32ec` | `position: sticky` fix in the sidebar layout (deferred 2026-09-08) | **adopted** | `app-sidebar-layout.tsx` now `min-w-0 overflow-x-clip`. No page here uses sticky yet; it protects the first descendant that does. |
+| 2026-10-29 | `2b5ab57` | `lsp-*.php` in `storage/framework/.gitignore` (deferred 2026-09-08) | **adopted** | The logging half stays skipped (comment-only). |
+| 2026-10-29 | `e82c316` | vite-plus → 1.x for security advisories | **adapted** | `vite-plus` ^1.4.0, the `vite` alias pinned to `vite-plus-core@1.4.0` (was `@latest`, which had drifted to 0.3.1 against vite-plus 0.2.9), and an `overrides` entry so Vitest's nested `vite@8.2.1` resolves to the core too. Clears the vite/vite-plus advisories; others in `bun audit` remain (shell-quote, undici, brace-expansion, …). New oxfmt rewrapped one `font-family` in the Filament theme; 1.x's lint adds six React Compiler warnings (no errors). Chisel/CI parts skipped. |
+| 2026-10-29 | `dbd4817` | File-cache `lock_path` → `framework/cache/locks` | **adopted** | Moot under our default `CACHE_STORE=database`; matters to any descendant on the file driver, where `cache:clear` deleted held locks. The `.codex` gitignore and YAML `.editorconfig` parts skipped — ours commits agent config, and already had the YAML rules. |
+| 2026-10-29 | `717b8f5` | User implements `MustVerifyEmail` | skipped | Already does (`User.php`). |
+| 2026-10-29 | `8e44013` | oxfmt `stylesheet` option for Tailwind sorting | skipped | Already uses it (`vite.config.ts`). |
+| 2026-10-29 | `98d9b82` | `Unique` in `ProfileValidationRules` return types | skipped | Our docblocks type the arrays as `mixed`; the PHPStan gap they closed doesn't exist here. |
+| 2026-10-29 | `0c94c26` | Gitignore Boost and AI assistant files | skipped | This repo commits `.claude/settings.json` and `.ai/` on purpose. |
+| 2026-10-29 | 3 commits | Chisel ×2 (`6626e52`, `29086ec`), comment typo in vendor `ui/sidebar.tsx` (`504dfac`) | noise | — |
