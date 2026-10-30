@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests;
 
+use Illuminate\Database\ConnectionResolverInterface;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use RuntimeException;
 
@@ -21,13 +22,13 @@ abstract class TestCase extends BaseTestCase
     {
         parent::refreshApplication();
 
-        $database = (string) $this->app->make('db')->connection()->getDatabaseName();
+        $database = (string) $this->app->make(ConnectionResolverInterface::class)->connection()->getDatabaseName();
 
         throw_unless(
             str_ends_with($database, '_test'),
             RuntimeException::class,
             "Refusing to run the suite against '{$database}': a test database name must end in '_test'. "
-            .'Write this checkout\'s .env.testing from .env.testing.example (see .ai/rules/database.md).',
+            ."Write this checkout's .env.testing from .env.testing.example (see .ai/rules/database.md).",
         );
     }
 }
