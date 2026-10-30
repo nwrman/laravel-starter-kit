@@ -40,6 +40,9 @@ writing every migration portably or running a second CI lane, which 0013 already
 - `Tests\TestCase` refuses to run unless the test database's name ends in `_test`. It checks
   before the traits boot, so the run dies ahead of the first migration — `RefreshDatabase`
   would otherwise wipe whatever `.env` points at, which is the development database.
+- The `toolkit:*` composer scripts pass `--env=testing`. Their artisan parent otherwise
+  loads `.env` and exports its `DB_DATABASE` to Pest, where it beats `.env.testing` — measured
+  while building this, and caught by the guard below.
 - `.env.testing.example` is committed with a throwaway `APP_KEY` and passkey secret. They are
   disposable by construction: the file only ever names a `_test` database.
 - `composer create-project` names the databases after the project folder and creates both

@@ -194,11 +194,9 @@ jobs:
           key: ${{ github.repository }}-bun-${{ hashFiles('bun.lock') }}
           restore-keys: ${{ github.repository }}-bun-
 
-      # A "no database" stub, not a sqlite path: .env.example's Postgres driver comes
-      # along with the copy, and artisan boots here (post-autoload-dump, key:generate,
-      # the Wayfinder build, PHPStan) without ever querying. Point it at in-memory
-      # sqlite so a boot-time query can never turn this lane red for a database it
-      # was never meant to reach. The suite itself reads .env.testing.
+      # .env is for artisan's boot here, not for the suite: the suite reads .env.testing,
+      # written below for the Postgres service. Give .env the same "no database" stub as
+      # the lanes without a service, so nothing booted from it can reach a database.
       - name: Copy Environment File
         run: |
           cp .env.example .env

@@ -202,7 +202,8 @@ both.
    host), copies `.env`, `vendor`, `node_modules` and the built assets from main, rewrites
    `APP_URL`, and gives it its own database: empty and migrated, or a copy of main's.
 3. The Product's `herd.yml` `after_create` does the rest — refuse a worktree Herd left on
-   main's database, the `_test` database and its `.env.testing`, seed a fresh database, the TIA baseline the last landed ticket published for the base
+   main's database, the `_test` database and its `.env.testing`, seed a fresh database, the
+   TIA baseline the last landed ticket published for the base
    — and leaves a marker. **Herd runs a failing hook line and carries on without a word**, so
    the marker is the only proof setup finished: without it the ticket does not start, and the
    failing command is printed.
