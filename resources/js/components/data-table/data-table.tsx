@@ -1,19 +1,13 @@
 import {
-  type ColumnDef,
   type ColumnFiltersState,
+  type PaginationState,
   type Row,
+  type RowData,
   type RowSelectionState,
   type SortingState,
-  type Table as TanstackTable,
-  type VisibilityState,
-  flexRender,
-  getCoreRowModel,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
+  type Updater,
+  functionalUpdate,
+  useTable,
 } from '@tanstack/react-table';
 import * as React from 'react';
 import {
@@ -25,12 +19,21 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
+import {
+  type DataTableColumnDef,
+  type DataTableFeatures,
+  type DataTableInstance,
+  dataTableFeatures,
+} from './features';
 
-type DataTableProps<TData, TValue> = {
-  columns: ColumnDef<TData, TValue>[];
+type DataTableProps<TData extends RowData> = {
+  // Each column keeps its own value type, so the array is typed the way TanStack's own
+  // `columnHelper.columns()` types it.
+  // oxlint-disable-next-line typescript/no-explicit-any
+  columns: DataTableColumnDef<TData, any>[];
   data: TData[];
-  renderToolbar?: (table: TanstackTable<TData>) => React.ReactNode;
-  renderPagination?: (table: TanstackTable<TData>) => React.ReactNode;
+  renderToolbar?: (table: DataTableInstance<TData>) => React.ReactNode;
+  renderPagination?: (table: DataTableInstance<TData>) => React.ReactNode;
   onRowClick?: (row: TData) => void;
   rowClassName?: (row: TData) => string | undefined;
   rowSelection?: RowSelectionState;
@@ -40,7 +43,7 @@ type DataTableProps<TData, TValue> = {
   initialPageSize?: number;
 };
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends RowData>({
   columns,
   data,
   renderToolbar,
@@ -52,10 +55,7 @@ export function DataTable<TData, TValue>({
   getRowId,
   emptyMessage = 'Sin resultados.',
   initialPageSize = 25,
-}: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
+}: DataTableProps<TData>) {
   const [internalSelection, setInternalSelection] = React.useState<RowSelectionState>({});
 
   const selection = rowSelection ?? internalSelection;
@@ -71,35 +71,48 @@ export function DataTable<TData, TValue>({
     [selection, onRowSelectionChange],
   );
 
-  const table = useReactTable({
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+  const [globalFilter, setGlobalFilter] = React.useState('');
+  const [pagination, setPagination] = React.useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: initialPageSize,
+  });
+
+  // The table's own page reset is off (`autoResetPageIndex` below), because it also fires
+  // whenever `data` changes, so a poll or a partial reload threw the reader back to page 1
+  // (campaign-messenger's fix, ADR 0008). A new sort or filter still starts at page 1, here.
+  const toFirstPage = <T,>(set: React.Dispatch<React.SetStateAction<T>>) => {
+    return (updater: Updater<T>) => {
+      set((previous) => functionalUpdate(updater, previous));
+      setPagination((previous) =>
+        previous.pageIndex === 0 ? previous : { ...previous, pageIndex: 0 },
+      );
+    };
+  };
+
+  const table = useTable({
+    features: dataTableFeatures,
     data,
     columns,
     getRowId,
     state: {
       sorting,
       columnFilters,
-      columnVisibility,
+      globalFilter,
+      pagination,
       rowSelection: selection,
     },
     enableRowSelection: true,
-    onRowSelectionChange: (updater) => {
-      setSelection(typeof updater === 'function' ? updater(selection) : updater);
-    },
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onColumnVisibilityChange: setColumnVisibility,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-    initialState: {
-      pagination: { pageSize: initialPageSize },
-    },
+    onSortingChange: toFirstPage(setSorting),
+    onColumnFiltersChange: toFirstPage(setColumnFilters),
+    onGlobalFilterChange: toFirstPage(setGlobalFilter),
+    onPaginationChange: setPagination,
+    onRowSelectionChange: setSelection,
+    autoResetPageIndex: false,
   });
 
-  const handleRowClick = (row: Row<TData>, event: React.MouseEvent) => {
+  const handleRowClick = (row: Row<DataTableFeatures, TData>, event: React.MouseEvent) => {
     if (!onRowClick) return;
     // Ignore clicks that originated on an interactive element (checkbox, button, link).
     const target = event.target as HTMLElement;
@@ -119,9 +132,7 @@ export function DataTable<TData, TValue>({
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <TableHead key={header.id} colSpan={header.colSpan}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
+                    {header.isPlaceholder ? null : <table.FlexRender header={header} />}
                   </TableHead>
                 ))}
               </TableRow>
@@ -138,7 +149,7 @@ export function DataTable<TData, TValue>({
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      <table.FlexRender cell={cell} />
                     </TableCell>
                   ))}
                 </TableRow>
