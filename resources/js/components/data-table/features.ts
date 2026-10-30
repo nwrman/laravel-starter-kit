@@ -27,6 +27,11 @@ import {
  *
  * The full `filterFns` and `sortFns` registries keep v8's behaviour: `'auto'` resolves
  * against every built-in, and string names such as `'arrIncludesSome'` keep working.
+ *
+ * Under the React Compiler, a component that receives a `row`, `column` or `cell` and
+ * reads state through one of its methods (`getIsSorted()`, `getIsSelected()`, …) is
+ * memoized against an object that never changes, and freezes. Read that state through
+ * `<Subscribe>` inside the component, as `DataTableColumnHeader` does.
  */
 export const dataTableFeatures = tableFeatures({
   columnFilteringFeature,
