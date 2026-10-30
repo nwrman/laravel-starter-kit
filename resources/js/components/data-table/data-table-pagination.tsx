@@ -1,18 +1,19 @@
-import type { Table } from '@tanstack/react-table';
+import type { RowData } from '@tanstack/react-table';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import type { DataTableInstance } from './features';
 
-type Props<TData> = {
-  table: Table<TData>;
+type Props<TData extends RowData> = {
+  table: DataTableInstance<TData>;
   pageSizeOptions?: number[];
 };
 
-export function DataTablePagination<TData>({
+export function DataTablePagination<TData extends RowData>({
   table,
   pageSizeOptions = [10, 25, 50, 100],
 }: Props<TData>) {
   const totalRows = table.getFilteredRowModel().rows.length;
-  const pageSize = table.getState().pagination.pageSize;
+  const pageSize = table.state.pagination.pageSize;
   // Hide pagination entirely when all rows fit on a single page.
   if (totalRows <= pageSize) {
     return null;
@@ -25,7 +26,7 @@ export function DataTablePagination<TData>({
       <div className="flex-1">
         {selectedCount > 0
           ? `${selectedCount} de ${totalRows} seleccionados`
-          : `${totalRows} destinatarios`}
+          : `${totalRows} resultados`}
       </div>
       <div className="flex items-center gap-4">
         <label className="flex items-center gap-2">
@@ -43,7 +44,7 @@ export function DataTablePagination<TData>({
           </select>
         </label>
         <span>
-          Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
+          Página {table.state.pagination.pageIndex + 1} de {table.getPageCount()}
         </span>
         <div className="flex items-center gap-1">
           <Button
