@@ -1,10 +1,8 @@
-import {
-  DataTable,
-  type DataTableColumnDef,
-  DataTableColumnHeader,
-  DataTablePagination,
-  DataTableToolbar,
-} from '@/components/data-table';
+import { DataTable } from '@/components/data-table/data-table';
+import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
+import { DataTablePagination } from '@/components/data-table/data-table-pagination';
+import { DataTableToolbar } from '@/components/data-table/data-table-toolbar';
+import type { DataTableColumnDef } from '@/components/data-table/features';
 import { Badge } from '@/components/ui/badge';
 import type { TeamMember } from '@/types/demo';
 
