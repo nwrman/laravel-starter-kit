@@ -54,4 +54,17 @@ describe('CommandMenu', () => {
 
     expect(screen.queryByText('Jane Smith')).not.toBeInTheDocument();
   });
+
+  it('finds records whatever their accents', async () => {
+    const user = userEvent.setup();
+    render(<CommandMenu open onOpenChange={vi.fn()} />);
+
+    await user.type(screen.getByPlaceholderText('Buscar proyectos, equipo...'), 'lopez');
+
+    // Ana López leads one project and is one team member.
+    const labels = screen
+      .getAllByRole('option')
+      .map((option) => option.querySelector('span')?.textContent);
+    expect(labels).toEqual(['Migración a Cloud', 'Ana López']);
+  });
 });
