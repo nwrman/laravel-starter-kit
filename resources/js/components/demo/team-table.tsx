@@ -13,7 +13,8 @@ const statusVariant: Record<string, 'default' | 'secondary' | 'outline' | 'destr
 
 const columns: DataTableColumnDef<TeamMember>[] = [
   {
-    // The cell shows the email under the name, so search covers both.
+    // The cell shows the email under the name, so search covers both. Sorting reads the
+    // same string, which still orders by name first.
     id: 'name',
     accessorFn: (row) => `${row.name} ${row.email}`,
     header: ({ column }) => <DataTableColumnHeader column={column} title="Nombre" />,
