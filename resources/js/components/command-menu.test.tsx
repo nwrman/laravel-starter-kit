@@ -1,5 +1,5 @@
 import { router } from '@inertiajs/react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CommandMenu } from './command-menu';
 
@@ -53,5 +53,18 @@ describe('CommandMenu', () => {
     render(<CommandMenu open={false} onOpenChange={vi.fn()} />);
 
     expect(screen.queryByText('Jane Smith')).not.toBeInTheDocument();
+  });
+
+  it('finds records whatever their accents', async () => {
+    const user = userEvent.setup();
+    render(<CommandMenu open onOpenChange={vi.fn()} />);
+
+    await user.type(screen.getByPlaceholderText('Buscar proyectos, equipo...'), 'lopez');
+
+    // Ana López leads one project and is one team member.
+    const options = screen.getAllByRole('option');
+    expect(options).toHaveLength(2);
+    expect(within(options[0]).getByText('Migración a Cloud')).toBeInTheDocument();
+    expect(within(options[1]).getByText('Ana López')).toBeInTheDocument();
   });
 });

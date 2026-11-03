@@ -1,12 +1,13 @@
-import type { Table } from '@tanstack/react-table';
+import type { RowData } from '@tanstack/react-table';
 import { Search, X } from 'lucide-react';
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import type { DataTableInstance } from './features';
 
-type Props<TData> = {
-  table: Table<TData>;
+type Props<TData extends RowData> = {
+  table: DataTableInstance<TData>;
   searchPlaceholder?: string;
   /** Columns to search against when the global input changes. Uses TanStack's column filter on each ID. */
   searchColumnIds?: string[];
@@ -14,7 +15,7 @@ type Props<TData> = {
   className?: string;
 };
 
-export function DataTableToolbar<TData>({
+export function DataTableToolbar<TData extends RowData>({
   table,
   searchPlaceholder = 'Buscar…',
   searchColumnIds,
@@ -22,7 +23,8 @@ export function DataTableToolbar<TData>({
   className,
 }: Props<TData>) {
   const [searchValue, setSearchValue] = React.useState('');
-  const isFiltered = table.getState().columnFilters.length > 0 || searchValue.length > 0;
+  const searchRef = React.useRef<HTMLInputElement>(null);
+  const isFiltered = table.state.columnFilters.length > 0 || searchValue.length > 0;
 
   const handleSearch = (value: string) => {
     setSearchValue(value);
@@ -40,6 +42,8 @@ export function DataTableToolbar<TData>({
     setSearchValue('');
     table.resetColumnFilters();
     table.setGlobalFilter('');
+    // The button unmounts once nothing is filtered; keep keyboard focus in the toolbar.
+    searchRef.current?.focus();
   };
 
   return (
@@ -48,6 +52,7 @@ export function DataTableToolbar<TData>({
         <div className="relative">
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
+            ref={searchRef}
             value={searchValue}
             onChange={(event) => handleSearch(event.target.value)}
             placeholder={searchPlaceholder}

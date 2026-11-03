@@ -1,13 +1,9 @@
-import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
+import { DataTable } from '@/components/data-table/data-table';
+import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
+import { DataTablePagination } from '@/components/data-table/data-table-pagination';
+import { DataTableToolbar } from '@/components/data-table/data-table-toolbar';
+import type { DataTableColumnDef } from '@/components/data-table/features';
 import { Badge } from '@/components/ui/badge';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import type { TeamMember } from '@/types/demo';
 
 const statusVariant: Record<string, 'default' | 'secondary' | 'outline' | 'destructive'> = {
@@ -15,10 +11,13 @@ const statusVariant: Record<string, 'default' | 'secondary' | 'outline' | 'destr
   Licencia: 'outline',
 };
 
-const columns: ColumnDef<TeamMember>[] = [
+const columns: DataTableColumnDef<TeamMember>[] = [
   {
-    accessorKey: 'name',
-    header: 'Nombre',
+    // The cell shows the email under the name, so search covers both. Sorting reads the
+    // same string, which still orders by name first.
+    id: 'name',
+    accessorFn: (row) => `${row.name} ${row.email}`,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Nombre" />,
     cell: ({ row }) => (
       <div>
         <div className="font-medium">{row.original.name}</div>
@@ -28,22 +27,22 @@ const columns: ColumnDef<TeamMember>[] = [
   },
   {
     accessorKey: 'role',
-    header: 'Rol',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Rol" />,
   },
   {
     accessorKey: 'department',
-    header: 'Departamento',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Departamento" />,
   },
   {
     accessorKey: 'status',
-    header: 'Estado',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Estado" />,
     cell: ({ row }) => (
       <Badge variant={statusVariant[row.original.status] ?? 'outline'}>{row.original.status}</Badge>
     ),
   },
   {
     accessorKey: 'utilization',
-    header: 'Utilización',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Utilización" />,
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
         <div className="h-2 w-16 overflow-hidden rounded-full bg-muted">
@@ -65,48 +64,17 @@ type Props = {
 };
 
 export function TeamTable({ rows }: Props) {
-  const table = useReactTable({
-    data: rows,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-  });
-
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(header.column.columnDef.header, header.getContext())}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                Sin resultados.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </div>
+    <DataTable
+      columns={columns}
+      data={rows}
+      initialPageSize={10}
+      renderToolbar={(table) => (
+        <DataTableToolbar table={table} searchPlaceholder="Buscar personas…" />
+      )}
+      renderPagination={(table) => (
+        <DataTablePagination table={table} pageSizeOptions={[10, 25, 50]} />
+      )}
+    />
   );
 }

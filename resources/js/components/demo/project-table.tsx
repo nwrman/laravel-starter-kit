@@ -1,14 +1,10 @@
 import { Link } from '@inertiajs/react';
-import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
+import { DataTable } from '@/components/data-table/data-table';
+import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
+import { DataTablePagination } from '@/components/data-table/data-table-pagination';
+import { DataTableToolbar } from '@/components/data-table/data-table-toolbar';
+import type { DataTableColumnDef } from '@/components/data-table/features';
 import { Badge } from '@/components/ui/badge';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import type { ProjectRow } from '@/types/demo';
 
 const statusVariant: Record<string, 'default' | 'secondary' | 'outline' | 'destructive'> = {
@@ -22,10 +18,10 @@ function formatCurrency(value: number): string {
   return `$${(value / 1_000).toFixed(0)}K`;
 }
 
-const columns: ColumnDef<ProjectRow>[] = [
+const columns: DataTableColumnDef<ProjectRow>[] = [
   {
     accessorKey: 'name',
-    header: 'Proyecto',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Proyecto" />,
     cell: ({ row }) => (
       <Link href={`/projects/${row.original.id}`} className="font-medium hover:underline" prefetch>
         {row.original.name}
@@ -34,28 +30,28 @@ const columns: ColumnDef<ProjectRow>[] = [
   },
   {
     accessorKey: 'status',
-    header: 'Estado',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Estado" />,
     cell: ({ row }) => (
       <Badge variant={statusVariant[row.original.status] ?? 'outline'}>{row.original.status}</Badge>
     ),
   },
   {
     accessorKey: 'teamLead',
-    header: 'Líder',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Líder" />,
   },
   {
     accessorKey: 'budget',
-    header: 'Presupuesto',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Presupuesto" />,
     cell: ({ row }) => <span className="tabular-nums">{formatCurrency(row.original.budget)}</span>,
   },
   {
     accessorKey: 'deadline',
-    header: 'Fecha Límite',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Fecha Límite" />,
     cell: ({ row }) => <span className="tabular-nums">{row.original.deadline}</span>,
   },
   {
     accessorKey: 'progress',
-    header: 'Progreso',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Progreso" />,
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
         <div className="h-2 w-16 overflow-hidden rounded-full bg-muted">
@@ -75,48 +71,17 @@ type Props = {
 };
 
 export function ProjectTable({ rows }: Props) {
-  const table = useReactTable({
-    data: rows,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-  });
-
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(header.column.columnDef.header, header.getContext())}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                Sin resultados.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </div>
+    <DataTable
+      columns={columns}
+      data={rows}
+      initialPageSize={10}
+      renderToolbar={(table) => (
+        <DataTableToolbar table={table} searchPlaceholder="Buscar proyectos…" />
+      )}
+      renderPagination={(table) => (
+        <DataTablePagination table={table} pageSizeOptions={[10, 25, 50]} />
+      )}
+    />
   );
 }

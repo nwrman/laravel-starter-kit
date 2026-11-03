@@ -32,6 +32,11 @@ export function formatDateTime(date: string | Date | number): string {
   return format(new Date(date), 'dd MMM yyyy hh:mm a', { locale: es });
 }
 
+/**
+ * Folds text for matching: accents stripped, lowercased, so "movil" finds "Móvil" and
+ * "nino" finds "Niño". Every client-side search goes through it — the shared DataTable's
+ * filters and the command menu's `Command` — so a search box never misses Spanish text.
+ */
 export function normalizeForSearch(str: string): string {
   return str
     .normalize('NFD')
