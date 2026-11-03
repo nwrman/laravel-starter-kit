@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DataTable } from './data-table';
 import { DataTableColumnHeader } from './data-table-column-header';
@@ -250,6 +250,8 @@ describe('DataTable', () => {
 
     // A poll or partial reload hands the table a new array with the same rows.
     rerender(<PagedTable data={people(15)} />);
+    // TanStack applies its own page reset after the render that saw the new data.
+    await act(() => Promise.resolve());
 
     expect(screen.getByText('Página 2 de 2')).toBeInTheDocument();
     expect(bodyNames()).toEqual(['Person 11', 'Person 12', 'Person 13', 'Person 14', 'Person 15']);
