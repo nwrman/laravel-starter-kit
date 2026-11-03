@@ -103,6 +103,8 @@ export function DataTable<TData extends RowData>({
       pagination,
       rowSelection: selection,
     },
+    // The registry's accent-insensitive entry; the library's 'auto' bypasses the registry.
+    globalFilterFn: 'includesString',
     enableRowSelection: true,
     onSortingChange: toFirstPage(setSorting),
     onColumnFiltersChange: toFirstPage(setColumnFilters),

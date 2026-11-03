@@ -11,6 +11,8 @@ import {
   createFilteredRowModel,
   createPaginatedRowModel,
   createSortedRowModel,
+  constructFilterFn,
+  filterFn_includesString,
   filterFns,
   globalFilteringFeature,
   rowPaginationFeature,
@@ -19,6 +21,14 @@ import {
   sortFns,
   tableFeatures,
 } from '@tanstack/react-table';
+import { normalizeForSearch } from '@/lib/utils';
+
+// "movil" finds "Móvil": both sides go through the app's one search normalizer.
+const includesStringIgnoringAccents = constructFilterFn({
+  ...filterFn_includesString,
+  resolveFilterValue: (value) => normalizeForSearch(String(value ?? '')),
+  resolveDataValue: (value) => (value == null ? undefined : normalizeForSearch(String(value))),
+});
 
 /**
  * The TanStack Table v9 features every DataTable registers. v9 exposes an API only when
@@ -27,6 +37,8 @@ import {
  *
  * The full `filterFns` and `sortFns` registries keep v8's behaviour: `'auto'` resolves
  * against every built-in, and string names such as `'arrIncludesSome'` keep working.
+ * `includesString`, the one `'auto'` picks for text and the one `DataTable` points its
+ * global search at, ignores accents: Spanish copy is full of them.
  *
  * Under the React Compiler, a component that receives a `row`, `column` or `cell` and
  * reads state through one of its methods (`getIsSorted()`, `getIsSelected()`, …) is
@@ -46,7 +58,7 @@ export const dataTableFeatures = tableFeatures({
   paginatedRowModel: createPaginatedRowModel(),
   facetedRowModel: createFacetedRowModel(),
   facetedUniqueValues: createFacetedUniqueValues(),
-  filterFns,
+  filterFns: { ...filterFns, includesString: includesStringIgnoringAccents },
   sortFns,
 });
 
