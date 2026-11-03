@@ -36,6 +36,11 @@ export function DataTablePagination<TData extends RowData>({
   // size that fits everything on one page never takes away the way back.
   const showPageSize = totalRows > Math.min(...pageSizeOptions);
 
+  // The table already says "Sin resultados."; a "0 resultados" under it repeats it.
+  if (totalRows === 0) {
+    return null;
+  }
+
   return (
     <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-xs text-muted-foreground">
       <div className="whitespace-nowrap">
