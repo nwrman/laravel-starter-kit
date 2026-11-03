@@ -1,7 +1,7 @@
 import * as React from "react"
-import { Command as CommandPrimitive } from "cmdk"
+import { Command as CommandPrimitive, defaultFilter } from "cmdk"
 
-import { cn } from "@/lib/utils"
+import { cn, normalizeForSearch } from "@/lib/utils"
 import {
   Dialog,
   DialogContent,
@@ -15,13 +15,25 @@ import {
 } from "@/components/ui/input-group"
 import { SearchIcon, CheckIcon } from "lucide-react"
 
+// cmdk's scorer compares raw text, so "movil" missed "Móvil". Score the folded text instead.
+const filterIgnoringAccents: NonNullable<
+  React.ComponentProps<typeof CommandPrimitive>["filter"]
+> = (value, search, keywords) =>
+  defaultFilter(
+    normalizeForSearch(value),
+    normalizeForSearch(search),
+    keywords?.map(normalizeForSearch)
+  )
+
 function Command({
   className,
+  filter = filterIgnoringAccents,
   ...props
 }: React.ComponentProps<typeof CommandPrimitive>) {
   return (
     <CommandPrimitive
       data-slot="command"
+      filter={filter}
       className={cn(
         "flex size-full flex-col overflow-hidden rounded-4xl bg-popover p-1 text-popover-foreground",
         className
