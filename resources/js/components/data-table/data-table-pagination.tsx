@@ -18,8 +18,6 @@ export function DataTablePagination<TData extends RowData>({
   const pageSize = table.state.pagination.pageSize;
   const pageCount = table.getPageCount();
   const selectedCount = table.getFilteredSelectedRowModel().rows.length;
-  // The size picker stays while a smaller size could still split the rows, so choosing a
-  // size that fits everything on one page never takes away the way back.
   const pageIndex = table.state.pagination.pageIndex;
   const previousRef = React.useRef<HTMLButtonElement>(null);
   const nextRef = React.useRef<HTMLButtonElement>(null);
@@ -34,6 +32,8 @@ export function DataTablePagination<TData extends RowData>({
       previousRef.current?.focus();
     }
   };
+  // The size picker stays while a smaller size could still split the rows, so choosing a
+  // size that fits everything on one page never takes away the way back.
   const showPageSize = totalRows > Math.min(...pageSizeOptions);
 
   return (

@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/input-group"
 import { SearchIcon, CheckIcon } from "lucide-react"
 
-// cmdk's scorer compares raw text, so "movil" missed "Móvil". Score the folded text instead.
+// cmdk's scorer ignores case but not accents, so "movil" missed "Móvil". Score folded text.
 const filterIgnoringAccents: NonNullable<
   React.ComponentProps<typeof CommandPrimitive>["filter"]
 > = (value, search, keywords) =>
