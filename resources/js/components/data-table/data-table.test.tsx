@@ -291,6 +291,30 @@ describe('DataTable', () => {
     expect(screen.getByText('Página 1 de 2')).toBeInTheDocument();
   });
 
+  it('returns to the first page when a column filter changes', async () => {
+    const user = userEvent.setup();
+    render(<PagedTable data={people(25)} searchColumnIds={['name']} />);
+
+    await user.click(screen.getByRole('button', { name: 'Página siguiente' }));
+    // "Person 1" matches Person 1 and Person 10–19: eleven rows, two pages.
+    await user.type(screen.getByPlaceholderText('Buscar'), 'Person 1');
+
+    expect(screen.getByText('Página 1 de 2')).toBeInTheDocument();
+  });
+
+  it('shows the empty message when a refresh on a later page returns no rows', async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(<PagedTable data={people(15)} />);
+
+    await user.click(screen.getByRole('button', { name: 'Página siguiente' }));
+    rerender(<PagedTable data={[]} />);
+
+    expect(screen.getByText('Sin resultados.')).toBeInTheDocument();
+    // Rows that come back land on page 1, not on a stale page 2.
+    rerender(<PagedTable data={people(15)} />);
+    expect(screen.getByText('Página 1 de 2')).toBeInTheDocument();
+  });
+
   it('puts focus back in the search box after clearing it', async () => {
     const user = userEvent.setup();
     render(<PagedTable data={people(5)} />);
@@ -317,14 +341,20 @@ function people(count: number): Row[] {
   }));
 }
 
-function PagedTable({ data }: { data: Row[] }) {
+function PagedTable({ data, searchColumnIds }: { data: Row[]; searchColumnIds?: string[] }) {
   return (
     <DataTable
       columns={plainColumns}
       data={data}
       getRowId={(row) => row.id}
       initialPageSize={10}
-      renderToolbar={(table) => <DataTableToolbar table={table} searchPlaceholder="Buscar" />}
+      renderToolbar={(table) => (
+        <DataTableToolbar
+          table={table}
+          searchColumnIds={searchColumnIds}
+          searchPlaceholder="Buscar"
+        />
+      )}
       renderPagination={(table) => <DataTablePagination table={table} />}
     />
   );

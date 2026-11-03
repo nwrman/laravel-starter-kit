@@ -44,6 +44,25 @@ describe('DataTablePagination', () => {
     expect(screen.queryByText(/Página/)).not.toBeInTheDocument();
   });
 
+  it.each([
+    [10, false],
+    [11, true],
+  ])('with %i rows, offers the page-size picker: %s', (count, offered) => {
+    render(<PagedTable data={rows.slice(0, count)} />);
+
+    expect(screen.queryByRole('combobox', { name: 'Filas por página' }) !== null).toBe(offered);
+  });
+
+  it('leaves focus on "Página siguiente" while pages remain', async () => {
+    const user = userEvent.setup();
+    render(<PagedTable data={rows} />);
+
+    await user.click(screen.getByRole('button', { name: 'Página siguiente' }));
+
+    expect(screen.getByText('Página 2 de 3')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Página siguiente' })).toHaveFocus();
+  });
+
   it('keeps the page-size picker after a size that fits every row', async () => {
     const user = userEvent.setup();
     render(<PagedTable data={rows.slice(0, 15)} />);
