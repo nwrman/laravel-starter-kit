@@ -17,14 +17,13 @@ it("hands Rector the same paths rector.php's withPaths() lists", function (): vo
     preg_match('/const RECTOR_PATHS = \[(.*?)\];/s', (string) file_get_contents($root.'/vite.config.ts'), $hook);
     preg_match_all("/'([^']+)'/", $hook[1], $hookPaths);
 
-    $normalise = function (array $paths): array {
-        $paths = array_map(fn (string $path): string => mb_rtrim($path, '/'), $paths);
-        sort($paths);
+    // The hook matches a directory by prefix only when its entry ends in '/', and a file
+    // exactly: so each rector.php path must appear in the form its kind needs.
+    $expected = array_map(fn (string $path): string => is_dir($root.'/'.$path) ? $path.'/' : $path, $rectorPaths[1]);
+    $actual = $hookPaths[1];
+    sort($expected);
+    sort($actual);
 
-        return $paths;
-    };
-
-    expect($normalise($hookPaths[1]))
-        ->toBe($normalise($rectorPaths[1]))
-        ->toContain('app', 'bootstrap/app.php');
+    expect($actual)->toBe($expected)
+        ->toContain('app/', 'bootstrap/app.php');
 });
