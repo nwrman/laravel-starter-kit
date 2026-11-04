@@ -1,5 +1,15 @@
+import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { defineConfig } from 'vitest/config';
+
+// The toolkit's reporter writes frontend failures into storage/logs/test-failures.md beside
+// Pest's, so `composer test` and `test:retry` read one report. It ships in the PHP vendor
+// folder, which CI's frontend lane never installs: Vitest exits before any test runs when a
+// reporter file is missing, so the lane runs without it.
+const toolkitReporter = resolve(
+  import.meta.dirname,
+  'vendor/nwrman/laravel-toolkit/resources/js/vitest-reporter.mjs',
+);
 
 export default defineConfig({
   resolve: {
@@ -22,9 +32,7 @@ export default defineConfig({
     ],
     setupFiles: ['resources/js/testing/setup.ts'],
     css: false,
-    // The toolkit's reporter writes frontend failures into storage/logs/test-failures.md
-    // beside Pest's, so `composer test` and `test:retry` read one report.
-    reporters: ['default', './vendor/nwrman/laravel-toolkit/resources/js/vitest-reporter.mjs'],
+    reporters: existsSync(toolkitReporter) ? ['default', toolkitReporter] : ['default'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json-summary'],
