@@ -1,9 +1,26 @@
+import { relative } from 'node:path';
 import { wayfinder } from '@laravel/vite-plugin-wayfinder';
 import babel from '@rolldown/plugin-babel';
 import tailwindcss from '@tailwindcss/vite';
 import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
 import { defineConfig } from 'vite-plus';
+
+// Rector's `withPaths()` in rector.php. A file named on the command line is processed even
+// when it lies outside them (a file in lang/ is rewritten), so the pre-commit hook hands
+// Rector only staged files inside these. Its `withSkip()` still holds for named files.
+const RECTOR_PATHS = [
+  'app/',
+  'bootstrap/app.php',
+  'config/',
+  'database/',
+  'public/',
+  'routes/',
+  'tests/',
+];
+
+const quote = (files: readonly string[]): string =>
+  files.map((file) => JSON.stringify(file)).join(' ');
 
 export default defineConfig({
   lint: {
@@ -109,7 +126,25 @@ export default defineConfig({
   staged: {
     '*.{js,ts,tsx,css}': 'vp check --fix',
     '*.json,!package.json,!composer.json': 'vp check --fix',
-    '*.php': 'vendor/bin/pint --parallel',
+    // One task, so Rector and Pint never write the same file at once: Rector first, then
+    // Pint over its output. Both rewrite in place and the hook stages the result.
+    '*.php': (files) => {
+      const rector = files.filter((file) => {
+        const path = relative(import.meta.dirname, file);
+
+        return (
+          !path.endsWith('.blade.php') &&
+          RECTOR_PATHS.some((root) => (root.endsWith('/') ? path.startsWith(root) : path === root))
+        );
+      });
+
+      return [
+        ...(rector.length > 0
+          ? [`vendor/bin/rector process --no-progress-bar ${quote(rector)}`]
+          : []),
+        `vendor/bin/pint --parallel ${quote(files)}`,
+      ];
+    },
   },
   plugins: [
     laravel({

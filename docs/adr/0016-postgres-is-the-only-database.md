@@ -4,7 +4,8 @@ Date: 2026-10-30
 
 ## Status
 
-Accepted (supersedes 0013)
+Accepted (supersedes 0013). Its `--env=testing` clause is replaced by
+[ADR 0017](0017-no-test-command-boots-laravel.md); see the amendment at the end.
 
 ## Context
 
@@ -67,3 +68,10 @@ writing every migration portably or running a second CI lane, which 0013 already
   take this when they choose to; `.ai/rules/database.md` describes the arrangement they adopt.
 - **The `_test` suffix is a requirement**, not a habit. An app naming its test database
   anything else must change the guard too.
+
+## Amended 2026-11-03
+
+The clause "the `toolkit:*` composer scripts pass `--env=testing`" is replaced by
+[ADR 0017](0017-no-test-command-boots-laravel.md): toolkit v1 starts Pest from the shell, so no
+test command boots Laravel and none takes the flag. The `migrate --env=testing` steps keep it.
+The rest of this decision stands, the `_test` guard included.

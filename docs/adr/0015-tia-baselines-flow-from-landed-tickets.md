@@ -5,7 +5,8 @@ Date: 2026-10-19
 ## Status
 
 Accepted. Amends [ADR 0014](0014-build-loop-two-sessions-shape-before-tests.md): the
-"refreshes main" step no longer re-pins a TIA baseline.
+"refreshes main" step no longer re-pins a TIA baseline. Its browser clause is replaced by
+[ADR 0017](0017-no-test-command-boots-laravel.md); see the amendment at the end.
 
 ## Context
 
@@ -76,3 +77,10 @@ The build loop moved into the software factory's `factory` plugin. The mechanism
 `start-ticket.sh`, `worktree-setup.sh`, `worktree-teardown.sh` and `finish-ticket` are gone. The plugin's
 `factory-start-ticket` cuts the worktree from the base's local state and no longer fast-forwards it: pull the base
 first when the inherited commit must be the latest.
+
+## Amended 2026-11-03
+
+"Browser specs stay in the coverage run" is replaced by
+[ADR 0017](0017-no-test-command-boots-laravel.md): they run in their own `browser` gate, after
+the coverage gate and without coverage. The coverage gate still runs through TIA:
+`--toolkit-no-browser` leaves the Browser suite out without making the run a partial selection.

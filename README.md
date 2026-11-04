@@ -157,9 +157,10 @@ Business modules use singular PascalCase subfolders under each layer (`Http/Cont
 ### Backend (Pest)
 
 ```bash
-composer test:report -- --suite=unit,feature  # Unit + feature tests with report
-composer test:report -- --suite=browser       # Playwright browser tests
-composer test:retry                           # Re-run only previously failed tests
+composer test                                 # Backend tests TIA can reach, then Vitest
+composer test:feature                         # One suite (also test:unit, test:browser)
+composer test:retry                           # Re-run exactly the tests that failed last run
+composer preflight                            # Every CI gate, fail-fast, with a summary table
 ```
 
 ### Frontend (Vitest)
@@ -307,7 +308,7 @@ The authentication shell, settings pages, two-factor auth, preflight command, an
 
 ## Companion Package
 
-This starter kit includes [`nwrman/laravel-toolkit`](https://github.com/nwrman/laravel-toolkit) as a dependency. The toolkit provides Artisan commands (`preflight`, `test:report`, `test:retry`, `deploy:notify-telegram`). It is stack-agnostic and can be used independently on any Laravel project.
+This starter kit includes [`nwrman/laravel-toolkit`](https://github.com/nwrman/laravel-toolkit) as a dependency. The toolkit provides `vendor/bin/preflight`, a Pest plugin that writes the failure report and re-runs failed tests (`--toolkit-retry`), and the `toolkit:install` and `toolkit:tia` Artisan commands. It is stack-agnostic and can be used independently on any Laravel project.
 
 ## Credits
 

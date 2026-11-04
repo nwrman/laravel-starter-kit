@@ -26,5 +26,6 @@ until chosen and built.
 | [0012](0012-multi-agent-build-loop.md) | Multi-agent build loop: worktrees, the issue tracker as state machine | Accepted |
 | [0013](0013-sqlite-default-postgres-shipped.md) | sqlite is the default test driver, and the Postgres path ships complete | Superseded by 0016 |
 | [0014](0014-build-loop-two-sessions-shape-before-tests.md) | Build loop: two sessions per ticket, and the shape settles before the tests | Accepted (amends 0012) |
-| [0015](0015-tia-baselines-flow-from-landed-tickets.md) | TIA baselines flow from landed tickets, and the coverage gate stays unfiltered | Accepted (amends 0014) |
-| [0016](0016-postgres-is-the-only-database.md) | Postgres is the only database | Accepted (supersedes 0013) |
+| [0015](0015-tia-baselines-flow-from-landed-tickets.md) | TIA baselines flow from landed tickets, and the coverage gate stays unfiltered | Accepted (amends 0014; browser clause replaced by 0017) |
+| [0016](0016-postgres-is-the-only-database.md) | Postgres is the only database | Accepted (supersedes 0013; `--env=testing` clause replaced by 0017) |
+| [0017](0017-no-test-command-boots-laravel.md) | No test command boots Laravel; browser specs get their own gate | Accepted (replaces a clause of 0015 and of 0016) |

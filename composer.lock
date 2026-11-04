@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cc0454936c5bf7a02f61c05cf2048e92",
+    "content-hash": "cbf82f9a1976b7469dde74c20e36a3aa",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -2824,16 +2824,16 @@
         },
         {
             "name": "laravel/framework",
-            "version": "v13.39.0",
+            "version": "v13.40.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "d52c3b3129e4c8e213c97cdc68f94b0b7d27f181"
+                "reference": "1449bf241017087fbd38c118ecaabef3f6797fdc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/d52c3b3129e4c8e213c97cdc68f94b0b7d27f181",
-                "reference": "d52c3b3129e4c8e213c97cdc68f94b0b7d27f181",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/1449bf241017087fbd38c118ecaabef3f6797fdc",
+                "reference": "1449bf241017087fbd38c118ecaabef3f6797fdc",
                 "shasum": ""
             },
             "require": {
@@ -3051,7 +3051,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2026-10-27T14:04:39+00:00"
+            "time": "2026-11-03T15:07:18+00:00"
         },
         {
             "name": "laravel/passkeys",
@@ -3308,16 +3308,16 @@
         },
         {
             "name": "league/commonmark",
-            "version": "2.10.4",
+            "version": "2.10.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thephpleague/commonmark.git",
-                "reference": "40821b7606d8d946bac57dbd2290076c722e3a65"
+                "reference": "8eb53e906fd60c67038d22f1f1cab420ed58b8be"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/commonmark/zipball/40821b7606d8d946bac57dbd2290076c722e3a65",
-                "reference": "40821b7606d8d946bac57dbd2290076c722e3a65",
+                "url": "https://api.github.com/repos/thephpleague/commonmark/zipball/8eb53e906fd60c67038d22f1f1cab420ed58b8be",
+                "reference": "8eb53e906fd60c67038d22f1f1cab420ed58b8be",
                 "shasum": ""
             },
             "require": {
@@ -3411,7 +3411,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-10-17T19:59:50+00:00"
+            "time": "2026-10-31T13:35:37+00:00"
         },
         {
             "name": "league/config",
@@ -4927,26 +4927,28 @@
         },
         {
             "name": "nwrman/laravel-toolkit",
-            "version": "v0.4.2",
+            "version": "v1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nwrman/laravel-toolkit.git",
-                "reference": "d51f5f81a7b8c974a86088bdc111a191f3287e5a"
+                "reference": "4ade7856f2bf70300d8a5da2475f1fb5c6c00e7c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nwrman/laravel-toolkit/zipball/d51f5f81a7b8c974a86088bdc111a191f3287e5a",
-                "reference": "d51f5f81a7b8c974a86088bdc111a191f3287e5a",
+                "url": "https://api.github.com/repos/nwrman/laravel-toolkit/zipball/4ade7856f2bf70300d8a5da2475f1fb5c6c00e7c",
+                "reference": "4ade7856f2bf70300d8a5da2475f1fb5c6c00e7c",
                 "shasum": ""
             },
             "require": {
                 "illuminate/console": "^13.0",
                 "illuminate/contracts": "^13.0",
+                "illuminate/filesystem": "^13.0",
                 "illuminate/http": "^13.0",
                 "illuminate/process": "^13.0",
                 "illuminate/support": "^13.0",
                 "laravel/agent-detector": "^2.0",
-                "php": "^8.5"
+                "php": "^8.5",
+                "vlucas/phpdotenv": "^5.6"
             },
             "require-dev": {
                 "larastan/larastan": "^3.0",
@@ -4959,8 +4961,16 @@
                 "phpstan/phpstan-deprecation-rules": "^2.0",
                 "phpstan/phpstan-phpunit": "^2.0"
             },
+            "bin": [
+                "bin/preflight"
+            ],
             "type": "library",
             "extra": {
+                "pest": {
+                    "plugins": [
+                        "Nwrman\\LaravelToolkit\\Pest\\Plugin"
+                    ]
+                },
                 "laravel": {
                     "providers": [
                         "Nwrman\\LaravelToolkit\\LaravelToolkitServiceProvider"
@@ -4993,9 +5003,9 @@
             ],
             "support": {
                 "issues": "https://github.com/nwrman/laravel-toolkit/issues",
-                "source": "https://github.com/nwrman/laravel-toolkit/tree/v0.4.2"
+                "source": "https://github.com/nwrman/laravel-toolkit/tree/v1.0.0"
             },
-            "time": "2026-10-23T05:56:10+00:00"
+            "time": "2026-11-04T04:40:53+00:00"
         },
         {
             "name": "openspout/openspout",
@@ -5417,16 +5427,16 @@
         },
         {
             "name": "phpstan/phpdoc-parser",
-            "version": "2.4.0",
+            "version": "2.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpdoc-parser.git",
-                "reference": "e3647094ed8f0f1f67393d812b793a5143e25af3"
+                "reference": "af8e840551031d254cfdb3a18a62c3470a309c10"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/e3647094ed8f0f1f67393d812b793a5143e25af3",
-                "reference": "e3647094ed8f0f1f67393d812b793a5143e25af3",
+                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/af8e840551031d254cfdb3a18a62c3470a309c10",
+                "reference": "af8e840551031d254cfdb3a18a62c3470a309c10",
                 "shasum": ""
             },
             "require": {
@@ -5458,9 +5468,9 @@
             "description": "PHPDoc parser with support for nullable, intersection and generic types",
             "support": {
                 "issues": "https://github.com/phpstan/phpdoc-parser/issues",
-                "source": "https://github.com/phpstan/phpdoc-parser/tree/2.4.0"
+                "source": "https://github.com/phpstan/phpdoc-parser/tree/2.4.1"
             },
-            "time": "2026-10-28T20:28:58+00:00"
+            "time": "2026-10-30T19:36:28+00:00"
         },
         {
             "name": "pragmarx/google2fa",

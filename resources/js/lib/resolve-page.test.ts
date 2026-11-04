@@ -1,3 +1,4 @@
+import * as errorPage from '../pages/error';
 import { pages, resolvePage } from './resolve-page';
 
 describe('resolvePage', () => {
@@ -10,9 +11,9 @@ describe('resolvePage', () => {
   });
 
   it('resolves a page by its Inertia name', async () => {
-    const page = await resolvePage('error');
-
-    expect(page).toHaveProperty('default');
+    // The page is imported above, at collection: resolving it here is a lookup, not a
+    // fresh transform of its module tree inside the test's time limit.
+    expect(await resolvePage('error')).toBe(errorPage);
   });
 
   it('rejects a name with no page behind it', async () => {
