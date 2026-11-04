@@ -1,4 +1,7 @@
 import { router } from '@inertiajs/react';
+// Transformed once at collection, so each fresh load below re-runs the module instead of
+// compiling its component tree inside a test's time limit.
+import './session-expired-handler';
 
 type Listener = (event: { detail: unknown; preventDefault?: () => void }) => void;
 
@@ -52,7 +55,7 @@ describe('session-expired-handler', () => {
 
     expect(registered).toContain('before');
     expect(registered).toContain('httpException');
-  }, 15_000);
+  });
 
   it('silently retries the original visit on 419 when csrf refresh + auth check succeed', async () => {
     await loadHandlerFresh();
