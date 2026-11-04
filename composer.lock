@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cbf82f9a1976b7469dde74c20e36a3aa",
+    "content-hash": "239894c980ee5a6975919df684523696",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -4927,16 +4927,16 @@
         },
         {
             "name": "nwrman/laravel-toolkit",
-            "version": "v1.0.0",
+            "version": "v1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nwrman/laravel-toolkit.git",
-                "reference": "4ade7856f2bf70300d8a5da2475f1fb5c6c00e7c"
+                "reference": "eb047ccfff7cfd0635c6bbd83069b5efd7b487b0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nwrman/laravel-toolkit/zipball/4ade7856f2bf70300d8a5da2475f1fb5c6c00e7c",
-                "reference": "4ade7856f2bf70300d8a5da2475f1fb5c6c00e7c",
+                "url": "https://api.github.com/repos/nwrman/laravel-toolkit/zipball/eb047ccfff7cfd0635c6bbd83069b5efd7b487b0",
+                "reference": "eb047ccfff7cfd0635c6bbd83069b5efd7b487b0",
                 "shasum": ""
             },
             "require": {
@@ -5003,9 +5003,9 @@
             ],
             "support": {
                 "issues": "https://github.com/nwrman/laravel-toolkit/issues",
-                "source": "https://github.com/nwrman/laravel-toolkit/tree/v1.0.0"
+                "source": "https://github.com/nwrman/laravel-toolkit/tree/v1.0.1"
             },
-            "time": "2026-11-04T04:40:53+00:00"
+            "time": "2026-11-04T05:21:27+00:00"
         },
         {
             "name": "openspout/openspout",
