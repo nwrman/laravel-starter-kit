@@ -22,6 +22,9 @@ export default defineConfig({
     ],
     setupFiles: ['resources/js/testing/setup.ts'],
     css: false,
+    // The toolkit's reporter writes frontend failures into storage/logs/test-failures.md
+    // beside Pest's, so `composer test` and `test:retry` read one report.
+    reporters: ['default', './vendor/nwrman/laravel-toolkit/resources/js/vitest-reporter.mjs'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json-summary'],
