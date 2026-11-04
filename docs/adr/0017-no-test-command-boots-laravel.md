@@ -65,7 +65,9 @@ but Herd does not ship PCOV and it needs a rebuild for every PHP minor, so it is
   uses TIA, which is everything the hook was enforcing.
 - **Preflight stops at the first failing gate**, and `--retry` / `--gate=` print every gate's
   row, so a run just to get the full table is never needed.
-- **Browser specs no longer count toward the 100 % coverage minimum.** Covering a page prop
-  through a browser visit stops working; use `assertInertia` in a feature test.
+- **Browser specs no longer count toward preflight's 100 % coverage minimum.** Covering a page
+  prop through a browser visit stops working there; use `assertInertia` in a feature test.
+  `composer test:ci` and CI still run every suite under coverage, so preflight is the stricter
+  of the two.
 - **Descendants move when they choose to** (ADR 0008). Each adds feature tests for the lines
   only its browser specs covered: Minuta had 67 lines in 12 files.
