@@ -38,11 +38,39 @@ function linesPassingEnvTesting(): array
 it('passes --env=testing only to migrate steps', function (): void {
     $lines = linesPassingEnvTesting();
 
-    $notMigrate = array_values(array_filter(
+    // Per command, not per line: one line may chain a migrate step with something else.
+    $segments = array_merge(...array_map(
+        fn (string $line): array => preg_split('/;|&&|\|\|/', $line) ?: [],
         $lines,
-        fn (string $line): bool => preg_match('/artisan migrate(:status)? [^;&|]*--env=testing/', $line) !== 1,
+    ));
+
+    $notMigrate = array_values(array_filter(
+        $segments,
+        fn (string $segment): bool => str_contains($segment, '--env=testing')
+            && preg_match('/artisan migrate(:status)?\b/', $segment) !== 1,
     ));
 
     expect($lines)->not->toBeEmpty()
         ->and($notMigrate)->toBe([]);
+});
+
+it('runs no test command through artisan', function (): void {
+    /** @var array{scripts: array<string, string|list<string>>} $composer */
+    $composer = json_decode((string) file_get_contents(dirname(__DIR__, 3).'/composer.json'), true, flags: JSON_THROW_ON_ERROR);
+
+    $throughArtisan = [];
+
+    foreach ($composer['scripts'] as $name => $commands) {
+        if (! str_starts_with($name, 'test') && $name !== 'preflight') {
+            continue;
+        }
+
+        foreach ((array) $commands as $command) {
+            if (str_contains($command, 'artisan')) {
+                $throughArtisan[] = $name.': '.$command;
+            }
+        }
+    }
+
+    expect($throughArtisan)->toBe([]);
 });
