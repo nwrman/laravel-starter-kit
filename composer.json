@@ -123,7 +123,7 @@
         ],
         "test:fast": [
             "Composer\\Config::disableProcessTimeout",
-            "XDEBUG_MODE=coverage pest --parallel"
+            "XDEBUG_MODE=coverage pest --parallel --toolkit-no-browser"
         ],
         "test:frontend": [
             "Composer\\Config::disableProcessTimeout",
@@ -140,7 +140,7 @@
         ],
         "test": [
             "Composer\\Config::disableProcessTimeout",
-            "XDEBUG_MODE=coverage pest --parallel; status=$?; bun run test:ui || status=1; exit $status"
+            "XDEBUG_MODE=coverage pest --parallel --toolkit-no-browser; status=$?; bun run test:ui || status=1; exit $status"
         ],
         "test:ci": [
             "@test:lint",
