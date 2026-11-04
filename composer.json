@@ -111,15 +111,15 @@
         "test:type-coverage": "pest --type-coverage --min=100",
         "test:unit": [
             "Composer\\Config::disableProcessTimeout",
-            "@php artisan toolkit:report --no-interaction --suite=unit --env=testing"
+            "XDEBUG_MODE=off pest --parallel --testsuite=Unit"
         ],
         "test:feature": [
             "Composer\\Config::disableProcessTimeout",
-            "@php artisan toolkit:report --no-interaction --suite=feature --env=testing"
+            "XDEBUG_MODE=off pest --parallel --testsuite=Feature"
         ],
         "test:browser": [
             "Composer\\Config::disableProcessTimeout",
-            "@php artisan toolkit:report --no-interaction --suite=browser --env=testing"
+            "XDEBUG_MODE=off pest --parallel --testsuite=Browser"
         ],
         "test:fast": [
             "Composer\\Config::disableProcessTimeout",
@@ -127,7 +127,7 @@
         ],
         "test:frontend": [
             "Composer\\Config::disableProcessTimeout",
-            "@php artisan toolkit:report --no-interaction --suite=frontend --env=testing"
+            "bun run test:ui"
         ],
         "test:lint": [
             "pint --parallel --test",
@@ -140,7 +140,7 @@
         ],
         "test": [
             "Composer\\Config::disableProcessTimeout",
-            "@php artisan toolkit:report --no-interaction --env=testing"
+            "XDEBUG_MODE=coverage pest --parallel; status=$?; bun run test:ui || status=1; exit $status"
         ],
         "test:ci": [
             "@test:lint",
@@ -149,14 +149,13 @@
             "XDEBUG_MODE=\"coverage\" pest --parallel --coverage --exactly=100.0 --no-tia",
             "bun run test:coverage"
         ],
-        "test:report": [
+        "test:retry": [
             "Composer\\Config::disableProcessTimeout",
-            "@php artisan toolkit:report --env=testing"
+            "XDEBUG_MODE=off pest --parallel --toolkit-retry; status=$?; node vendor/nwrman/laravel-toolkit/resources/js/vitest-retry.mjs || status=1; exit $status"
         ],
-        "test:retry": "@php artisan toolkit:retry --env=testing",
         "preflight": [
             "Composer\\Config::disableProcessTimeout",
-            "@php artisan toolkit:preflight --env=testing"
+            "preflight"
         ],
         "optimize": [
             "@php artisan optimize",
