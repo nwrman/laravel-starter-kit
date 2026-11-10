@@ -54,3 +54,6 @@ config/filament-colors.php
 
 # impeccable live mode: its config and its session journal. Personal tooling, machine-local.
 .impeccable/
+
+# Per-Product private folder: quotes, prices, hours. Never pushed (factory ADR 0003).
+/private
