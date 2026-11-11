@@ -1,3 +1,4 @@
+import { UserCancelledError } from '@laravel/passkeys';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { dashboard } from '@/routes';
@@ -28,6 +29,7 @@ describe('PasskeyVerify', () => {
       verify: mockVerify,
       isLoading: false,
       error: null,
+      errorInstance: null,
       isSupported: true,
     });
   });
@@ -46,6 +48,7 @@ describe('PasskeyVerify', () => {
       verify: mockVerify,
       isLoading: false,
       error: null,
+      errorInstance: null,
       isSupported: false,
     });
 
@@ -63,17 +66,21 @@ describe('PasskeyVerify', () => {
     expect(mockVerify).toHaveBeenCalledOnce();
   });
 
-  it('surfaces an error message', () => {
+  it('shows a cancelled ceremony in Spanish, not the library message', () => {
     mockUsePasskeyVerify.mockReturnValue({
       verify: mockVerify,
       isLoading: false,
-      error: 'No se pudo iniciar sesión',
+      error: 'The passkey operation was cancelled.',
+      errorInstance: new UserCancelledError(),
       isSupported: true,
     });
 
     render(<PasskeyVerify />);
 
-    expect(screen.getByText('No se pudo iniciar sesión')).toBeInTheDocument();
+    expect(
+      screen.getByText('Se canceló o se agotó el tiempo. Inténtalo de nuevo.'),
+    ).toBeInTheDocument();
+    expect(screen.queryByText('The passkey operation was cancelled.')).not.toBeInTheDocument();
   });
 
   it('redirects to the response URL on success', () => {

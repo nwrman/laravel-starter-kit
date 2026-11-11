@@ -5,6 +5,7 @@ import { Button } from '@/components/button';
 import InputError from '@/components/input-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { passkeyErrorMessage } from '@/lib/passkey-error-message';
 
 type Props = {
   onSuccess: () => void;
@@ -31,13 +32,14 @@ export default function PasskeyRegister({ onSuccess }: Props) {
   const [name, setName] = useState(defaultPasskeyName);
   const [showForm, setShowForm] = useState(false);
 
-  const { register, isLoading, error, isSupported } = usePasskeyRegister({
+  const { register, isLoading, errorInstance, isSupported } = usePasskeyRegister({
     onSuccess: () => {
       setName(defaultPasskeyName());
       setShowForm(false);
       onSuccess();
     },
   });
+  const error = passkeyErrorMessage(errorInstance);
 
   const submit = () => {
     if (name.trim()) {

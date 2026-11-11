@@ -22,6 +22,7 @@ describe('PasskeyRegister', () => {
       register: mockRegister,
       isLoading: false,
       error: null,
+      errorInstance: null,
       isSupported: true,
     });
   });
@@ -31,6 +32,7 @@ describe('PasskeyRegister', () => {
       register: mockRegister,
       isLoading: false,
       error: null,
+      errorInstance: null,
       isSupported: false,
     });
 
