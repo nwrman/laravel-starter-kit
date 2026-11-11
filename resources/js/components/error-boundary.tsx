@@ -29,6 +29,7 @@ interface ErrorBoundaryState {
  */
 export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   private removeNavigateListener?: () => void;
+  private removeSuccessListener?: () => void;
 
   constructor(props: ErrorBoundaryProps) {
     super(props);
@@ -68,11 +69,22 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
       this.resetError();
     });
+
+    // An instant visit renders the page once with only the shared props, then again at the
+    // same URL when the server answers. A page that threw on the first render gets its real
+    // props on the second, so a finished visit retries it; if it throws again, it is caught
+    // again. docs/adr/0019.
+    this.removeSuccessListener = router.on('success', () => {
+      if (this.state.hasError) {
+        this.resetError();
+      }
+    });
   }
 
   componentWillUnmount() {
     // Clean up event listener using the cleanup function
     this.removeNavigateListener?.();
+    this.removeSuccessListener?.();
   }
 
   handleCopyError = async () => {
