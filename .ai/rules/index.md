@@ -7,6 +7,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | phpunit.xml, .env.example, .env.testing.example, herd.yml, tests/TestCase.php, .github/workflows/** | .ai/rules/database.md |
 | phpunit.xml, ** | .ai/rules/general.md |
 | resources/js/** | .ai/rules/js.md |
+| resources/js/pages/**, resources/js/config/navigation.ts, app/Http/Controllers/** | .ai/rules/pages.md |
 | patches/** | .ai/rules/patches.md |
 | scripts/** | .ai/rules/scripts.md |
 | tests/Pest.php | .ai/rules/tests.md |
