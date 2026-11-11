@@ -43,7 +43,16 @@ export default function PasskeyItem({ passkey }: Props) {
         title="Eliminar llave de acceso"
         description={`¿Seguro que deseas eliminar la llave "${passkey.name}"? Ya no podrás usarla para iniciar sesión.`}
         confirmLabel="Eliminar"
-        onClick={() => router.delete(destroy.url(passkey.id), { preserveScroll: true })}
+        // Optimistic: the row leaves at once. Inertia puts `passkeys` back when the visit
+        // ends without success (a refused or failed delete), and the server's answer
+        // replaces it when it succeeds.
+        onClick={() =>
+          router
+            .optimistic<{ passkeys: Passkey[] }>((props) => ({
+              passkeys: props.passkeys.filter(({ id }) => id !== passkey.id),
+            }))
+            .delete(destroy.url(passkey.id), { preserveScroll: true })
+        }
         data-test={`delete-passkey-${passkey.id}`}
       >
         <Trash2 />
