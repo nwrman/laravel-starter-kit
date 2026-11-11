@@ -70,6 +70,7 @@ export function TeamTable({ rows }: Props) {
       columns={columns}
       data={rows ?? []}
       loading={rows === undefined}
+      loadingRowClassName="h-[61px]"
       loadingCell={(columnId) =>
         columnId === 'name' ? (
           <div className="space-y-1">

@@ -49,6 +49,11 @@ type DataTableProps<TData extends RowData> = {
   loading?: boolean;
   /** A column's placeholder cell while loading, when a plain bar is not its real height. */
   loadingCell?: (columnId: string) => React.ReactNode;
+  /**
+   * The loaded rows' height, for the placeholder rows (e.g. `h-[46px]`), when badges or
+   * progress bars make the real rows taller than a bar of text.
+   */
+  loadingRowClassName?: string;
 };
 
 export function DataTable<TData extends RowData>({
@@ -65,6 +70,7 @@ export function DataTable<TData extends RowData>({
   initialPageSize = 25,
   loading = false,
   loadingCell,
+  loadingRowClassName,
 }: DataTableProps<TData>) {
   const [internalSelection, setInternalSelection] = React.useState<RowSelectionState>({});
 
@@ -160,7 +166,7 @@ export function DataTable<TData extends RowData>({
           <TableBody>
             {loading ? (
               Array.from({ length: pagination.pageSize }, (_, index) => (
-                <TableRow key={index} aria-hidden="true">
+                <TableRow key={index} aria-hidden="true" className={loadingRowClassName}>
                   {table.getVisibleLeafColumns().map((column, columnIndex) => (
                     <TableCell key={column.id}>
                       {loadingCell?.(column.id) ?? (
@@ -201,10 +207,9 @@ export function DataTable<TData extends RowData>({
           </TableBody>
         </Table>
       </div>
-      {loading ? (
-        <div className="invisible" aria-hidden="true">
-          {renderPagination?.(table)}
-        </div>
+      {/* The pagination renders nothing without rows, so its height is held by hand. */}
+      {loading && renderPagination ? (
+        <div className="h-8" aria-hidden="true" />
       ) : (
         renderPagination?.(table)
       )}

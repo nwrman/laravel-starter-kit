@@ -77,6 +77,7 @@ export function ProjectTable({ rows }: Props) {
       columns={columns}
       data={rows ?? []}
       loading={rows === undefined}
+      loadingRowClassName="h-[46px]"
       initialPageSize={10}
       renderToolbar={(table) => (
         <DataTableToolbar table={table} searchPlaceholder="Buscar proyectos…" />
