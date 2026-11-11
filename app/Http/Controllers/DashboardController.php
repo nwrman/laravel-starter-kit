@@ -22,7 +22,11 @@ final readonly class DashboardController
     public function index(): Response
     {
         return Inertia::render('dashboard', [
-            'kpiStats' => Inertia::defer(fn (): array => $this->demo->dashboardKpis(), 'kpiStats'),
+            'kpiStats' => Inertia::defer(function (): array {
+                $this->demo->sleep('DEMO_LATENCY_KPIS_MS');
+
+                return $this->demo->dashboardKpis();
+            }, 'kpiStats'),
             'charts' => Inertia::defer(function (): array {
                 $this->demo->sleep('DEMO_LATENCY_CHARTS_MS');
 

@@ -18,7 +18,11 @@ final readonly class TeamController
     public function index(): Response
     {
         return Inertia::render('team/index', [
-            'kpiStats' => Inertia::defer(fn (): array => $this->demo->teamKpis(), 'kpiStats'),
+            'kpiStats' => Inertia::defer(function (): array {
+                $this->demo->sleep('DEMO_LATENCY_KPIS_MS');
+
+                return $this->demo->teamKpis();
+            }, 'kpiStats'),
             'tableData' => Inertia::defer(function (): array {
                 $this->demo->sleep('DEMO_LATENCY_TABLE_MS');
 

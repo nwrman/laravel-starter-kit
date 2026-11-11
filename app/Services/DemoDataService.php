@@ -10,7 +10,8 @@ use Illuminate\Support\Sleep;
  * Provides hardcoded Acme Corp demo data for the starter kit.
  *
  * Configurable artificial latency per data group is controlled via env variables:
- *   DEMO_LATENCY_CHARTS_MS, DEMO_LATENCY_FEED_MS, DEMO_LATENCY_TABLE_MS, DEMO_LATENCY_DETAIL_MS
+ *   DEMO_LATENCY_KPIS_MS, DEMO_LATENCY_CHARTS_MS, DEMO_LATENCY_FEED_MS, DEMO_LATENCY_TABLE_MS,
+ *   DEMO_LATENCY_DETAIL_MS
  *
  * Latency is disabled automatically in the testing environment.
  *
