@@ -52,10 +52,11 @@ export default function ManagePasskeys({ canManagePasskeys = false, passkeys = [
     return null;
   }
 
-  // Optimistic: the row leaves at once. This is the kit's reference optimistic update (#43). Inertia puts
-  // `passkeys` back when the visit ends without success, and the server's answer replaces
-  // it when it succeeds. A refusal (403, 404, 500) shows an error toast instead: returning false stops
-  // Inertia's error dialog (local) and error page (production), so the row simply returns.
+  // Optimistic, and the kit's reference optimistic update (the passkeys guideline): the row
+  // leaves at once. Inertia puts `passkeys` back when the visit ends without success, and the
+  // server's answer replaces it when it succeeds. A refusal (403, 404, 500) shows an error
+  // toast: returning false stops Inertia's error dialog (local) and error page (production),
+  // so the row simply returns.
   const deletePasskey = (passkey: Passkey) => {
     const index = passkeys.findIndex(({ id }) => id === passkey.id);
     const neighbour = passkeys[index + 1] ?? passkeys[index - 1];
