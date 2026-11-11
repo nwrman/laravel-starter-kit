@@ -48,7 +48,7 @@ export function AppSidebar() {
               ) : (
                 <SidebarMenuItem key={entry.title}>
                   <SidebarMenuButton
-                    render={<Link href={entry.href} prefetch />}
+                    render={<Link href={entry.href} component={entry.component} prefetch />}
                     isActive={isCurrentUrl(entry.href)}
                     tooltip={{ children: entry.title }}
                   >

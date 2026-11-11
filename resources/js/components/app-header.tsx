@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { LayoutGrid, Menu, Search } from 'lucide-react';
+import { Menu, Search } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { Breadcrumbs } from '@/components/breadcrumbs';
@@ -18,23 +18,16 @@ import {
 } from '@/components/ui/navigation-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { UserMenuContent } from '@/components/user-menu-content';
+import { headerNav } from '@/config/navigation';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import { dashboard } from '@/routes';
-import type { BreadcrumbItem, NavItem } from '@/types';
+import type { BreadcrumbItem } from '@/types';
 
 type Props = {
   breadcrumbs?: BreadcrumbItem[];
 };
-
-const mainNavItems: NavItem[] = [
-  {
-    title: 'Inicio',
-    href: dashboard(),
-    icon: LayoutGrid,
-  },
-];
 
 const activeItemStyles = 'text-neutral-900';
 
@@ -67,10 +60,11 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                 <div className="flex h-full flex-1 flex-col space-y-4 p-4">
                   <div className="flex h-full flex-col justify-between text-sm">
                     <div className="flex flex-col space-y-4">
-                      {mainNavItems.map((item) => (
+                      {headerNav.map((item) => (
                         <Link
                           key={item.title}
                           href={item.href}
+                          component={item.component}
                           prefetch
                           className="flex items-center space-x-2 font-medium"
                         >
@@ -93,10 +87,11 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
           <div className="ml-6 hidden h-full items-center space-x-6 lg:flex">
             <NavigationMenu className="flex h-full items-stretch">
               <NavigationMenuList className="flex h-full items-stretch space-x-2">
-                {mainNavItems.map((item, index) => (
+                {headerNav.map((item, index) => (
                   <NavigationMenuItem key={index} className="relative flex h-full items-center">
                     <Link
                       href={item.href}
+                      component={item.component}
                       className={cn(
                         navigationMenuTriggerStyle(),
                         whenCurrentUrl(item.href, activeItemStyles),

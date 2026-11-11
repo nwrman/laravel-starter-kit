@@ -17,7 +17,7 @@ export function NavMain({ items }: { items: NavItem[] }) {
         {items.map((item) => (
           <SidebarMenuItem key={item.title}>
             <SidebarMenuButton
-              render={<Link href={item.href} prefetch />}
+              render={<Link href={item.href} component={item.component} prefetch />}
               isActive={isCurrentUrl(item.href)}
               tooltip={{ children: item.title }}
             >
