@@ -88,6 +88,17 @@ New users will then be redirected to `/email/verify` after registration, and mus
 
 ### Create a New Project
 
+**For one of your Products, use the factory's kickoff.** Open Claude Code in `~/projects/software-factory` (the factory plugin is switched on there) and run:
+
+```text
+/factory:kickoff my-app            # private GitHub repo, labels, private/ folder, registered in the factory: ready to plan
+/factory:kickoff my-app --code     # …and this starter laid in, built, migrated and served at https://my-app.test
+```
+
+It can be re-run: each run does only the steps still missing, so add `--code` later when building starts, or run it again after a failure. `--owner=<org>` puts the repo under an organization. It refuses a folder or repo of that name that it did not make. Then open Claude Code in `~/projects/my-app` and plan with `/to-spec`. Details: [`docs/build-loop.md`](docs/build-loop.md#starting-a-new-product).
+
+**Without the factory**, create the app directly:
+
 ```bash
 composer create-project nwrman/laravel-starter-kit my-app --stability=dev
 ```

@@ -37,6 +37,18 @@ glossary): [`docs/agents/`](agents/).
 - **Postgres** (DBngin, on its defaults) — every checkout and worktree has its own database
   and its own `_test` database (ADR 0016).
 
+### Starting a new Product
+
+Don't do the per-repo setup below by hand for a new Product: from the factory's checkout run
+`/factory:kickoff <name>` (add `--code` to lay this starter in). It creates the private repo with
+the triage, `in-progress` and wayfinder labels, the ignored `private/` folder for quotes, the
+`.claude/settings.json` that switches the plugin on, and registers the Product in the factory. With
+`--code` it also creates the app, its two databases and its Herd site. Re-run it any time: it only
+does what is missing. The skill and script are `plugins/factory/skills/kickoff/` and
+`plugins/factory/bin/factory-kickoff` in the software factory.
+
+### Existing repos
+
 Once per repo:
 
 ```bash
