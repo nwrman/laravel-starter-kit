@@ -96,6 +96,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                     <Link
                       href={item.href}
                       component={item.component}
+                      prefetch
                       className={cn(
                         navigationMenuTriggerStyle(),
                         whenCurrentUrl(item.href, activeItemStyles),
