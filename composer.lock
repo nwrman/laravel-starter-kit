@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cbf2af4ff931b2e7112fb28eb152dc2a",
+    "content-hash": "93ed5fc7bf690601f6aa68f5e9e022a9",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -4928,16 +4928,16 @@
         },
         {
             "name": "nwrman/laravel-toolkit",
-            "version": "v1.0.5",
+            "version": "v1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nwrman/laravel-toolkit.git",
-                "reference": "6e57dbc2af3113deed514acb796eb2795027f722"
+                "reference": "da039713002597343bb02a1322b86e1cda43c7f7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nwrman/laravel-toolkit/zipball/6e57dbc2af3113deed514acb796eb2795027f722",
-                "reference": "6e57dbc2af3113deed514acb796eb2795027f722",
+                "url": "https://api.github.com/repos/nwrman/laravel-toolkit/zipball/da039713002597343bb02a1322b86e1cda43c7f7",
+                "reference": "da039713002597343bb02a1322b86e1cda43c7f7",
                 "shasum": ""
             },
             "require": {
@@ -4955,9 +4955,9 @@
                 "larastan/larastan": "^3.0",
                 "laravel/pint": "^1.14",
                 "orchestra/testbench": "^11.0",
-                "pestphp/pest": "^4.0||^5.0",
-                "pestphp/pest-plugin-arch": "^4.0||^5.0",
-                "pestphp/pest-plugin-laravel": "^4.0||^5.0",
+                "pestphp/pest": "^5.0",
+                "pestphp/pest-plugin-arch": "^5.0",
+                "pestphp/pest-plugin-laravel": "^5.0",
                 "phpstan/extension-installer": "^1.4",
                 "phpstan/phpstan-deprecation-rules": "^2.0",
                 "phpstan/phpstan-phpunit": "^2.0"
@@ -5004,10 +5004,10 @@
             ],
             "support": {
                 "issues": "https://github.com/nwrman/laravel-toolkit/issues",
-                "source": "https://github.com/nwrman/laravel-toolkit/tree/v1.0.5"
+                "source": "https://github.com/nwrman/laravel-toolkit/tree/v1.1.0"
             },
-            "time": "2026-11-04T20:20:41+00:00",
-            "published-time": "2026-11-04T20:23:12+00:00"
+            "time": "2026-11-11T07:23:39+00:00",
+            "published-time": "2026-11-11T07:24:23+00:00"
         },
         {
             "name": "openspout/openspout",
