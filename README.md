@@ -92,7 +92,7 @@ New users will then be redirected to `/email/verify` after registration, and mus
 composer create-project nwrman/laravel-starter-kit my-app --stability=dev
 ```
 
-This automatically runs the full setup: environment configuration, key generation, a `my_app` database (migrated and seeded) and a `my_app_test` database, both created on your Postgres server, and a git repository with an initial commit. If Postgres isn't running, setup finishes and says what to run once it is.
+This automatically runs the full setup: environment configuration, key generation, `bun install` and a front-end build (so the site loads before `composer dev` runs), a `my_app` database (migrated and seeded) and a `my_app_test` database, both created on your Postgres server, and a git repository with an initial commit. If Postgres isn't running, setup finishes and says what to run once it is.
 
 ### Start Developing
 
