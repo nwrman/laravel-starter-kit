@@ -3,6 +3,7 @@ import { Banknote, CheckCircle, FolderOpen, Plus } from 'lucide-react';
 import { type KpiCard, KpiRow } from '@/components/demo/kpi-row';
 import { ProjectChart } from '@/components/demo/project-chart';
 import { ProjectTable } from '@/components/demo/project-table';
+import { create } from '@/routes/projects';
 import type { BreadcrumbItem } from '@/types';
 import type { ProjectMonthly, ProjectRow, KpiValue } from '@/types/demo';
 
@@ -43,7 +44,14 @@ export default function ProjectsIndex() {
         <PageHeader
           title="Proyectos"
           description="Gestiona los proyectos de Acme Corp."
-          actions={<PagePrimaryAction label="Nuevo Proyecto" href="/projects/create" icon={Plus} />}
+          actions={
+            <PagePrimaryAction
+              label="Nuevo Proyecto"
+              href={create()}
+              component="projects/create"
+              icon={Plus}
+            />
+          }
         />
 
         <KpiRow

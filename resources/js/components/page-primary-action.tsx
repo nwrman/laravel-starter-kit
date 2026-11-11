@@ -1,11 +1,16 @@
-import { Link } from '@inertiajs/react';
+import { type InertiaLinkProps, Link } from '@inertiajs/react';
 import type { LucideIcon } from 'lucide-react';
 import { Button } from '@/components/button';
 import { cn } from '@/lib/utils';
 
 export type PagePrimaryActionProps = {
   label: string;
-  href: string;
+  href: NonNullable<InertiaLinkProps['href']>;
+  /**
+   * The page the link renders, for an instant visit. Set it only when that page draws
+   * with the shared props alone: an empty form or a panel page (docs/adr/0019).
+   */
+  component?: string;
   icon?: LucideIcon;
   className?: string;
 };
@@ -21,7 +26,13 @@ export type PagePrimaryActionProps = {
  * adds the iOS home-indicator inset, which only resolves because the root view sets
  * `viewport-fit=cover`.
  */
-export function PagePrimaryAction({ label, href, icon: Icon, className }: PagePrimaryActionProps) {
+export function PagePrimaryAction({
+  label,
+  href,
+  component,
+  icon: Icon,
+  className,
+}: PagePrimaryActionProps) {
   const content = (
     <>
       {Icon ? <Icon className="size-4" data-icon="inline-start" /> : null}
@@ -32,13 +43,13 @@ export function PagePrimaryAction({ label, href, icon: Icon, className }: PagePr
   return (
     <>
       {/* Desktop: sits in the header's action slot. */}
-      <Link href={href} className={cn('max-sm:hidden', className)}>
+      <Link href={href} component={component} prefetch className={cn('max-sm:hidden', className)}>
         <Button className="w-full">{content}</Button>
       </Link>
 
       {/* Mobile: floats bottom-right. */}
       <div className="fixed right-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 sm:hidden">
-        <Link href={href}>
+        <Link href={href} component={component} prefetch>
           <Button className="rounded-full shadow-lg">{content}</Button>
         </Link>
       </div>
