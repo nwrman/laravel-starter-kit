@@ -84,6 +84,7 @@
             "@php -r \"file_exists('.env.testing') || copy('.env.testing.example', '.env.testing');\"",
             "@php -r '$db = strtolower(preg_replace(\"/[^A-Za-z0-9]+/\", \"_\", basename(getcwd()))); foreach ([\".env\" => $db, \".env.testing\" => $db.\"_test\"] as $file => $name) { file_put_contents($file, preg_replace(\"/^DB_DATABASE=.*$/m\", \"DB_DATABASE=\".$name, file_get_contents($file))); }'",
             "@php artisan key:generate --ansi",
+            "@setup",
             "@php artisan migrate --seed --force --graceful --ansi",
             "@php artisan migrate --env=testing --force --graceful --ansi",
             "@php artisan migrate:status --env=testing > /dev/null 2>&1 || php -r \"echo PHP_EOL . chr(27) . '[33m  Postgres was not reachable. Start it (DBngin), then: php artisan migrate --seed && php artisan migrate --env=testing' . chr(27) . '[0m' . PHP_EOL;\"",
