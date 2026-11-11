@@ -11,6 +11,9 @@ paths:
 
 **The database pin lives in `.ai/rules/database.md`.** `phpunit.xml` forces only `DB_CONNECTION=pgsql`; why `DB_DATABASE` is deliberately left unforced, and what keeps the suite off the development database, is written there.
 
+## The lint gate is the only format check
+`bun run test:lint` (preflight's and CI's lint gate) format-checks the whole repo; `fmt.ignorePatterns` in `vite.config.ts` is the one list of what it skips. `bun run build` only builds — never add `vp check` or a path argument back. A descendant's build once rejected a file outside `resources/` after preflight had passed it, and stopped the post-merge refresh of main.
+
 ## A ticket number in a comment must be one someone can act on
 Before writing `#NN` in a comment, a docblock or a commit message, open it. `gh issue view NN` takes two seconds and is the difference between a pointer and a dead end.
 
