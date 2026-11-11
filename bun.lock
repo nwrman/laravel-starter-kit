@@ -8,8 +8,8 @@
         "@fontsource-variable/ibm-plex-sans": "^5.3.0",
         "@fontsource-variable/inter": "^5.3.0",
         "@fontsource-variable/noto-sans": "^5.3.0",
-        "@inertiajs/react": "^3.9.1",
-        "@inertiajs/vite": "^3.9.1",
+        "@inertiajs/react": "^3.11",
+        "@inertiajs/vite": "^3.11",
         "@laravel/passkeys": "^0.4.0",
         "@tailwindcss/vite": "^4.3.3",
         "@tanstack/react-form": "^1.33.5",
@@ -173,11 +173,11 @@
 
     "@fontsource-variable/noto-sans": ["@fontsource-variable/noto-sans@5.3.0", "", {}, "sha512-e3ZuxzY9AL2psXPZlhwhnYrHUHv6PMoyK9MQ7croF0CUgURLqu9EMjW7q2FgVLwij1tjLsIHQrnwQ8aUcg4BiA=="],
 
-    "@inertiajs/core": ["@inertiajs/core@3.9.1", "", { "dependencies": { "@jridgewell/trace-mapping": "^0.3.31", "es-toolkit": "^1.33.0", "laravel-precognition": "^2.1.0" }, "peerDependencies": { "axios": "^1.15.2" }, "optionalPeers": ["axios"] }, "sha512-ScLQZ1/KXlvmqCEJMEZABSK5updJZIli1kaG/coWXpWMmpSLsazSJkR7esITYp7X5vTgrOGNIrcRmdMp/GQ0NA=="],
+    "@inertiajs/core": ["@inertiajs/core@3.11.0", "", { "dependencies": { "@jridgewell/trace-mapping": "^0.3.31", "es-toolkit": "^1.33.0", "laravel-precognition": "^2.1.1" }, "peerDependencies": { "axios": "^1.15.2" }, "optionalPeers": ["axios"] }, "sha512-YDqkKHsTiDUKofVzE3p6IduuU1u0ZwmheSpk2AZP6Eig3ZwhTlchDiLbUhFUCd138naqlhjRh2rTxIXeKrnmOQ=="],
 
-    "@inertiajs/react": ["@inertiajs/react@3.9.1", "", { "dependencies": { "@inertiajs/core": "3.9.1", "es-toolkit": "^1.33.0", "laravel-precognition": "^2.1.0" }, "peerDependencies": { "react": "^19.0.0", "react-dom": "^19.0.0" } }, "sha512-fRWElF5XIm1j01ecQCEehx0KPLEYVA6fCdWvig7XUhwhmSQG6EIyNum3eG8ZEfYuY7mWhNyqae/MSRIv+bAsjw=="],
+    "@inertiajs/react": ["@inertiajs/react@3.11.0", "", { "dependencies": { "@inertiajs/core": "3.11.0", "es-toolkit": "^1.33.0", "laravel-precognition": "^2.1.1" }, "peerDependencies": { "@laravel/echo-react": "^2.0.0", "@types/react": "^19.0.0", "@types/react-dom": "^19.0.0", "react": "^19.0.0", "react-dom": "^19.0.0" }, "optionalPeers": ["@laravel/echo-react", "@types/react", "@types/react-dom"] }, "sha512-G5JZ5B27hPuwPEJ/vw3aW4eFJ4KmGvmcFkA+28IXXgOFQcse0GPCmv0/lLAw2vbbLMNqcsNzWNJH9XJmOZkejA=="],
 
-    "@inertiajs/vite": ["@inertiajs/vite@3.9.1", "", { "dependencies": { "@inertiajs/core": "3.9.1", "@jridgewell/remapping": "^2.3.5", "magic-string": "^0.30.21", "tinyglobby": "^0.2.15" }, "peerDependencies": { "vite": "^7.0.0 || ^8.0.0" } }, "sha512-Phwwa/joUAxuZO/KoPnBNab5skQVHBwmYFk+OMMyS+qqB4gg/BpDSmWLepW7kiSVJ4AF/SLeJEwWvBH49EWiqg=="],
+    "@inertiajs/vite": ["@inertiajs/vite@3.11.0", "", { "dependencies": { "@inertiajs/core": "3.11.0", "@jridgewell/remapping": "^2.3.5", "magic-string": "^0.30.21", "tinyglobby": "^0.2.15" }, "peerDependencies": { "vite": "^7.0.0 || ^8.0.0" } }, "sha512-BQDD++BbQ/Q7U2E3yPGYki/vkwC+pT2DNUXUItrGeMefLy8aBaJXftF979+hupU/V3rfXf1RpGZZRi+BcQ5jRQ=="],
 
     "@jridgewell/gen-mapping": ["@jridgewell/gen-mapping@0.3.13", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.0", "@jridgewell/trace-mapping": "^0.3.24" } }, "sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA=="],
 
