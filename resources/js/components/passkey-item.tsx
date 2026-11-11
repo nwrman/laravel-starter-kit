@@ -1,14 +1,13 @@
-import { router } from '@inertiajs/react';
 import { KeyRound, Trash2 } from 'lucide-react';
-import { destroy } from '@/actions/Laravel/Passkeys/Http/Controllers/PasskeyRegistrationController';
 import { ConfirmButton } from '@/components/confirm-button';
 import type { Passkey } from '@/types/auth';
 
 type Props = {
   passkey: Passkey;
+  onDelete: () => void;
 };
 
-export default function PasskeyItem({ passkey }: Props) {
+export default function PasskeyItem({ passkey, onDelete }: Props) {
   return (
     <div className="flex items-center justify-between border-b p-4 last:border-b-0">
       <div className="flex items-center gap-4">
@@ -43,16 +42,7 @@ export default function PasskeyItem({ passkey }: Props) {
         title="Eliminar llave de acceso"
         description={`¿Seguro que deseas eliminar la llave "${passkey.name}"? Ya no podrás usarla para iniciar sesión.`}
         confirmLabel="Eliminar"
-        // Optimistic: the row leaves at once. Inertia puts `passkeys` back when the visit
-        // ends without success (a refused or failed delete), and the server's answer
-        // replaces it when it succeeds.
-        onClick={() =>
-          router
-            .optimistic<{ passkeys: Passkey[] }>((props) => ({
-              passkeys: props.passkeys.filter(({ id }) => id !== passkey.id),
-            }))
-            .delete(destroy.url(passkey.id), { preserveScroll: true })
-        }
+        onClick={onDelete}
         data-test={`delete-passkey-${passkey.id}`}
       >
         <Trash2 />
