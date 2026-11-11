@@ -44,6 +44,7 @@ export default function PasskeyItem({ passkey, onDelete }: Props) {
         confirmLabel="Eliminar"
         onClick={onDelete}
         data-test={`delete-passkey-${passkey.id}`}
+        data-passkey-delete={passkey.id}
       >
         <Trash2 />
         <span className="sr-only">Eliminar</span>

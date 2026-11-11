@@ -57,7 +57,12 @@ export default function PasskeyRegister({ onSuccess }: Props) {
 
   if (!showForm) {
     return (
-      <Button variant="outline" onClick={() => setShowForm(true)} data-test="add-passkey-button">
+      <Button
+        variant="outline"
+        onClick={() => setShowForm(true)}
+        data-test="add-passkey-button"
+        data-passkey-add
+      >
         <KeyRound />
         Agregar llave de acceso
       </Button>

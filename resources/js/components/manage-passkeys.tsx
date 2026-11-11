@@ -52,7 +52,7 @@ export default function ManagePasskeys({ canManagePasskeys = false, passkeys = [
     return null;
   }
 
-  // Optimistic: the row leaves at once (docs/adr/0019's reference pattern). Inertia puts
+  // Optimistic: the row leaves at once. This is the kit's reference optimistic update (#43). Inertia puts
   // `passkeys` back when the visit ends without success, and the server's answer replaces
   // it when it succeeds. A refusal (403, 404, 500) shows an error toast instead: returning false stops
   // Inertia's error dialog (local) and error page (production), so the row simply returns.
@@ -61,8 +61,8 @@ export default function ManagePasskeys({ canManagePasskeys = false, passkeys = [
     const neighbour = passkeys[index + 1] ?? passkeys[index - 1];
 
     focusAfterDelete.current = neighbour
-      ? `[data-test="delete-passkey-${neighbour.id}"]`
-      : '[data-test="add-passkey-button"]';
+      ? `[data-passkey-delete="${neighbour.id}"]`
+      : '[data-passkey-add]';
 
     router
       .optimistic<{ passkeys: Passkey[] }>((props) => ({
