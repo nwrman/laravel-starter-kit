@@ -103,10 +103,8 @@ export default function ProjectShow() {
                   <StatCard
                     key={stat.title}
                     title={stat.title}
-                    value={stat.value}
-                    description={stat.description}
-                    trend={stat.trend}
                     icon={iconMap[stat.icon as keyof typeof iconMap]}
+                    stat={stat}
                   />
                 ))}
               </div>

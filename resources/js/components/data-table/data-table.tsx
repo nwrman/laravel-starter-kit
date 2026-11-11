@@ -41,6 +41,11 @@ type DataTableProps<TData extends RowData> = {
   getRowId?: (row: TData, index: number) => string;
   emptyMessage?: string;
   initialPageSize?: number;
+  /**
+   * The rows have not arrived yet (a deferred prop): the toolbar and the column headers render
+   * as usual, the body shows this many placeholder rows, and the pagination waits. docs/adr/0019.
+   */
+  loadingRows?: number;
 };
 
 export function DataTable<TData extends RowData>({
@@ -55,6 +60,7 @@ export function DataTable<TData extends RowData>({
   getRowId,
   emptyMessage = 'Sin resultados.',
   initialPageSize = 25,
+  loadingRows,
 }: DataTableProps<TData>) {
   const [internalSelection, setInternalSelection] = React.useState<RowSelectionState>({});
 
@@ -148,7 +154,17 @@ export function DataTable<TData extends RowData>({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows.length > 0 ? (
+            {loadingRows !== undefined ? (
+              Array.from({ length: loadingRows }, (_, index) => (
+                <TableRow key={index} aria-hidden="true">
+                  {table.getVisibleLeafColumns().map((column) => (
+                    <TableCell key={column.id}>
+                      <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : table.getRowModel().rows.length > 0 ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -176,7 +192,7 @@ export function DataTable<TData extends RowData>({
           </TableBody>
         </Table>
       </div>
-      {renderPagination?.(table)}
+      {loadingRows === undefined && renderPagination?.(table)}
     </div>
   );
 }

@@ -67,14 +67,16 @@ const columns: DataTableColumnDef<ProjectRow>[] = [
 ];
 
 type Props = {
-  rows: ProjectRow[];
+  /** Undefined while the deferred prop loads: search and headers show, the rows pulse. */
+  rows?: ProjectRow[];
 };
 
 export function ProjectTable({ rows }: Props) {
   return (
     <DataTable
       columns={columns}
-      data={rows}
+      data={rows ?? []}
+      loadingRows={rows ? undefined : 5}
       initialPageSize={10}
       renderToolbar={(table) => (
         <DataTableToolbar table={table} searchPlaceholder="Buscar proyectos…" />

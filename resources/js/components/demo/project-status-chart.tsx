@@ -1,4 +1,5 @@
 import { Label, Pie, PieChart } from 'recharts';
+import { ChartBodySkeleton } from '@/components/chart-skeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   ChartContainer,
@@ -19,12 +20,13 @@ const chartConfig = {
 const statusColors = ['#2563eb', '#16a34a', '#f59e0b', '#94a3b8'];
 
 type Props = {
-  projectStatuses: ProjectStatus[];
-  projectTotal: number;
+  /** Undefined while the deferred prop loads: the title shows, the chart area pulses. */
+  projectStatuses?: ProjectStatus[];
+  projectTotal?: number;
 };
 
 export function ProjectStatusChart({ projectStatuses, projectTotal }: Props) {
-  const chartData = projectStatuses.map((s) => ({
+  const chartData = (projectStatuses ?? []).map((s) => ({
     status: s.status.toLowerCase().replace(/ /g, '-'),
     count: s.count,
     fill: `var(--color-${s.status
@@ -41,61 +43,69 @@ export function ProjectStatusChart({ projectStatuses, projectTotal }: Props) {
         <CardTitle className="text-2xl">Proyectos</CardTitle>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[250px]">
-          <PieChart>
-            <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-            <Pie
-              data={chartData}
-              dataKey="count"
-              nameKey="status"
-              innerRadius={60}
-              strokeWidth={4}
-              stroke="hsl(var(--background))"
-            >
-              <Label
-                content={({ viewBox }) => {
-                  if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
-                    return (
-                      <text
-                        x={viewBox.cx}
-                        y={viewBox.cy}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                      >
-                        <tspan
-                          x={viewBox.cx}
-                          y={viewBox.cy}
-                          className="fill-foreground text-2xl font-bold"
-                        >
-                          {projectTotal.toLocaleString()}
-                        </tspan>
-                        <tspan
-                          x={viewBox.cx}
-                          y={(viewBox.cy ?? 0) + 20}
-                          className="fill-muted-foreground text-xs"
-                        >
-                          Proyectos
-                        </tspan>
-                      </text>
-                    );
-                  }
-                }}
-              />
-            </Pie>
-          </PieChart>
-        </ChartContainer>
-        <div className="mt-2 grid grid-cols-2 gap-2">
-          {projectStatuses.map((s, i) => (
-            <div key={s.status} className="flex items-center gap-2 text-sm">
-              <div
-                className="size-2.5 shrink-0 rounded-full"
-                style={{ backgroundColor: statusColors[i] }}
-              />
-              <span className="text-muted-foreground">{s.status}</span>
-              <span className="ml-auto font-medium tabular-nums">{s.count.toLocaleString()}</span>
+        {projectStatuses && projectTotal !== undefined ? (
+          <>
+            <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[250px]">
+              <PieChart>
+                <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+                <Pie
+                  data={chartData}
+                  dataKey="count"
+                  nameKey="status"
+                  innerRadius={60}
+                  strokeWidth={4}
+                  stroke="hsl(var(--background))"
+                >
+                  <Label
+                    content={({ viewBox }) => {
+                      if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
+                        return (
+                          <text
+                            x={viewBox.cx}
+                            y={viewBox.cy}
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                          >
+                            <tspan
+                              x={viewBox.cx}
+                              y={viewBox.cy}
+                              className="fill-foreground text-2xl font-bold"
+                            >
+                              {projectTotal.toLocaleString()}
+                            </tspan>
+                            <tspan
+                              x={viewBox.cx}
+                              y={(viewBox.cy ?? 0) + 20}
+                              className="fill-muted-foreground text-xs"
+                            >
+                              Proyectos
+                            </tspan>
+                          </text>
+                        );
+                      }
+                    }}
+                  />
+                </Pie>
+              </PieChart>
+            </ChartContainer>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              {projectStatuses.map((s, i) => (
+                <div key={s.status} className="flex items-center gap-2 text-sm">
+                  <div
+                    className="size-2.5 shrink-0 rounded-full"
+                    style={{ backgroundColor: statusColors[i] }}
+                  />
+                  <span className="text-muted-foreground">{s.status}</span>
+                  <span className="ml-auto font-medium tabular-nums">
+                    {s.count.toLocaleString()}
+                  </span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </>
+        ) : (
+          <ChartBodySkeleton />
+        )}
       </CardContent>
     </Card>
   );

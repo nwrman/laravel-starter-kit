@@ -1,4 +1,5 @@
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
+import { ChartBodySkeleton } from '@/components/chart-skeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   ChartContainer,
@@ -20,7 +21,8 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 type Props = {
-  data: ProjectMonthly[];
+  /** Undefined while the deferred prop loads: the title shows, the chart area pulses. */
+  data?: ProjectMonthly[];
 };
 
 export function ProjectChart({ data }: Props) {
@@ -31,16 +33,20 @@ export function ProjectChart({ data }: Props) {
         <CardTitle className="text-xl">Proyectos por Mes</CardTitle>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full">
-          <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-            <CartesianGrid vertical={false} />
-            <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} />
-            <YAxis tickLine={false} axisLine={false} tickMargin={8} width={30} />
-            <ChartTooltip content={<ChartTooltipContent />} />
-            <Bar dataKey="completed" fill="var(--color-completed)" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="started" fill="var(--color-started)" radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ChartContainer>
+        {data ? (
+          <ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full">
+            <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+              <CartesianGrid vertical={false} />
+              <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} />
+              <YAxis tickLine={false} axisLine={false} tickMargin={8} width={30} />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <Bar dataKey="completed" fill="var(--color-completed)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="started" fill="var(--color-started)" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ChartContainer>
+        ) : (
+          <ChartBodySkeleton />
+        )}
       </CardContent>
     </Card>
   );

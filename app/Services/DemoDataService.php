@@ -38,38 +38,34 @@ final class DemoDataService
     // -------------------------------------------------------------------------
 
     /**
-     * @return array<int, array{title: string, value: string, description: string, trend: array{direction: string, value: string}, icon: string}>
+     * @return array<int, array{key: string, value: string, description: string, trend: array{direction: string, value: string}}>
      */
     public function dashboardKpis(): array
     {
         return [
             [
-                'title' => 'Ingresos Mensuales',
+                'key' => 'revenue',
                 'value' => '$1.2M',
                 'description' => 'vs mes anterior',
                 'trend' => ['direction' => 'up', 'value' => '+8%'],
-                'icon' => 'banknote',
             ],
             [
-                'title' => 'Proyectos Activos',
+                'key' => 'active-projects',
                 'value' => '24',
                 'description' => 'vs mes anterior',
                 'trend' => ['direction' => 'up', 'value' => '+12%'],
-                'icon' => 'folder',
             ],
             [
-                'title' => 'Miembros del Equipo',
+                'key' => 'team-members',
                 'value' => '48',
                 'description' => 'vs trimestre anterior',
                 'trend' => ['direction' => 'up', 'value' => '+4%'],
-                'icon' => 'users',
             ],
             [
-                'title' => 'Tasa de Completados',
+                'key' => 'completion-rate',
                 'value' => '87.3%',
                 'description' => 'vs año anterior',
                 'trend' => ['direction' => 'down', 'value' => '-2%'],
-                'icon' => 'check-circle',
             ],
         ];
     }
@@ -134,31 +130,28 @@ final class DemoDataService
     // -------------------------------------------------------------------------
 
     /**
-     * @return array<int, array{title: string, value: string, description: string, trend: array{direction: string, value: string}, icon: string}>
+     * @return array<int, array{key: string, value: string, description: string, trend: array{direction: string, value: string}}>
      */
     public function projectKpis(): array
     {
         return [
             [
-                'title' => 'Proyectos Activos',
+                'key' => 'active-projects',
                 'value' => '24',
                 'description' => 'vs mes anterior',
                 'trend' => ['direction' => 'up', 'value' => '+3'],
-                'icon' => 'folder',
             ],
             [
-                'title' => 'Presupuesto Total',
+                'key' => 'total-budget',
                 'value' => '$2.4M',
                 'description' => 'vs trimestre anterior',
                 'trend' => ['direction' => 'up', 'value' => '+15%'],
-                'icon' => 'banknote',
             ],
             [
-                'title' => 'Completados este Mes',
+                'key' => 'completed-this-month',
                 'value' => '7',
                 'description' => 'vs mes anterior',
                 'trend' => ['direction' => 'up', 'value' => '+2'],
-                'icon' => 'check-circle',
             ],
         ];
     }
@@ -282,31 +275,28 @@ final class DemoDataService
     // -------------------------------------------------------------------------
 
     /**
-     * @return array<int, array{title: string, value: string, description: string, trend: array{direction: string, value: string}, icon: string}>
+     * @return array<int, array{key: string, value: string, description: string, trend: array{direction: string, value: string}}>
      */
     public function teamKpis(): array
     {
         return [
             [
-                'title' => 'Total Miembros',
+                'key' => 'members',
                 'value' => '48',
                 'description' => 'vs trimestre anterior',
                 'trend' => ['direction' => 'up', 'value' => '+4'],
-                'icon' => 'users',
             ],
             [
-                'title' => 'Departamentos',
+                'key' => 'departments',
                 'value' => '6',
                 'description' => 'sin cambio',
                 'trend' => ['direction' => 'neutral', 'value' => '0'],
-                'icon' => 'building',
             ],
             [
-                'title' => 'Utilización Promedio',
+                'key' => 'utilization',
                 'value' => '84%',
                 'description' => 'vs mes anterior',
                 'trend' => ['direction' => 'up', 'value' => '+3%'],
-                'icon' => 'activity',
             ],
         ];
     }

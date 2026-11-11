@@ -1,4 +1,5 @@
 import { AlertTriangle, TrendingUp } from 'lucide-react';
+import { ListSkeleton } from '@/components/list-skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type { DashboardAlert } from '@/types/demo';
@@ -17,7 +18,8 @@ const alertStyles = {
 } as const;
 
 type Props = {
-  alerts: DashboardAlert[];
+  /** Undefined while the deferred prop loads: the title shows, the list pulses. */
+  alerts?: DashboardAlert[];
 };
 
 export function DashboardAlerts({ alerts }: Props) {
@@ -27,7 +29,8 @@ export function DashboardAlerts({ alerts }: Props) {
         <CardTitle>Alertas</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-3">
-        {alerts.map((alert) => {
+        {!alerts && <ListSkeleton rows={3} />}
+        {alerts?.map((alert) => {
           const style = alertStyles[alert.type];
           const Icon = style.icon;
 

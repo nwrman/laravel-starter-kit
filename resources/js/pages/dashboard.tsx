@@ -1,14 +1,12 @@
-import { Deferred, Head, usePage } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { Banknote, CheckCircle, FolderOpen, Users } from 'lucide-react';
 import { useState } from 'react';
-import { ChartSkeleton } from '@/components/chart-skeleton';
 import { DashboardAlerts } from '@/components/demo/dashboard-alerts';
+import { type KpiCard, KpiRow } from '@/components/demo/kpi-row';
 import { ProjectStatusChart } from '@/components/demo/project-status-chart';
 import { RecentActivity } from '@/components/demo/recent-activity';
 import { RevenueChart } from '@/components/demo/revenue-chart';
-import { StatCard } from '@/components/demo/stat-card';
 import { PageHeader } from '@/components/page-header';
-import { StatCardGridSkeleton, StatCardSkeleton } from '@/components/stat-card-skeleton';
 import { getTimeOfDayGreeting } from '@/lib/utils';
 import { dashboard } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
@@ -17,7 +15,7 @@ import type {
   DashboardAlert,
   MonthlyRevenue,
   ProjectStatus,
-  StatCardData,
+  KpiValue,
 } from '@/types/demo';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -27,12 +25,14 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
-const iconMap = {
-  users: Users,
-  banknote: Banknote,
-  folder: FolderOpen,
-  'check-circle': CheckCircle,
-} as const;
+// Panel page (docs/adr/0019): every card renders its frame at once, and only the deferred
+// figures wait for the server.
+const kpiCards: KpiCard[] = [
+  { key: 'revenue', title: 'Ingresos Mensuales', icon: Banknote },
+  { key: 'active-projects', title: 'Proyectos Activos', icon: FolderOpen },
+  { key: 'team-members', title: 'Miembros del Equipo', icon: Users },
+  { key: 'completion-rate', title: 'Tasa de Completados', icon: CheckCircle },
+];
 
 type ChartsProps = {
   monthlyRevenue: MonthlyRevenue[];
@@ -47,7 +47,7 @@ type FeedProps = {
 };
 
 type PageProps = {
-  kpiStats?: StatCardData[];
+  kpiStats?: KpiValue[];
   charts?: ChartsProps;
   feed?: FeedProps;
 };
@@ -69,74 +69,27 @@ export default function Dashboard() {
           description="Resumen de la actividad en Acme Corp."
         />
 
-        {/* KPI Stat Cards */}
-        <Deferred
-          data="kpiStats"
-          fallback={
-            <StatCardGridSkeleton count={4} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" />
-          }
-        >
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {kpiStats?.map((stat) => (
-              <StatCard
-                key={stat.title}
-                title={stat.title}
-                value={stat.value}
-                description={stat.description}
-                trend={stat.trend}
-                icon={iconMap[stat.icon as keyof typeof iconMap]}
-              />
-            ))}
-          </div>
-        </Deferred>
+        <KpiRow
+          cards={kpiCards}
+          values={kpiStats}
+          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+        />
 
-        {/* Charts Row */}
-        <Deferred
-          data="charts"
-          fallback={
-            <div className="grid gap-4 lg:grid-cols-3">
-              <div className="min-w-0 lg:col-span-2">
-                <ChartSkeleton />
-              </div>
-              <ChartSkeleton />
-            </div>
-          }
-        >
-          <div className="grid gap-4 lg:grid-cols-3">
-            {charts && (
-              <>
-                <RevenueChart
-                  monthlyRevenue={charts.monthlyRevenue}
-                  revenueTotal={charts.revenueTotal}
-                />
-                <ProjectStatusChart
-                  projectStatuses={charts.projectStatuses}
-                  projectTotal={charts.projectTotal}
-                />
-              </>
-            )}
-          </div>
-        </Deferred>
+        <div className="grid gap-4 lg:grid-cols-3">
+          <RevenueChart
+            monthlyRevenue={charts?.monthlyRevenue}
+            revenueTotal={charts?.revenueTotal}
+          />
+          <ProjectStatusChart
+            projectStatuses={charts?.projectStatuses}
+            projectTotal={charts?.projectTotal}
+          />
+        </div>
 
-        {/* Alerts + Activity */}
-        <Deferred
-          data="feed"
-          fallback={
-            <div className="grid gap-4 lg:grid-cols-2">
-              <StatCardSkeleton />
-              <StatCardSkeleton />
-            </div>
-          }
-        >
-          <div className="grid gap-4 lg:grid-cols-2">
-            {feed && (
-              <>
-                <DashboardAlerts alerts={feed.dashboardAlerts} />
-                <RecentActivity items={feed.recentActivity} />
-              </>
-            )}
-          </div>
-        </Deferred>
+        <div className="grid gap-4 lg:grid-cols-2">
+          <DashboardAlerts alerts={feed?.dashboardAlerts} />
+          <RecentActivity items={feed?.recentActivity} />
+        </div>
       </div>
     </>
   );
