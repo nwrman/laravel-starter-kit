@@ -124,16 +124,18 @@ return [
     | History
     |--------------------------------------------------------------------------
     |
-    | Enable `encrypt` to encrypt page data before it is stored in the
-    | browser's history state, preventing sensitive information from
-    | being accessible after logout. Can also be enabled per-request
-    | or via the `inertia.encrypt` middleware.
+    | On by default (ADR 0018). Page data is encrypted before it is stored
+    | in the browser's history state, with a key kept in sessionStorage.
+    | Logout and account deletion call Inertia::clearHistory(), which drops
+    | the key, so the back button cannot show an authenticated page. Needs a
+    | secure context (HTTPS, localhost or 127.0.0.1); elsewhere Inertia warns
+    | in the console and stores the page unencrypted.
     |
     */
 
     'history' => [
 
-        'encrypt' => (bool) env('INERTIA_ENCRYPT_HISTORY', false),
+        'encrypt' => (bool) env('INERTIA_ENCRYPT_HISTORY', true),
 
     ],
 
