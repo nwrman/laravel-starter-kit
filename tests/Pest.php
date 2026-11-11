@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Process;
@@ -92,4 +93,17 @@ function visitWithoutAnimations(string|array $url): ArrayablePendingAwaitablePag
     }
 
     return $pages;
+}
+
+/**
+ * The headers of an Inertia visit, with the asset version the server expects, so a GET is
+ * not answered with a version-mismatch 409.
+ *
+ * @return array<string, string>
+ */
+function inertiaHeaders(): array
+{
+    $version = resolve(HandleInertiaRequests::class)->version(request());
+
+    return ['X-Inertia' => 'true', 'X-Inertia-Version' => (string) $version];
 }
