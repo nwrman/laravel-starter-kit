@@ -15,8 +15,10 @@ use Symfony\Component\Process\Process;
  */
 
 it('refuses to boot the suite against a database not named *_test', function (string $key, string $value, string $database): void {
+    // Any test that extends Tests\TestCase boots the guard. CoverageExclusionsTest is one
+    // every app keeps; one that can be removed (a CI-only test, say) leaves "No tests found".
     $process = new Process(
-        [PHP_BINARY, 'vendor/bin/pest', '--filter=EnvTestingTemplateTest'],
+        [PHP_BINARY, 'vendor/bin/pest', '--filter=CoverageExclusionsTest'],
         dirname(__DIR__, 3),
         [
             $key => $value,
