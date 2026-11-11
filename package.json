@@ -8,7 +8,6 @@
         "preinstall": "npx only-allow bun",
         "brand": "node scripts/generate-brand-assets.mjs",
         "build": "vp build",
-        "build:ssr": "vp build && vp build --ssr",
         "dev": "vp dev",
         "lint": "vp fmt && vp lint --fix",
         "test:lint": "vp fmt --check && vp lint",
