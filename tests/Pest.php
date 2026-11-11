@@ -2,11 +2,14 @@
 
 declare(strict_types=1);
 
+use App\Http\Middleware\HandleInertiaRequests;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Sleep;
 use Illuminate\Support\Str;
+use Laravel\Passkeys\Passkey;
 use Pest\Browser\Api\ArrayablePendingAwaitablePage;
 use Pest\Browser\Api\PendingAwaitablePage;
 use Tests\TestCase;
@@ -92,4 +95,27 @@ function visitWithoutAnimations(string|array $url): ArrayablePendingAwaitablePag
     }
 
     return $pages;
+}
+
+/**
+ * The headers of an Inertia visit, with the asset version the server expects, so a GET is
+ * not answered with a version-mismatch 409.
+ *
+ * @return array<string, string>
+ */
+function inertiaHeaders(): array
+{
+    $version = resolve(HandleInertiaRequests::class)->version(request());
+
+    return ['X-Inertia' => 'true', 'X-Inertia-Version' => (string) $version];
+}
+
+/** A passkey the user registered, as the WebAuthn ceremony leaves it in the database. */
+function passkeyFor(User $user, string $name = 'Phone'): Passkey
+{
+    return $user->passkeys()->create([
+        'name' => $name,
+        'credential_id' => 'credential-'.Str::uuid(),
+        'credential' => ['aaguid' => '00000000-0000-0000-0000-000000000000'],
+    ]);
 }

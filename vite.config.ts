@@ -1,4 +1,5 @@
 import { relative } from 'node:path';
+import inertia from '@inertiajs/vite';
 import { wayfinder } from '@laravel/vite-plugin-wayfinder';
 import babel from '@rolldown/plugin-babel';
 import tailwindcss from '@tailwindcss/vite';
@@ -153,9 +154,9 @@ export default defineConfig({
         'resources/css/filament/admin/theme.css',
         'resources/js/app.tsx',
       ],
-      ssr: 'resources/js/ssr.tsx',
       refresh: true,
     }),
+    inertia({ ssr: false }),
     react(),
     babel({
       presets: [reactCompilerPreset()],

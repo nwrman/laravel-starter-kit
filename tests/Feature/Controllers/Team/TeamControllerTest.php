@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Models\User;
 
-it('renders team index for authenticated users', function (): void {
+it('renders team/index with no page data up front, so an instant visit can draw it', function (): void {
     $user = User::factory()->create();
 
     $this->actingAs($user)
@@ -12,7 +12,8 @@ it('renders team index for authenticated users', function (): void {
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('team/index')
-            ->has('kpiStats'));
+            ->missing('kpiStats')
+            ->missing('tableData'));
 });
 
 it('loads deferred table data on team index', function (): void {
@@ -28,7 +29,7 @@ it('loads deferred table data on team index', function (): void {
                 ->has('tableData.departmentDistribution', 6)));
 });
 
-it('team kpiStats contains 3 items', function (): void {
+it('defers the stat figures, keyed for the cards the page draws', function (): void {
     $user = User::factory()->create();
 
     $this->actingAs($user)
@@ -36,5 +37,11 @@ it('team kpiStats contains 3 items', function (): void {
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('team/index')
-            ->has('kpiStats', 3));
+            ->loadDeferredProps('kpiStats', fn ($reload) => $reload
+                ->where('kpiStats', fn ($stats): bool => collect($stats)->pluck('key')->all() === ['members', 'departments', 'utilization'])
+                ->has('kpiStats.0', fn ($stat) => $stat
+                    ->hasAll(['key', 'value', 'description', 'trend'])
+                    ->missing('title')
+                    ->missing('icon')
+                    ->etc())));
 });

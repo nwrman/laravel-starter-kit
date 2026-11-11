@@ -6,6 +6,14 @@ export type StatCardData = {
   icon: string;
 };
 
+/** A panel page's KPI figures; the page owns each card's title and icon, matched on `key`. */
+export type KpiValue = {
+  key: string;
+  value: string;
+  description: string;
+  trend: { direction: 'up' | 'down' | 'neutral'; value: string };
+};
+
 export type MonthlyRevenue = {
   month: string;
   revenue: number;

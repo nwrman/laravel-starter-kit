@@ -1,8 +1,9 @@
-import { router } from '@inertiajs/react';
 import { usePasskeyVerify } from '@laravel/passkeys/react';
 import { KeyRound } from 'lucide-react';
 import { Button } from '@/components/button';
 import InputError from '@/components/input-error';
+import { fullPageLoad } from '@/lib/full-page-load';
+import { passkeyErrorMessage } from '@/lib/passkey-error-message';
 import { dashboard } from '@/routes';
 
 /**
@@ -12,11 +13,12 @@ import { dashboard } from '@/routes';
  * under the hood. Renders nothing when the browser has no WebAuthn support.
  */
 export default function PasskeyVerify() {
-  const { verify, isLoading, error, isSupported } = usePasskeyVerify({
+  const { verify, isLoading, errorInstance, isSupported } = usePasskeyVerify({
     onSuccess: (response) => {
-      router.visit(response.redirect ?? dashboard().url);
+      fullPageLoad(response.redirect ?? dashboard().url);
     },
   });
+  const error = passkeyErrorMessage(errorInstance);
 
   if (!isSupported) {
     return null;

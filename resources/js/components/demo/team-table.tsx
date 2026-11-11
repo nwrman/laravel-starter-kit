@@ -60,14 +60,25 @@ const columns: DataTableColumnDef<TeamMember>[] = [
 ];
 
 type Props = {
-  rows: TeamMember[];
+  /** Undefined while the deferred prop loads: search and headers show, the rows pulse. */
+  rows?: TeamMember[];
 };
 
 export function TeamTable({ rows }: Props) {
   return (
     <DataTable
       columns={columns}
-      data={rows}
+      data={rows ?? []}
+      loading={rows === undefined}
+      loadingRowClassName="h-[61px]"
+      loadingCell={(columnId) =>
+        columnId === 'name' ? (
+          <div className="space-y-1">
+            <div className="h-4 w-32 animate-pulse rounded bg-muted" />
+            <div className="h-3 w-44 animate-pulse rounded bg-muted" />
+          </div>
+        ) : null
+      }
       initialPageSize={10}
       renderToolbar={(table) => (
         <DataTableToolbar table={table} searchPlaceholder="Buscar personas…" />

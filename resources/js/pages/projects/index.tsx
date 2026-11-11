@@ -1,23 +1,24 @@
-import { Deferred, Head, usePage } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { Banknote, CheckCircle, FolderOpen, Plus } from 'lucide-react';
-import { ChartSkeleton } from '@/components/chart-skeleton';
+import { type KpiCard, KpiRow } from '@/components/demo/kpi-row';
 import { ProjectChart } from '@/components/demo/project-chart';
 import { ProjectTable } from '@/components/demo/project-table';
-import { StatCard } from '@/components/demo/stat-card';
-import { TableSkeleton } from '@/components/table-skeleton';
+import { create } from '@/routes/projects';
 import type { BreadcrumbItem } from '@/types';
-import type { ProjectMonthly, ProjectRow, StatCardData } from '@/types/demo';
+import type { ProjectMonthly, ProjectRow, KpiValue } from '@/types/demo';
 
 const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Inicio', href: '/dashboard' },
   { title: 'Proyectos', href: '/projects' },
 ];
 
-const iconMap = {
-  folder: FolderOpen,
-  banknote: Banknote,
-  'check-circle': CheckCircle,
-} as const;
+// Panel page (docs/adr/0019): the cards, table and chart render their frames at once, and
+// only the deferred figures wait for the server.
+const kpiCards: KpiCard[] = [
+  { key: 'active-projects', title: 'Proyectos Activos', icon: FolderOpen },
+  { key: 'total-budget', title: 'Presupuesto Total', icon: Banknote },
+  { key: 'completed-this-month', title: 'Completados este Mes', icon: CheckCircle },
+];
 
 type TableDataProps = {
   projectRows: ProjectRow[];
@@ -25,7 +26,7 @@ type TableDataProps = {
 };
 
 type PageProps = {
-  kpiStats: StatCardData[];
+  kpiStats?: KpiValue[];
   tableData?: TableDataProps;
   chartData?: TableDataProps;
 };
@@ -43,32 +44,25 @@ export default function ProjectsIndex() {
         <PageHeader
           title="Proyectos"
           description="Gestiona los proyectos de Acme Corp."
-          actions={<PagePrimaryAction label="Nuevo Proyecto" href="/projects/create" icon={Plus} />}
+          actions={
+            <PagePrimaryAction
+              label="Nuevo Proyecto"
+              href={create()}
+              component="projects/create"
+              icon={Plus}
+            />
+          }
         />
 
-        {/* KPI Stat Cards */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {kpiStats.map((stat) => (
-            <StatCard
-              key={stat.title}
-              title={stat.title}
-              value={stat.value}
-              description={stat.description}
-              trend={stat.trend}
-              icon={iconMap[stat.icon as keyof typeof iconMap]}
-            />
-          ))}
-        </div>
+        <KpiRow
+          cards={kpiCards}
+          values={kpiStats}
+          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+        />
 
-        {/* Projects Table */}
-        <Deferred data="tableData" fallback={<TableSkeleton />}>
-          {tableData && <ProjectTable rows={tableData.projectRows} />}
-        </Deferred>
+        <ProjectTable rows={tableData?.projectRows} />
 
-        {/* Chart */}
-        <Deferred data="chartData" fallback={<ChartSkeleton />}>
-          {chartData && <ProjectChart data={chartData.projectMonthly} />}
-        </Deferred>
+        <ProjectChart data={chartData?.projectMonthly} />
       </div>
     </>
   );

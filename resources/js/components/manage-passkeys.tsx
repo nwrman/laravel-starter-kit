@@ -1,5 +1,8 @@
 import { router } from '@inertiajs/react';
 import { KeyRound } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import { toast } from 'sonner';
+import { destroy } from '@/actions/Laravel/Passkeys/Http/Controllers/PasskeyRegistrationController';
 import PasskeyItem from '@/components/passkey-item';
 import PasskeyRegister from '@/components/passkey-register';
 import {
@@ -32,9 +35,64 @@ function EmptyState() {
 }
 
 export default function ManagePasskeys({ canManagePasskeys = false, passkeys = [] }: Props) {
+  const focusAfterDelete = useRef<string | null>(null);
+
+  // The deleted row takes its button, and the focus, with it. Once the list has re-rendered,
+  // hand the focus to the neighbouring row's delete button, or to "add" when none is left.
+  useEffect(() => {
+    if (focusAfterDelete.current === null) {
+      return;
+    }
+
+    document.querySelector<HTMLElement>(focusAfterDelete.current)?.focus();
+    focusAfterDelete.current = null;
+  }, [passkeys]);
+
   if (!canManagePasskeys) {
     return null;
   }
+
+  // Optimistic, and the kit's reference optimistic update (the passkeys guideline): the row
+  // leaves at once. Inertia puts `passkeys` back when the visit ends without success, and the
+  // server's answer replaces it when it succeeds. A refusal (403, 404, 500) or a dropped
+  // connection shows an error toast: returning false stops Inertia's error dialog (local) and
+  // error page (production), so the row simply returns.
+  const refuse = (passkey: Passkey, message: string) => {
+    focusAfterDelete.current = `[data-passkey-delete="${passkey.id}"]`;
+    toast.error(message, { duration: 6_000 });
+  };
+
+  const deletePasskey = (passkey: Passkey) => {
+    const index = passkeys.findIndex(({ id }) => id === passkey.id);
+    const neighbour = passkeys[index + 1] ?? passkeys[index - 1];
+
+    focusAfterDelete.current = neighbour
+      ? `[data-passkey-delete="${neighbour.id}"]`
+      : '[data-passkey-add]';
+
+    router
+      .optimistic<{ passkeys: Passkey[] }>((props) => ({
+        passkeys: props.passkeys.filter(({ id }) => id !== passkey.id),
+      }))
+      .delete(destroy.url(passkey.id), {
+        preserveScroll: true,
+        // A failure toasts through the app's feedback channel (use-flash-toast shows server
+        // flashes the same way), and the focus goes back to the row the rollback restores.
+        onHttpException: () => {
+          refuse(passkey, `No se pudo eliminar la llave “${passkey.name}”.`);
+
+          return false;
+        },
+        onNetworkError: () => {
+          refuse(
+            passkey,
+            `No se pudo eliminar la llave “${passkey.name}”. Revisa tu conexión e inténtalo de nuevo.`,
+          );
+
+          return false;
+        },
+      });
+  };
 
   return (
     <Card>
@@ -49,7 +107,11 @@ export default function ManagePasskeys({ canManagePasskeys = false, passkeys = [
         {passkeys.length > 0 ? (
           <div className="overflow-hidden rounded-lg border border-border">
             {passkeys.map((passkey) => (
-              <PasskeyItem key={passkey.id} passkey={passkey} />
+              <PasskeyItem
+                key={passkey.id}
+                passkey={passkey}
+                onDelete={() => deletePasskey(passkey)}
+              />
             ))}
           </div>
         ) : (

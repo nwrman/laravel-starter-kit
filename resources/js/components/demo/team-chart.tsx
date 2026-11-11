@@ -1,4 +1,5 @@
 import { Label, Pie, PieChart } from 'recharts';
+import { ChartRingSkeleton } from '@/components/chart-skeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   ChartContainer,
@@ -21,11 +22,30 @@ const chartConfig = {
 const deptColors = ['#2563eb', '#8b5cf6', '#16a34a', '#f59e0b', '#ec4899', '#94a3b8'];
 
 type Props = {
-  departments: DepartmentDistribution[];
-  total: number;
+  /** Undefined while the deferred prop loads: the title shows, the chart area pulses. */
+  departments?: DepartmentDistribution[];
 };
 
-export function TeamChart({ departments, total }: Props) {
+export function TeamChart({ departments }: Props) {
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardDescription>Distribución actual</CardDescription>
+        <CardTitle className="text-2xl">Equipo por Departamento</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {departments ? (
+          <TeamPie departments={departments} />
+        ) : (
+          <ChartRingSkeleton legendItems={6} />
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function TeamPie({ departments }: { departments: DepartmentDistribution[] }) {
+  const total = departments.reduce((sum, d) => sum + d.count, 0);
   const chartData = departments.map((d) => ({
     department: d.department
       .toLowerCase()
@@ -41,68 +61,62 @@ export function TeamChart({ departments, total }: Props) {
   }));
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardDescription>Distribución actual</CardDescription>
-        <CardTitle className="text-2xl">Equipo por Departamento</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[250px]">
-          <PieChart>
-            <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-            <Pie
-              data={chartData}
-              dataKey="count"
-              nameKey="department"
-              innerRadius={60}
-              strokeWidth={4}
-              stroke="hsl(var(--background))"
-            >
-              <Label
-                content={({ viewBox }) => {
-                  if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
-                    return (
-                      <text
+    <>
+      <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[250px]">
+        <PieChart>
+          <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+          <Pie
+            data={chartData}
+            dataKey="count"
+            nameKey="department"
+            innerRadius={60}
+            strokeWidth={4}
+            stroke="hsl(var(--background))"
+          >
+            <Label
+              content={({ viewBox }) => {
+                if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
+                  return (
+                    <text
+                      x={viewBox.cx}
+                      y={viewBox.cy}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                    >
+                      <tspan
                         x={viewBox.cx}
                         y={viewBox.cy}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
+                        className="fill-foreground text-2xl font-bold"
                       >
-                        <tspan
-                          x={viewBox.cx}
-                          y={viewBox.cy}
-                          className="fill-foreground text-2xl font-bold"
-                        >
-                          {total}
-                        </tspan>
-                        <tspan
-                          x={viewBox.cx}
-                          y={(viewBox.cy ?? 0) + 20}
-                          className="fill-muted-foreground text-xs"
-                        >
-                          Miembros
-                        </tspan>
-                      </text>
-                    );
-                  }
-                }}
-              />
-            </Pie>
-          </PieChart>
-        </ChartContainer>
-        <div className="mt-2 grid grid-cols-2 gap-2">
-          {departments.map((d, i) => (
-            <div key={d.department} className="flex items-center gap-2 text-sm">
-              <div
-                className="size-2.5 shrink-0 rounded-full"
-                style={{ backgroundColor: deptColors[i] }}
-              />
-              <span className="text-muted-foreground">{d.department}</span>
-              <span className="ml-auto font-medium tabular-nums">{d.count}</span>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+                        {total}
+                      </tspan>
+                      <tspan
+                        x={viewBox.cx}
+                        y={(viewBox.cy ?? 0) + 20}
+                        className="fill-muted-foreground text-xs"
+                      >
+                        Miembros
+                      </tspan>
+                    </text>
+                  );
+                }
+              }}
+            />
+          </Pie>
+        </PieChart>
+      </ChartContainer>
+      <div className="mt-2 grid grid-cols-2 gap-2">
+        {departments.map((d, i) => (
+          <div key={d.department} className="flex items-center gap-2 text-sm">
+            <div
+              className="size-2.5 shrink-0 rounded-full"
+              style={{ backgroundColor: deptColors[i] }}
+            />
+            <span className="text-muted-foreground">{d.department}</span>
+            <span className="ml-auto font-medium tabular-nums">{d.count}</span>
+          </div>
+        ))}
+      </div>
+    </>
   );
 }

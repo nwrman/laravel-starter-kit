@@ -19,7 +19,11 @@ final readonly class ProjectController
     public function index(): Response
     {
         return Inertia::render('projects/index', [
-            'kpiStats' => $this->demo->projectKpis(),
+            'kpiStats' => Inertia::defer(function (): array {
+                $this->demo->sleep('DEMO_LATENCY_KPIS_MS');
+
+                return $this->demo->projectKpis();
+            }, 'kpiStats'),
             'tableData' => Inertia::defer(function (): array {
                 $this->demo->sleep('DEMO_LATENCY_TABLE_MS');
 

@@ -41,6 +41,19 @@ type DataTableProps<TData extends RowData> = {
   getRowId?: (row: TData, index: number) => string;
   emptyMessage?: string;
   initialPageSize?: number;
+  /**
+   * The rows have not arrived yet (a deferred prop). The toolbar and the column headers render
+   * as usual; the body shows one placeholder row per row of the page, and the pagination keeps
+   * its space, hidden, so nothing below the table moves when the data lands. docs/adr/0019.
+   */
+  loading?: boolean;
+  /** A column's placeholder cell while loading, when a plain bar is not its real height. */
+  loadingCell?: (columnId: string) => React.ReactNode;
+  /**
+   * The loaded rows' height, for the placeholder rows (e.g. `h-[46px]`), when badges or
+   * progress bars make the real rows taller than a bar of text.
+   */
+  loadingRowClassName?: string;
 };
 
 export function DataTable<TData extends RowData>({
@@ -55,6 +68,9 @@ export function DataTable<TData extends RowData>({
   getRowId,
   emptyMessage = 'Sin resultados.',
   initialPageSize = 25,
+  loading = false,
+  loadingCell,
+  loadingRowClassName,
 }: DataTableProps<TData>) {
   const [internalSelection, setInternalSelection] = React.useState<RowSelectionState>({});
 
@@ -148,7 +164,23 @@ export function DataTable<TData extends RowData>({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows.length > 0 ? (
+            {loading ? (
+              Array.from({ length: pagination.pageSize }, (_, index) => (
+                <TableRow key={index} aria-hidden="true" className={loadingRowClassName}>
+                  {table.getVisibleLeafColumns().map((column, columnIndex) => (
+                    <TableCell key={column.id}>
+                      {loadingCell?.(column.id) ?? (
+                        <div
+                          data-test="loading-cell"
+                          className="h-4 animate-pulse rounded bg-muted"
+                          style={{ width: `${[75, 55, 65, 45, 60][columnIndex % 5]}%` }}
+                        />
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : table.getRowModel().rows.length > 0 ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -176,7 +208,12 @@ export function DataTable<TData extends RowData>({
           </TableBody>
         </Table>
       </div>
-      {renderPagination?.(table)}
+      {/* The pagination renders nothing without rows, so its height is held by hand. */}
+      {loading && renderPagination ? (
+        <div className="h-8" aria-hidden="true" data-test="pagination-placeholder" />
+      ) : (
+        renderPagination?.(table)
+      )}
     </div>
   );
 }

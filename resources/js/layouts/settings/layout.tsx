@@ -44,7 +44,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                 size="sm"
                 variant="ghost"
                 nativeButton={false}
-                render={<Link href={item.href} />}
+                render={<Link href={item.href} prefetch />}
                 className={cn('w-full justify-start', {
                   'bg-muted': isCurrentOrParentUrl(item.href),
                 })}

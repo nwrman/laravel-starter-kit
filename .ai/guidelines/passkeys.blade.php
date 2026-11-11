@@ -9,12 +9,19 @@ deletion, or the login/security pages, keep this in mind.
 - **Backend:** `App\Models\User` implements `Laravel\Fortify\Contracts\PasskeyUser` and uses `PasskeyAuthenticatable`.
   `App\Providers\FortifyServiceProvider` holds the `passkeys` rate limiter **and** `Passkeys::authorizeLoginUsing()` — the
   single chokepoint that rejects soft-deleted users on passkey login (mirrors the trashed-user block on password login).
+  It also binds `App\Http\Responses\PasskeyDeletedResponse`, which flashes the success toast after a delete.
 - **Production secret:** `config/fortify.php` → `passkeys.user_handle_secret` reads `PASSKEYS_USER_HANDLE_SECRET`
   (defaulting to `APP_KEY`). Set a fixed value per environment — otherwise rotating `APP_KEY` invalidates every passkey.
 - **Frontend:** `resources/js/components/passkey-verify.tsx` (the "Iniciar sesión con llave de acceso" button on the login
   page) plus `manage-passkeys.tsx` / `passkey-register.tsx` / `passkey-item.tsx` (Settings → Seguridad). They use
   `@laravel/passkeys/react` hooks for the WebAuthn ceremony and the kit's Inertia `<Form>` + Wayfinder conventions for
-  everything else (delete reuses `ConfirmButton`).
+  everything else.
+  - **Delete** is an optimistic `router` call owned by `manage-passkeys.tsx` (behind `ConfirmButton`): the row leaves at
+    once, a refusal rolls it back and shows an error toast (`onHttpException` returns false).
+  - **Ceremony errors** show through `lib/passkey-error-message.ts`, keyed on the error's class: the library's own
+    messages are English.
+  - **Passkey login** navigates with `fullPageLoad()`, never `router.visit()`, so the session starts in its own
+    `no-store` document (docs/adr/0018).
 - **Tests:** `tests/Feature/Auth/PasskeyTest.php` + co-located Vitest (`resources/js/components/passkey-*.test.tsx`). The
   WebAuthn ceremony itself is not unit-testable (no fake authenticator; real crypto) — test at the wiring level (route
   middleware, the login-authorization guard), not the assertion.

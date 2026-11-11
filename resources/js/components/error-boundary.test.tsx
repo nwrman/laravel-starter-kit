@@ -189,8 +189,10 @@ describe('ErrorBoundary', () => {
 
   it('resets error state when navigate event fires to a different URL', () => {
     let navigateCallback: (() => void) | undefined;
-    vi.mocked(router.on).mockImplementation((_event: any, callback: any) => {
-      navigateCallback = callback;
+    vi.mocked(router.on).mockImplementation((event: any, callback: any) => {
+      if (event === 'navigate') {
+        navigateCallback = callback;
+      }
       return vi.fn();
     });
 
@@ -221,8 +223,10 @@ describe('ErrorBoundary', () => {
 
   it('does not reset error state when navigate event fires to the same URL', () => {
     let navigateCallback: (() => void) | undefined;
-    vi.mocked(router.on).mockImplementation((_event: any, callback: any) => {
-      navigateCallback = callback;
+    vi.mocked(router.on).mockImplementation((event: any, callback: any) => {
+      if (event === 'navigate') {
+        navigateCallback = callback;
+      }
       return vi.fn();
     });
 
@@ -240,6 +244,56 @@ describe('ErrorBoundary', () => {
     });
 
     expect(screen.getByText('Ocurrió un error inesperado')).toBeInTheDocument();
+  });
+
+  it('retries the page when a visit succeeds at the same URL, as an instant visit does', () => {
+    const listeners: Record<string, () => void> = {};
+    vi.mocked(router.on).mockImplementation((event: any, callback: any) => {
+      listeners[event] = callback;
+      return vi.fn();
+    });
+
+    // An instant visit first renders the page with only the shared props; the real props
+    // arrive at the same URL when the server answers.
+    let hasRealProps = false;
+    function InstantPage() {
+      if (!hasRealProps) {
+        throw new Error('kpiStats is undefined');
+      }
+      return <div>Real page</div>;
+    }
+
+    render(
+      <ErrorBoundary>
+        <InstantPage />
+      </ErrorBoundary>,
+    );
+    expect(screen.getByText('Ocurrió un error inesperado')).toBeInTheDocument();
+
+    hasRealProps = true;
+    act(() => {
+      listeners.success?.();
+    });
+
+    expect(screen.getByText('Real page')).toBeInTheDocument();
+    expect(screen.queryByText('Ocurrió un error inesperado')).not.toBeInTheDocument();
+  });
+
+  it('removes the success listener on unmount', () => {
+    const cleanups: Record<string, () => void> = {};
+    vi.mocked(router.on).mockImplementation((event: any) => {
+      cleanups[event] = vi.fn();
+      return cleanups[event];
+    });
+
+    const { unmount } = render(
+      <ErrorBoundary>
+        <div>Content</div>
+      </ErrorBoundary>,
+    );
+    unmount();
+
+    expect(cleanups.success).toHaveBeenCalledTimes(1);
   });
 
   it('logs error when clipboard fallback execCommand throws', async () => {

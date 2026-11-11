@@ -74,6 +74,7 @@ export function NavCollapsible({ group }: { group: NavGroup }) {
                   render={
                     <Link
                       href={item.href}
+                      component={item.component}
                       prefetch
                       aria-current={isCurrentUrl(item.href) ? 'page' : undefined}
                     />
@@ -108,7 +109,7 @@ export function NavCollapsible({ group }: { group: NavGroup }) {
           {group.items.map((item) => (
             <SidebarMenuSubItem key={item.title}>
               <SidebarMenuSubButton
-                render={<Link href={item.href} prefetch />}
+                render={<Link href={item.href} component={item.component} prefetch />}
                 isActive={isCurrentUrl(item.href)}
               >
                 <span>{item.title}</span>

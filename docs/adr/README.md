@@ -29,3 +29,5 @@ until chosen and built.
 | [0015](0015-tia-baselines-flow-from-landed-tickets.md) | TIA baselines flow from landed tickets, and the coverage gate stays unfiltered | Accepted (amends 0014; browser clause replaced by 0017) |
 | [0016](0016-postgres-is-the-only-database.md) | Postgres is the only database | Accepted (supersedes 0013; `--env=testing` clause replaced by 0017) |
 | [0017](0017-no-test-command-boots-laravel.md) | No test command boots Laravel; browser specs get their own gate | Accepted (replaces a clause of 0015 and of 0016) |
+| [0018](0018-history-encryption-on-by-default.md) | Inertia history encryption is on by default | Accepted |
+| [0019](0019-instant-visits-for-panels-prefetch-for-records.md) | Instant visits for panel pages, prefetch for records and forms | Accepted |
