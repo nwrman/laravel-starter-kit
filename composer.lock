@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fd7ac354bbbecfff715b62098bd91c07",
+    "content-hash": "36370cd5a64cfd13e9b6a6aee0380ff4",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -4927,16 +4927,16 @@
         },
         {
             "name": "nwrman/laravel-toolkit",
-            "version": "v1.0.4",
+            "version": "v1.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nwrman/laravel-toolkit.git",
-                "reference": "7a2fb191f39a0a04d31ce92ecd50ebfcc46185de"
+                "reference": "6e57dbc2af3113deed514acb796eb2795027f722"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nwrman/laravel-toolkit/zipball/7a2fb191f39a0a04d31ce92ecd50ebfcc46185de",
-                "reference": "7a2fb191f39a0a04d31ce92ecd50ebfcc46185de",
+                "url": "https://api.github.com/repos/nwrman/laravel-toolkit/zipball/6e57dbc2af3113deed514acb796eb2795027f722",
+                "reference": "6e57dbc2af3113deed514acb796eb2795027f722",
                 "shasum": ""
             },
             "require": {
@@ -5003,9 +5003,10 @@
             ],
             "support": {
                 "issues": "https://github.com/nwrman/laravel-toolkit/issues",
-                "source": "https://github.com/nwrman/laravel-toolkit/tree/v1.0.4"
+                "source": "https://github.com/nwrman/laravel-toolkit/tree/v1.0.5"
             },
-            "time": "2026-11-04T19:14:15+00:00"
+            "time": "2026-11-04T20:20:41+00:00",
+            "published-time": "2026-11-04T20:23:12+00:00"
         },
         {
             "name": "openspout/openspout",
@@ -17814,5 +17815,5 @@
         "php": "^8.5.0"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.9.0"
+    "plugin-api-version": "2.11.0"
 }
