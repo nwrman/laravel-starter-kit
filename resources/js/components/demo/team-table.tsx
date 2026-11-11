@@ -69,7 +69,15 @@ export function TeamTable({ rows }: Props) {
     <DataTable
       columns={columns}
       data={rows ?? []}
-      loadingRows={rows ? undefined : 5}
+      loading={rows === undefined}
+      loadingCell={(columnId) =>
+        columnId === 'name' ? (
+          <div className="space-y-1">
+            <div className="h-4 w-32 animate-pulse rounded bg-muted" />
+            <div className="h-3 w-44 animate-pulse rounded bg-muted" />
+          </div>
+        ) : null
+      }
       initialPageSize={10}
       renderToolbar={(table) => (
         <DataTableToolbar table={table} searchPlaceholder="Buscar personas…" />

@@ -42,10 +42,13 @@ type DataTableProps<TData extends RowData> = {
   emptyMessage?: string;
   initialPageSize?: number;
   /**
-   * The rows have not arrived yet (a deferred prop): the toolbar and the column headers render
-   * as usual, the body shows this many placeholder rows, and the pagination waits. docs/adr/0019.
+   * The rows have not arrived yet (a deferred prop). The toolbar and the column headers render
+   * as usual; the body shows one placeholder row per row of the page, and the pagination keeps
+   * its space, hidden, so nothing below the table moves when the data lands. docs/adr/0019.
    */
-  loadingRows?: number;
+  loading?: boolean;
+  /** A column's placeholder cell while loading, when a plain bar is not its real height. */
+  loadingCell?: (columnId: string) => React.ReactNode;
 };
 
 export function DataTable<TData extends RowData>({
@@ -60,7 +63,8 @@ export function DataTable<TData extends RowData>({
   getRowId,
   emptyMessage = 'Sin resultados.',
   initialPageSize = 25,
-  loadingRows,
+  loading = false,
+  loadingCell,
 }: DataTableProps<TData>) {
   const [internalSelection, setInternalSelection] = React.useState<RowSelectionState>({});
 
@@ -154,12 +158,17 @@ export function DataTable<TData extends RowData>({
             ))}
           </TableHeader>
           <TableBody>
-            {loadingRows !== undefined ? (
-              Array.from({ length: loadingRows }, (_, index) => (
+            {loading ? (
+              Array.from({ length: pagination.pageSize }, (_, index) => (
                 <TableRow key={index} aria-hidden="true">
-                  {table.getVisibleLeafColumns().map((column) => (
+                  {table.getVisibleLeafColumns().map((column, columnIndex) => (
                     <TableCell key={column.id}>
-                      <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
+                      {loadingCell?.(column.id) ?? (
+                        <div
+                          className="h-4 animate-pulse rounded bg-muted"
+                          style={{ width: `${[75, 55, 65, 45, 60][columnIndex % 5]}%` }}
+                        />
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
@@ -192,7 +201,13 @@ export function DataTable<TData extends RowData>({
           </TableBody>
         </Table>
       </div>
-      {loadingRows === undefined ? renderPagination?.(table) : null}
+      {loading ? (
+        <div className="invisible" aria-hidden="true">
+          {renderPagination?.(table)}
+        </div>
+      ) : (
+        renderPagination?.(table)
+      )}
     </div>
   );
 }
