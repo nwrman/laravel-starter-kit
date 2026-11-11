@@ -20,3 +20,22 @@ it('can log out', function (): void {
 
     $this->assertGuest();
 });
+
+it('leaves nothing from the account behind the back button', function (): void {
+    $this->actingAs(User::factory()->create());
+
+    // Logout is a full page load (ADR 0018), so the signed-in document is left behind, and it
+    // was sent no-store: Back fetches it again and the server answers with the login screen.
+    visitWithoutAnimations('/team')
+        ->assertSee('Total Miembros')
+        ->click('[data-test="sidebar-menu-button"]')
+        ->click('[data-test="logout-button"]')
+        ->assertPathIs('/login')
+        ->back()
+        ->assertPathIs('/login')
+        ->assertSee('Inicia sesión en tu cuenta')
+        ->assertDontSee('Total Miembros')
+        ->assertNoJavaScriptErrors();
+
+    $this->assertGuest();
+});

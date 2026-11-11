@@ -324,6 +324,74 @@ describe('DataTable', () => {
 
     expect(screen.getByPlaceholderText('Buscar')).toHaveFocus();
   });
+
+  describe('while its rows load', () => {
+    it('keeps the search and the headers, and draws a placeholder row per row of the page', () => {
+      render(
+        <DataTable
+          columns={columns}
+          data={[]}
+          loading
+          initialPageSize={3}
+          renderToolbar={(table) => <DataTableToolbar table={table} searchPlaceholder="Buscar…" />}
+        />,
+      );
+
+      expect(screen.getByPlaceholderText('Buscar…')).toBeInTheDocument();
+      expect(screen.getByRole('columnheader', { name: /Name/ })).toBeInTheDocument();
+      expect(screen.getByRole('columnheader', { name: /Status/ })).toBeInTheDocument();
+      expect(document.querySelectorAll('tbody tr[aria-hidden="true"]')).toHaveLength(3);
+      expect(screen.queryByText('Sin resultados.')).not.toBeInTheDocument();
+    });
+
+    it("draws a column's own placeholder cell and the loaded rows' height", () => {
+      render(
+        <DataTable
+          columns={columns}
+          data={[]}
+          loading
+          initialPageSize={1}
+          loadingRowClassName="h-[61px]"
+          loadingCell={(columnId) =>
+            columnId === 'name' ? <span data-testid="name-placeholder" /> : null
+          }
+        />,
+      );
+
+      const row = document.querySelector('tbody tr[aria-hidden="true"]');
+      expect(row).toHaveClass('h-[61px]');
+      expect(within(row as HTMLElement).getAllByTestId('name-placeholder')).toHaveLength(1);
+    });
+
+    it("holds the pagination's place instead of showing it", () => {
+      render(
+        <DataTable
+          columns={columns}
+          data={[]}
+          loading
+          renderPagination={() => <div>Página 1 de 1</div>}
+        />,
+      );
+
+      expect(screen.queryByText('Página 1 de 1')).not.toBeInTheDocument();
+      expect(document.querySelector('div.h-8[aria-hidden="true"]')).toBeInTheDocument();
+    });
+
+    it('shows the rows and the pagination once they arrive', () => {
+      render(
+        <DataTable
+          columns={columns}
+          data={rows}
+          loading={false}
+          renderPagination={() => <div>Página 1 de 1</div>}
+        />,
+      );
+
+      expect(screen.getByText('Alice')).toBeInTheDocument();
+      expect(screen.getByText('Página 1 de 1')).toBeInTheDocument();
+      expect(document.querySelectorAll('tbody tr[aria-hidden="true"]')).toHaveLength(0);
+    });
+  });
 });
 
 const plainColumns: DataTableColumnDef<Row>[] = [
