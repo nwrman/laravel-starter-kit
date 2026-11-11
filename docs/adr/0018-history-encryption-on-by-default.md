@@ -41,6 +41,21 @@ so the browser keeps no authenticated document to restore. Chrome's newer back/f
 cache can hold some `no-store` pages, but it evicts them when cookies change, and logout
 changes them. Encryption protects history entries; the header protects the document.
 
+**Signing in and signing out are full page loads** (amended after the second walk of #43).
+A header only reaches the document that a full page load started. Every session starts by
+loading `/login`, a guest page sent without `no-store`, and signing in through an Inertia
+visit kept that guest document alive. The whole signed-in session then ran inside it, and
+after logout Back restored it from the back/forward cache, team page rendered. Logging out
+the same way left the signed-in user's first-page props in the login screen's `data-page`.
+`App\Http\Middleware\ReloadAcrossAuthBoundary` therefore compares whether the user was
+signed in before a request and after it. When that changed and the response to an Inertia
+request is a redirect, it answers `Inertia::location()` instead, and the browser loads the
+target as a new document. That covers login, logout, registration, the two-factor
+challenge and account deletion, and any auth route a Product adds. A sign-in that answers
+JSON, like passkey login (`resources/js/components/passkey-verify.tsx`), is outside it: its
+client navigates with `fullPageLoad()` (`resources/js/lib/full-page-load.ts`), never
+`router.visit()`.
+
 ## Consequences
 
 - Logout and account deletion actually remove authenticated page data from the browser,
