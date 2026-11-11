@@ -1,8 +1,8 @@
-import { router } from '@inertiajs/react';
 import { usePasskeyVerify } from '@laravel/passkeys/react';
 import { KeyRound } from 'lucide-react';
 import { Button } from '@/components/button';
 import InputError from '@/components/input-error';
+import { fullPageLoad } from '@/lib/full-page-load';
 import { dashboard } from '@/routes';
 
 /**
@@ -14,7 +14,7 @@ import { dashboard } from '@/routes';
 export default function PasskeyVerify() {
   const { verify, isLoading, error, isSupported } = usePasskeyVerify({
     onSuccess: (response) => {
-      router.visit(response.redirect ?? dashboard().url);
+      fullPageLoad(response.redirect ?? dashboard().url);
     },
   });
 

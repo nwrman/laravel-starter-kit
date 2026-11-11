@@ -4,12 +4,12 @@ import { dashboard } from '@/routes';
 import PasskeyVerify from './passkey-verify';
 
 const mockVerify = vi.fn();
-const mockRouterVisit = vi.fn();
+const mockFullPageLoad = vi.fn();
 const mockUsePasskeyVerify = vi.fn();
 let mockOnSuccess: ((response: { redirect?: string }) => void) | undefined;
 
-vi.mock('@inertiajs/react', () => ({
-  router: { visit: (...args: unknown[]) => mockRouterVisit(...args) },
+vi.mock('@/lib/full-page-load', () => ({
+  fullPageLoad: (...args: unknown[]) => mockFullPageLoad(...args),
 }));
 
 vi.mock('@laravel/passkeys/react', () => ({
@@ -81,7 +81,7 @@ describe('PasskeyVerify', () => {
 
     mockOnSuccess?.({ redirect: '/projects' });
 
-    expect(mockRouterVisit).toHaveBeenCalledWith('/projects');
+    expect(mockFullPageLoad).toHaveBeenCalledWith('/projects');
   });
 
   it('falls back to the dashboard when no redirect is returned', () => {
@@ -89,6 +89,6 @@ describe('PasskeyVerify', () => {
 
     mockOnSuccess?.({});
 
-    expect(mockRouterVisit).toHaveBeenCalledWith(dashboard().url);
+    expect(mockFullPageLoad).toHaveBeenCalledWith(dashboard().url);
   });
 });
