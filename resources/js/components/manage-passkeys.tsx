@@ -110,7 +110,7 @@ export default function ManagePasskeys({ canManagePasskeys = false, passkeys = [
             className="mt-3 text-sm text-destructive"
             data-test="passkey-delete-refused"
           >
-            No se pudo eliminar la llave "{refusedName}". Intenta de nuevo.
+            No se pudo eliminar la llave "{refusedName}".
           </p>
         )}
       </CardContent>
