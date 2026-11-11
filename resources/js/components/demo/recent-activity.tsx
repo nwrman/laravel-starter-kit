@@ -38,7 +38,7 @@ export function RecentActivity({ items }: Props) {
               </div>
             ))
           ) : (
-            <ListSkeleton rows={4} />
+            <ListSkeleton rows={5} />
           )}
         </div>
       </CardContent>

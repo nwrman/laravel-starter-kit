@@ -1,5 +1,5 @@
 import { Label, Pie, PieChart } from 'recharts';
-import { ChartBodySkeleton } from '@/components/chart-skeleton';
+import { ChartRingSkeleton } from '@/components/chart-skeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   ChartContainer,
@@ -34,7 +34,11 @@ export function TeamChart({ departments }: Props) {
         <CardTitle className="text-2xl">Equipo por Departamento</CardTitle>
       </CardHeader>
       <CardContent>
-        {departments ? <TeamPie departments={departments} /> : <ChartBodySkeleton />}
+        {departments ? (
+          <TeamPie departments={departments} />
+        ) : (
+          <ChartRingSkeleton legendItems={6} />
+        )}
       </CardContent>
     </Card>
   );

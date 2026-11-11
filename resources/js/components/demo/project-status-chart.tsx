@@ -1,5 +1,5 @@
 import { Label, Pie, PieChart } from 'recharts';
-import { ChartBodySkeleton } from '@/components/chart-skeleton';
+import { ChartRingSkeleton } from '@/components/chart-skeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   ChartContainer,
@@ -104,7 +104,7 @@ export function ProjectStatusChart({ projectStatuses, projectTotal }: Props) {
             </div>
           </>
         ) : (
-          <ChartBodySkeleton />
+          <ChartRingSkeleton legendItems={4} />
         )}
       </CardContent>
     </Card>

@@ -1,5 +1,4 @@
 import { AlertTriangle, TrendingUp } from 'lucide-react';
-import { ListSkeleton } from '@/components/list-skeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type { DashboardAlert } from '@/types/demo';
@@ -51,9 +50,30 @@ export function DashboardAlerts({ alerts }: Props) {
             );
           })
         ) : (
-          <ListSkeleton rows={3} />
+          <AlertsSkeleton />
         )}
       </CardContent>
     </Card>
+  );
+}
+
+/** Two alert tiles in the list's own shape, so the card does not change form on arrival. */
+function AlertsSkeleton() {
+  return (
+    <>
+      {[0, 1].map((index) => (
+        <div
+          key={index}
+          className="flex items-start gap-3 rounded-lg border p-3"
+          aria-hidden="true"
+        >
+          <div className="mt-0.5 size-4 shrink-0 animate-pulse rounded bg-muted" />
+          <div className="flex-1 space-y-1.5">
+            <div className="h-4 w-2/3 animate-pulse rounded bg-muted" />
+            <div className="h-3 w-5/6 animate-pulse rounded bg-muted" />
+          </div>
+        </div>
+      ))}
+    </>
   );
 }

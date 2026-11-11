@@ -17,3 +17,27 @@ export function ChartBodySkeleton({ className = 'h-[250px]' }: { className?: str
     </div>
   );
 }
+
+/**
+ * A donut chart's placeholder: the ring at the chart's size, and one legend line per category
+ * in the legend's own grid, so the card is already its loaded height.
+ */
+export function ChartRingSkeleton({ legendItems }: { legendItems: number }) {
+  return (
+    <div aria-hidden="true">
+      <div className="flex h-[250px] items-center justify-center">
+        <div className="flex size-[180px] animate-pulse items-center justify-center rounded-full bg-muted">
+          <div className="size-[120px] rounded-full bg-card" />
+        </div>
+      </div>
+      <div className="mt-2 grid grid-cols-2 gap-2">
+        {Array.from({ length: legendItems }, (_, index) => (
+          <div key={index} className="flex h-5 items-center gap-2">
+            <div className="size-2.5 shrink-0 animate-pulse rounded-full bg-muted" />
+            <div className="h-3 w-20 animate-pulse rounded bg-muted" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
