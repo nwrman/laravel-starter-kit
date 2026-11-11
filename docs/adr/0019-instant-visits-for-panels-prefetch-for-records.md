@@ -38,7 +38,7 @@ it:
 
 | Kind | Data | Links |
 | --- | --- | --- |
-| **Panel page**: a frame of independent sections (dashboard, list, report) | every page-specific prop deferred (`Inertia::defer`), each drawn behind `<Deferred>` with a skeleton fallback | instant visit **and** `prefetch` |
+| **Panel page**: a frame of independent sections (dashboard, list, report) | every page-specific prop deferred (`Inertia::defer`); each section takes its data as optional and draws its own loading state | instant visit **and** `prefetch` |
 | **Record or filled form**: a detail page, an edit page, settings | sent eagerly | `prefetch` only, **never** instant |
 | **Empty form**: a create page | none | instant visit and `prefetch` |
 
@@ -53,11 +53,21 @@ arrive at the same URL.
 The top progress bar keeps Inertia's defaults. It appears only after its delay, so on a fast
 server it is never seen.
 
+**A skeleton covers only what is still loading** (amended at the human walk of #43). Whatever
+a section knows before its data arrives renders at once: card titles and icons, a table's
+search box and column headers, a chart's title and subtitle, a list's heading. Only the
+figures, rows and plot areas pulse. So a section component takes its data prop as optional
+and draws the placeholder itself, in place of a `<Deferred>` fallback that blanks the whole
+card. A stat card's title and icon belong to the page (`KpiRow` with a `KpiCard` per card),
+and the server sends only the figures, matched by `key`. The first build swapped whole cards
+for grey boxes; at the walk the screen read as empty until everything arrived.
+
 ## Consequences
 
 - Every navigation draws something at once: the frame and skeletons of a panel page, or the
   whole page from a prefetch.
-- A new panel page owes a skeleton for every section. The test catches a nav item pointing at
+- A new panel page owes a loading state for every section: the data parts pulse, the rest
+  renders. The test catches a nav item pointing at
   a page that reads an eager prop on first render.
 - Eager props on a panel page are gone, KPI cards included. A section that must be on screen
   in the first paint belongs to a record page.
