@@ -53,6 +53,26 @@ describe('ImageUploadCrop', () => {
     expect(screen.getByRole('button', { name: /deshacer/i })).toBeInTheDocument();
   });
 
+  it('shows each selected file in the crop dialog', async () => {
+    const user = userEvent.setup();
+    render(<ImageUploadCrop onChange={vi.fn()} />);
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+
+    await user.upload(fileInput, new File(['pixels'], 'first.jpg', { type: 'image/jpeg' }));
+    expect(await screen.findByAltText('Recortar')).toHaveAttribute(
+      'src',
+      'data:image/jpeg;base64,cGl4ZWxz',
+    );
+
+    await user.click(screen.getByRole('button', { name: /usar original/i }));
+    await user.upload(fileInput, new File(['other'], 'second.jpg', { type: 'image/jpeg' }));
+
+    expect(await screen.findByAltText('Recortar')).toHaveAttribute(
+      'src',
+      'data:image/jpeg;base64,b3RoZXI=',
+    );
+  });
+
   it('resets local state when imageUrl changes after upload is saved', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

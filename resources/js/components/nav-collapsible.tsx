@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { ChevronRight } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   DropdownMenu,
@@ -26,12 +26,15 @@ export function NavCollapsible({ group }: { group: NavGroup }) {
   const { state, isMobile } = useSidebar();
   const hasActiveChild = group.items.some((item) => isCurrentOrParentUrl(item.href));
   const [open, setOpen] = useState(hasActiveChild);
+  const [hadActiveChild, setHadActiveChild] = useState(hasActiveChild);
 
-  useEffect(() => {
+  // Navigating into the group opens it; leaving it keeps whatever the user chose.
+  if (hasActiveChild !== hadActiveChild) {
+    setHadActiveChild(hasActiveChild);
     if (hasActiveChild) {
       setOpen(true);
     }
-  }, [hasActiveChild]);
+  }
 
   // `state` follows the desktop cookie even on mobile, where the sidebar renders as a
   // sheet with no `data-collapsible` attribute — the inline sub-list works fine there.

@@ -1,5 +1,6 @@
 import { Deferred, Head, usePage } from '@inertiajs/react';
 import { Banknote, CheckCircle, FolderOpen, Users } from 'lucide-react';
+import { useState } from 'react';
 import { ChartSkeleton } from '@/components/chart-skeleton';
 import { DashboardAlerts } from '@/components/demo/dashboard-alerts';
 import { ProjectStatusChart } from '@/components/demo/project-status-chart';
@@ -56,7 +57,8 @@ export default function Dashboard() {
     { auth: { user: { name: string } } } & PageProps
   >().props;
 
-  const greeting = getTimeOfDayGreeting(new Date().getHours());
+  // Read the clock once, not on every render.
+  const [greeting] = useState(() => getTimeOfDayGreeting(new Date().getHours()));
 
   return (
     <>

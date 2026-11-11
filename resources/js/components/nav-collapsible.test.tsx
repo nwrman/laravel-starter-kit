@@ -82,6 +82,25 @@ describe('NavCollapsible', () => {
     expect(queryByText('Profile')).not.toBeInTheDocument();
   });
 
+  it('opens when the user navigates into the group after it rendered closed', () => {
+    setPageUrl('/other');
+    // A fresh element each time: React skips re-rendering an identical one.
+    const tree = () => (
+      <SidebarProvider>
+        <SidebarMenu>
+          <NavCollapsible group={group} />
+        </SidebarMenu>
+      </SidebarProvider>
+    );
+    const { rerender } = render(tree());
+    expect(screen.queryByText('Profile')).not.toBeInTheDocument();
+
+    setPageUrl('/settings/security');
+    rerender(tree());
+
+    expect(screen.getByText('Profile')).toBeInTheDocument();
+  });
+
   it('marks the parent active when a child URL is active', () => {
     setPageUrl('/settings/profile');
 

@@ -17,6 +17,8 @@ describe('resolvePage', () => {
   });
 
   it('rejects a name with no page behind it', async () => {
-    await expect(resolvePage('does-not-exist')).rejects.toThrow();
+    await expect(resolvePage('does-not-exist')).rejects.toThrow(
+      'Page not found: ../pages/does-not-exist.tsx',
+    );
   });
 });

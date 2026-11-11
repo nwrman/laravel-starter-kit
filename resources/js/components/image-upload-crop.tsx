@@ -129,7 +129,10 @@ export function ImageUploadCrop({
   // Crop dialog state
   const [cropDialogOpen, setCropDialogOpen] = useState(false);
   const [fileToCrop, setFileToCrop] = useState<File | null>(null);
-  const [cropImgSrc, setCropImgSrc] = useState('');
+  // The data URL read from a file, kept with that file: a read for a file no longer
+  // being cropped is ignored rather than shown.
+  const [cropRead, setCropRead] = useState<{ file: File; src: string } | null>(null);
+  const cropImgSrc = cropRead !== null && cropRead.file === fileToCrop ? cropRead.src : '';
   const [crop, setCrop] = useState<PercentCrop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop | null>(null);
   const cropImgRef = useRef<HTMLImageElement | null>(null);
@@ -166,11 +169,12 @@ export function ImageUploadCrop({
   // Read file for crop dialog
   useEffect(() => {
     if (!fileToCrop) {
-      setCropImgSrc('');
       return;
     }
     const reader = new FileReader();
-    reader.addEventListener('load', () => setCropImgSrc((reader.result as string) ?? ''));
+    reader.addEventListener('load', () =>
+      setCropRead({ file: fileToCrop, src: (reader.result as string) ?? '' }),
+    );
     reader.readAsDataURL(fileToCrop);
   }, [fileToCrop]);
 
