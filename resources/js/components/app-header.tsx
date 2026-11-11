@@ -18,11 +18,10 @@ import {
 } from '@/components/ui/navigation-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { UserMenuContent } from '@/components/user-menu-content';
-import { headerNav } from '@/config/navigation';
+import { headerNav, homeNav } from '@/config/navigation';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
-import { dashboard } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
 
 type Props = {
@@ -79,7 +78,12 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
             </Sheet>
           </div>
 
-          <Link href={dashboard()} prefetch="mount" className="flex items-center space-x-2">
+          <Link
+            href={homeNav.href}
+            component={homeNav.component}
+            prefetch="mount"
+            className="flex items-center space-x-2"
+          >
             <AppLogo />
           </Link>
 

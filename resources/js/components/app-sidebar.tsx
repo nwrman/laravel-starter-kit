@@ -13,10 +13,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { isNavGroup, sidebarNav } from '@/config/navigation';
+import { homeNav, isNavGroup, sidebarNav } from '@/config/navigation';
 import { useCloseMobileSidebarOnNavigate } from '@/hooks/use-close-mobile-sidebar-on-navigate';
 import { useCurrentUrl } from '@/hooks/use-current-url';
-import { dashboard } from '@/routes';
 
 export function AppSidebar() {
   const { isCurrentUrl } = useCurrentUrl();
@@ -31,7 +30,7 @@ export function AppSidebar() {
             <SidebarMenuButton
               size="lg"
               className="[&_svg]:size-8 group-data-[collapsible=icon]:[&_svg]:size-8"
-              render={<Link href={dashboard()} prefetch="mount" />}
+              render={<Link href={homeNav.href} component={homeNav.component} prefetch="mount" />}
             >
               <AppLogo />
             </SidebarMenuButton>

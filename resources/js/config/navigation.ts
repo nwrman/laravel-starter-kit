@@ -5,14 +5,19 @@ import { index as teamIndex } from '@/routes/team';
 import type { NavGroup, NavItem, SidebarNavEntry } from '@/types';
 
 // Every item names the page its route renders, so <Link> swaps to it before the server
-// answers (an instant visit). navigation.test.ts checks each name against the page list.
+// answers (an instant visit), and keeps `prefetch`. Only a page that draws with the shared
+// props alone may be named here (docs/adr/0019); navigation.test.ts renders each one so.
+
+/** Home: the first nav item everywhere, and where the logo links. */
+export const homeNav: NavItem = {
+  title: 'Inicio',
+  href: dashboard(),
+  component: 'dashboard',
+  icon: LayoutGrid,
+};
+
 export const sidebarNav: SidebarNavEntry[] = [
-  {
-    title: 'Inicio',
-    href: dashboard(),
-    component: 'dashboard',
-    icon: LayoutGrid,
-  },
+  homeNav,
   {
     title: 'Proyectos',
     icon: FolderOpen,
@@ -29,14 +34,7 @@ export const sidebarNav: SidebarNavEntry[] = [
   },
 ];
 
-export const headerNav: NavItem[] = [
-  {
-    title: 'Inicio',
-    href: dashboard(),
-    component: 'dashboard',
-    icon: LayoutGrid,
-  },
-];
+export const headerNav: NavItem[] = [homeNav];
 
 export function isNavGroup(entry: SidebarNavEntry): entry is NavGroup {
   return 'items' in entry;
