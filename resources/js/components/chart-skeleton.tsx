@@ -32,7 +32,7 @@ export function ChartRingSkeleton({ legendItems }: { legendItems: number }) {
       </div>
       <div className="mt-2 grid grid-cols-2 gap-2">
         {Array.from({ length: legendItems }, (_, index) => (
-          <div key={index} className="flex h-5 items-center gap-2">
+          <div key={index} className="flex h-5 items-center gap-2" data-test="ring-legend-item">
             <div className="size-2.5 shrink-0 animate-pulse rounded-full bg-muted" />
             <div className="h-3 w-20 animate-pulse rounded bg-muted" />
           </div>

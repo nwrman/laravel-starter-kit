@@ -360,7 +360,11 @@ describe('DataTable', () => {
 
       const row = document.querySelector('tbody tr[aria-hidden="true"]');
       expect(row).toHaveClass('h-[61px]');
-      expect(within(row as HTMLElement).getAllByTestId('name-placeholder')).toHaveLength(1);
+      // The placeholder row is aria-hidden, so its cells are read from the DOM, not by role.
+      const cells = Array.from(row?.querySelectorAll('td') ?? []);
+      expect(within(cells[0]).getAllByTestId('name-placeholder')).toHaveLength(1);
+      // The status column returned null: it keeps the default bar.
+      expect(cells[1].querySelector('[data-test="loading-cell"]')).toBeInTheDocument();
     });
 
     it("holds the pagination's place instead of showing it", () => {
@@ -374,7 +378,7 @@ describe('DataTable', () => {
       );
 
       expect(screen.queryByText('Página 1 de 1')).not.toBeInTheDocument();
-      expect(document.querySelector('div.h-8[aria-hidden="true"]')).toBeInTheDocument();
+      expect(document.querySelector('[data-test="pagination-placeholder"]')).toBeInTheDocument();
     });
 
     it('shows the rows and the pagination once they arrive', () => {

@@ -52,7 +52,10 @@ describe('PagePrimaryAction', () => {
     expect(container.querySelectorAll('svg')).toHaveLength(2);
   });
 
-  it('visits the named page instantly when given one', async () => {
+  it.each([
+    ['inline', 0],
+    ['floating', 1],
+  ])('visits the named page instantly from the %s link', async (_where, index) => {
     const visit = vi.spyOn(router, 'visit').mockImplementation(() => {});
     render(
       <PagePrimaryAction
@@ -62,7 +65,7 @@ describe('PagePrimaryAction', () => {
       />,
     );
 
-    await userEvent.setup().click(screen.getAllByRole('link', { name: /Nuevo Proyecto/ })[0]);
+    await userEvent.setup().click(screen.getAllByRole('link', { name: /Nuevo Proyecto/ })[index]);
 
     expect(visit).toHaveBeenCalledWith(
       '/projects/create',
@@ -70,11 +73,14 @@ describe('PagePrimaryAction', () => {
     );
   });
 
-  it('prefetches the page when the pointer rests on it', async () => {
+  it.each([
+    ['inline', 0],
+    ['floating', 1],
+  ])('prefetches the page when the pointer rests on the %s link', async (_where, index) => {
     const prefetch = vi.spyOn(router, 'prefetch').mockImplementation(() => {});
     render(<PagePrimaryAction label="Nuevo Proyecto" href="/projects/create" />);
 
-    await userEvent.setup().hover(screen.getAllByRole('link', { name: /Nuevo Proyecto/ })[0]);
+    await userEvent.setup().hover(screen.getAllByRole('link', { name: /Nuevo Proyecto/ })[index]);
 
     await vi.waitFor(() => expect(prefetch).toHaveBeenCalledTimes(1));
     expect(prefetch.mock.calls[0][0]).toBe('/projects/create');

@@ -1,3 +1,4 @@
+import { PasskeyExistsError } from '@laravel/passkeys';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import PasskeyRegister from './passkey-register';
@@ -98,5 +99,25 @@ describe('PasskeyRegister', () => {
     await user.type(input, 'iPhone{Enter}');
 
     expect(mockRegister).toHaveBeenCalledWith('iPhone');
+  });
+
+  it('shows a failed registration in Spanish, not the library message', async () => {
+    mockUsePasskeyRegister.mockReturnValue({
+      register: mockRegister,
+      isLoading: false,
+      error: 'This device is already registered as a passkey.',
+      errorInstance: new PasskeyExistsError(),
+      isSupported: true,
+    });
+    render(<PasskeyRegister onSuccess={vi.fn<() => void>()} />);
+
+    await userEvent.setup().click(screen.getByRole('button', { name: /agregar llave de acceso/i }));
+
+    expect(
+      screen.getByText('Este dispositivo ya tiene una llave de acceso registrada.'),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText('This device is already registered as a passkey.'),
+    ).not.toBeInTheDocument();
   });
 });

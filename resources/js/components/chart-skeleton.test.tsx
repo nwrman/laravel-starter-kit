@@ -14,7 +14,7 @@ describe('ChartRingSkeleton', () => {
   it('draws one legend line per category, so the card is already its loaded height', () => {
     const { container } = render(<ChartRingSkeleton legendItems={6} />);
 
-    expect(container.querySelectorAll('.grid-cols-2 > div')).toHaveLength(6);
+    expect(container.querySelectorAll('[data-test="ring-legend-item"]')).toHaveLength(6);
     expect(container.firstChild).toHaveAttribute('aria-hidden', 'true');
   });
 });

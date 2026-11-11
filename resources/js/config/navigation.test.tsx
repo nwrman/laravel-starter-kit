@@ -1,6 +1,10 @@
-import { render } from '@testing-library/react';
+import { router } from '@inertiajs/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { ComponentType, ErrorInfo, ReactNode } from 'react';
 import { Component } from 'react';
+import { AppSidebar } from '@/components/app-sidebar';
+import { SidebarProvider } from '@/components/ui/sidebar';
 import { pages } from '@/lib/resolve-page';
 import type { NavItem } from '@/types';
 import { headerNav, homeNav, isNavGroup, sidebarNav } from './navigation';
@@ -76,4 +80,20 @@ describe('instant nav items', () => {
       expect(container).not.toBeEmptyDOMElement();
     },
   );
+
+  it('reach the sidebar link, which visits the page instantly', async () => {
+    const visit = vi.spyOn(router, 'visit').mockImplementation(() => {});
+    render(
+      <SidebarProvider>
+        <AppSidebar />
+      </SidebarProvider>,
+    );
+
+    await userEvent.setup().click(screen.getByRole('link', { name: 'Equipo' }));
+
+    expect(visit).toHaveBeenCalledWith(
+      '/team',
+      expect.objectContaining({ component: 'team/index' }),
+    );
+  });
 });

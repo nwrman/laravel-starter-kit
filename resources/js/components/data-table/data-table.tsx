@@ -171,6 +171,7 @@ export function DataTable<TData extends RowData>({
                     <TableCell key={column.id}>
                       {loadingCell?.(column.id) ?? (
                         <div
+                          data-test="loading-cell"
                           className="h-4 animate-pulse rounded bg-muted"
                           style={{ width: `${[75, 55, 65, 45, 60][columnIndex % 5]}%` }}
                         />
@@ -209,7 +210,7 @@ export function DataTable<TData extends RowData>({
       </div>
       {/* The pagination renders nothing without rows, so its height is held by hand. */}
       {loading && renderPagination ? (
-        <div className="h-8" aria-hidden="true" />
+        <div className="h-8" aria-hidden="true" data-test="pagination-placeholder" />
       ) : (
         renderPagination?.(table)
       )}

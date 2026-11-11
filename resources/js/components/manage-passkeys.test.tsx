@@ -160,6 +160,17 @@ describe('ManagePasskeys', () => {
       expect(document.activeElement).toBe(document.querySelector('[data-passkey-delete="2"]'));
     });
 
+    it('hands the focus to the previous row when the deleted one was last', async () => {
+      const { rerender } = render(
+        <ManagePasskeys canManagePasskeys passkeys={[...passkeys, laptop]} />,
+      );
+      await confirmDelete('Laptop');
+
+      rerender(<ManagePasskeys canManagePasskeys passkeys={passkeys} />);
+
+      expect(document.activeElement).toBe(document.querySelector('[data-passkey-delete="1"]'));
+    });
+
     it('hands the focus to "add" when the last passkey is gone', async () => {
       const { rerender } = render(<ManagePasskeys canManagePasskeys passkeys={passkeys} />);
       await confirmDelete('My Phone');
