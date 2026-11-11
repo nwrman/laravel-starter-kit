@@ -29,27 +29,30 @@ export function DashboardAlerts({ alerts }: Props) {
         <CardTitle>Alertas</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-3">
-        {!alerts && <ListSkeleton rows={3} />}
-        {alerts?.map((alert) => {
-          const style = alertStyles[alert.type];
-          const Icon = style.icon;
+        {alerts ? (
+          alerts.map((alert) => {
+            const style = alertStyles[alert.type];
+            const Icon = style.icon;
 
-          return (
-            <div
-              key={alert.id}
-              className={cn(
-                'flex items-start gap-3 rounded-lg border border-l-4 p-3',
-                style.border,
-              )}
-            >
-              <Icon className={cn('mt-0.5 size-4 shrink-0', style.iconColor)} />
-              <div className="min-w-0">
-                <p className="text-sm font-medium">{alert.title}</p>
-                <p className="text-xs text-muted-foreground">{alert.description}</p>
+            return (
+              <div
+                key={alert.id}
+                className={cn(
+                  'flex items-start gap-3 rounded-lg border border-l-4 p-3',
+                  style.border,
+                )}
+              >
+                <Icon className={cn('mt-0.5 size-4 shrink-0', style.iconColor)} />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium">{alert.title}</p>
+                  <p className="text-xs text-muted-foreground">{alert.description}</p>
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })
+        ) : (
+          <ListSkeleton rows={3} />
+        )}
       </CardContent>
     </Card>
   );

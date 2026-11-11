@@ -192,7 +192,7 @@ export function DataTable<TData extends RowData>({
           </TableBody>
         </Table>
       </div>
-      {loadingRows === undefined && renderPagination?.(table)}
+      {loadingRows === undefined ? renderPagination?.(table) : null}
     </div>
   );
 }

@@ -7,7 +7,6 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -24,7 +23,7 @@ final class ReloadAcrossAuthBoundary
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $wasSignedIn = Auth::check();
+        $wasSignedIn = $request->user() !== null;
 
         /** @var Response $response */
         $response = $next($request);
@@ -32,7 +31,7 @@ final class ReloadAcrossAuthBoundary
         if (
             $request->header('X-Inertia') !== null
             && $response instanceof RedirectResponse
-            && Auth::check() !== $wasSignedIn
+            && ($request->user() !== null) !== $wasSignedIn
         ) {
             return Inertia::location($response->getTargetUrl());
         }
