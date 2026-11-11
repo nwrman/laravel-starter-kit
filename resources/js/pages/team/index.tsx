@@ -5,6 +5,7 @@ import { StatCard } from '@/components/demo/stat-card';
 import { TeamChart } from '@/components/demo/team-chart';
 import { TeamTable } from '@/components/demo/team-table';
 import { PageHeader } from '@/components/page-header';
+import { StatCardGridSkeleton } from '@/components/stat-card-skeleton';
 import { TableSkeleton } from '@/components/table-skeleton';
 import type { BreadcrumbItem } from '@/types';
 import type { DepartmentDistribution, StatCardData, TeamMember } from '@/types/demo';
@@ -26,7 +27,7 @@ type TableDataProps = {
 };
 
 type PageProps = {
-  kpiStats: StatCardData[];
+  kpiStats?: StatCardData[];
   tableData?: TableDataProps;
 };
 
@@ -40,18 +41,25 @@ export default function TeamIndex() {
         <PageHeader title="Equipo" description="Miembros del equipo de Acme Corp." />
 
         {/* KPI Stat Cards */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {kpiStats.map((stat) => (
-            <StatCard
-              key={stat.title}
-              title={stat.title}
-              value={stat.value}
-              description={stat.description}
-              trend={stat.trend}
-              icon={iconMap[stat.icon as keyof typeof iconMap]}
-            />
-          ))}
-        </div>
+        <Deferred
+          data="kpiStats"
+          fallback={
+            <StatCardGridSkeleton count={3} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" />
+          }
+        >
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {kpiStats?.map((stat) => (
+              <StatCard
+                key={stat.title}
+                title={stat.title}
+                value={stat.value}
+                description={stat.description}
+                trend={stat.trend}
+                icon={iconMap[stat.icon as keyof typeof iconMap]}
+              />
+            ))}
+          </div>
+        </Deferred>
 
         {/* Table + Chart */}
         <Deferred

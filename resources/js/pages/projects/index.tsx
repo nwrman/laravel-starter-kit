@@ -25,13 +25,14 @@ type TableDataProps = {
 };
 
 type PageProps = {
-  kpiStats: StatCardData[];
+  kpiStats?: StatCardData[];
   tableData?: TableDataProps;
   chartData?: TableDataProps;
 };
 
 import { PageHeader } from '@/components/page-header';
 import { PagePrimaryAction } from '@/components/page-primary-action';
+import { StatCardGridSkeleton } from '@/components/stat-card-skeleton';
 
 export default function ProjectsIndex() {
   const { kpiStats, tableData, chartData } = usePage<PageProps>().props;
@@ -47,18 +48,25 @@ export default function ProjectsIndex() {
         />
 
         {/* KPI Stat Cards */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {kpiStats.map((stat) => (
-            <StatCard
-              key={stat.title}
-              title={stat.title}
-              value={stat.value}
-              description={stat.description}
-              trend={stat.trend}
-              icon={iconMap[stat.icon as keyof typeof iconMap]}
-            />
-          ))}
-        </div>
+        <Deferred
+          data="kpiStats"
+          fallback={
+            <StatCardGridSkeleton count={3} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" />
+          }
+        >
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {kpiStats?.map((stat) => (
+              <StatCard
+                key={stat.title}
+                title={stat.title}
+                value={stat.value}
+                description={stat.description}
+                trend={stat.trend}
+                icon={iconMap[stat.icon as keyof typeof iconMap]}
+              />
+            ))}
+          </div>
+        </Deferred>
 
         {/* Projects Table */}
         <Deferred data="tableData" fallback={<TableSkeleton />}>

@@ -8,7 +8,7 @@ import { RecentActivity } from '@/components/demo/recent-activity';
 import { RevenueChart } from '@/components/demo/revenue-chart';
 import { StatCard } from '@/components/demo/stat-card';
 import { PageHeader } from '@/components/page-header';
-import { StatCardSkeleton } from '@/components/stat-card-skeleton';
+import { StatCardGridSkeleton, StatCardSkeleton } from '@/components/stat-card-skeleton';
 import { getTimeOfDayGreeting } from '@/lib/utils';
 import { dashboard } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
@@ -47,7 +47,7 @@ type FeedProps = {
 };
 
 type PageProps = {
-  kpiStats: StatCardData[];
+  kpiStats?: StatCardData[];
   charts?: ChartsProps;
   feed?: FeedProps;
 };
@@ -70,18 +70,25 @@ export default function Dashboard() {
         />
 
         {/* KPI Stat Cards */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {kpiStats.map((stat) => (
-            <StatCard
-              key={stat.title}
-              title={stat.title}
-              value={stat.value}
-              description={stat.description}
-              trend={stat.trend}
-              icon={iconMap[stat.icon as keyof typeof iconMap]}
-            />
-          ))}
-        </div>
+        <Deferred
+          data="kpiStats"
+          fallback={
+            <StatCardGridSkeleton count={4} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" />
+          }
+        >
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {kpiStats?.map((stat) => (
+              <StatCard
+                key={stat.title}
+                title={stat.title}
+                value={stat.value}
+                description={stat.description}
+                trend={stat.trend}
+                icon={iconMap[stat.icon as keyof typeof iconMap]}
+              />
+            ))}
+          </div>
+        </Deferred>
 
         {/* Charts Row */}
         <Deferred

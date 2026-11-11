@@ -14,3 +14,14 @@ export function StatCardSkeleton() {
     </Card>
   );
 }
+
+/** The fallback for a deferred row of stat cards: one skeleton per card, in the row's grid. */
+export function StatCardGridSkeleton({ count, className }: { count: number; className: string }) {
+  return (
+    <div className={className}>
+      {Array.from({ length: count }, (_, index) => (
+        <StatCardSkeleton key={index} />
+      ))}
+    </div>
+  );
+}
